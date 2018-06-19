@@ -1,0 +1,25 @@
+
+$mediaSizes: (
+	xs: 320px,
+	s: 480px,
+	m: 768px,
+	l: 1024px,
+	xl: 1224px
+);
+
+@mixin media($breakPoint) {
+    @media (min-width: map-get($mediaSizes, $breakPoint)) { @content }
+}
+
+@mixin clearfix {
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin access {
+    position: absolute;
+    left: -9999em;
+}

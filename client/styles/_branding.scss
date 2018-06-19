@@ -1,0 +1,43 @@
+
+// Colors
+$cGrey3: #333;
+$cGrey6: #666;
+$cGrey: #808080; // Light text
+$cGrey9: #999;
+$cGreyB: #bbb;
+$cGreyC: #ccc;
+$cGreyD: #ddd;
+$cGreyE: #eee;
+
+$cYellow: #fbe122;
+$cError: #ce0037;
+$cLightError: #cb5363;
+$cDarkBlue: #1f2a44;
+$cGreen: #43b02a;
+$cLightGreen: #66be6d;
+$cBlue: #2379A4;
+$cIconButton: #4C5569;
+$cLightBlue: #41B6E6;
+$cOrange: #F78964;
+$cButton: #f3f3f3;
+$cButtonHover: #fdfdfd;
+
+// Fonts
+$font: sans-serif;
+$fontLight: sans-serif;
+
+// Shadows
+$shadow0: 0 2px 1px -1px rgba(0, 0, 0, 0.12);
+$shadow1: 0 1px 3px 0 rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+$shadow1In: 0 1px 2px 0px rgba(0,0,0,0.11) inset;
+$shadow2: 0 1px 5px 0 rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.12);
+$shadow3: 0 1px 8px 0 rgba(0,0,0,.2), 0 3px 4px 0 rgba(0,0,0,.14), 0 3px 3px -2px rgba(0,0,0,.12);
+$shadow5: 0 3px 5px -1px rgba(0,0,0,.2), 0 5px 8px 0 rgba(0,0,0,.14), 0 1px 14px 0 rgba(0,0,0,.12);
+$shadowText: 1px 1px 2px rgba(0, 0, 0, 0.2);
+
+// Spacing
+$spacing: 15px;
+$spacingLg: 30px;
+
+// Others
+$border: 1px solid #eee;

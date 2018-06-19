@@ -1,0 +1,36 @@
+
+.world-screen {
+	position: relative;
+	background-image: url(images/map.svg);
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+
+	.time,
+	.skill-points,
+	.events {
+		position: absolute;
+		left: 0;
+		top: 0;
+		padding: 15px;
+		font-size: 16px;
+		color: #fff;
+		background: #666;
+		width: 150px;
+		height: 50px;
+	}
+
+	.skill-points {
+		top: 50px;
+	}
+
+	.events {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 100%;
+		padding-top: 46.93%;
+
+	}
+}

@@ -1,10 +1,10 @@
-import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import path from 'path';
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');
 
 module.exports = {
 	entry: {
-		game: './client/game.js',
+		game: './client/index.js',
 	},
 	output: {
 		path: path.join(__dirname, 'static/'),
