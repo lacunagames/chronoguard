@@ -31,7 +31,7 @@ const dispatch = (action, ...args) => {
 Object.keys(agents).forEach(agentName => {
 	const {[agentName]: thisAgent, ...otherAgents} = agents;
 
-	agents[agentName].agents = {...otherAgents};
+	Object.keys(otherAgents).forEach(otherAgentName => agents[agentName][otherAgentName] = agents[otherAgentName]);
 	agents[agentName].dispatch = dispatch;
 });
 
@@ -47,6 +47,7 @@ const connect = (Component, agentNames) => {
 			this.state = {};
 			agentNames.forEach(agentName => this.state[agentName] = agents[agentName].getState());
 			this.dispatch = dispatch;
+			this.timer = {};
 		}
 
 		componentDidMount() {
@@ -58,10 +59,12 @@ const connect = (Component, agentNames) => {
 		componentWillUnmount() {
 			const fnObj = subscribedFn.find(fnObj => fnObj.counter === this.subscribedCounter);
 			subscribedFn.splice(subscribedFn.indexOf(fnObj), 1);
+			agentNames.forEach(agentName => clearTimeout(this.timer[agentName]));
 		}
 
-		onChange(agentName, newState) {
-			this.setState({[agentName]: {...this.state[agentName], ...newState}});
+		onChange(agentName) {
+			clearTimeout(this.timer[agentName]);
+			this.timer[agentName] = setTimeout(() => this.setState({[agentName]: {...agents[agentName].state}}), 10);
 		}
 
 		render() {

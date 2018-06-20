@@ -14,12 +14,15 @@ class WorldScreen extends React.Component {
 
 	render() {
 		const {world, player} = this.props;
-		const events = this.props.world.events.map((event, index) => <EventDisc index={index} />) || '';
+		const events = this.props.world.events.map((event, index) => <EventDisc key={event.id} event={event} />) || '';
 
 		return (
 			<div className="screen world-screen">
 				<div className="time">{`Day ${world.day}, ${world.hour % 24}:00`}</div>
-				<div className="skill-points" onClick={() => this.props.dispatch('gainSkillPoints', 1)}>Skill points: {player.skillPoints}</div>
+				<div className="skill-points" onClick={() => this.props.dispatch('gainSkillPoints', 1)}>
+					Skill points: {player.skillPoints}<br />
+					Energy: {player.energy}
+				</div>
 				<ul className="events">{events}</ul>
 			</div>
 		);

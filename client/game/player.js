@@ -28,6 +28,8 @@ const skills = [
 
 const defaultState = {
 	skillPoints: 1,
+	energy: 40,
+	maxEnergy: 40,
 	skills: [],
 };
 
@@ -50,6 +52,12 @@ class Player {
 
 	gainSkillPoints(points) {
 		this.setState({skillPoints: this.state.skillPoints + points});
+	}
+
+	changeEnergy(amount) {
+		const energy = Math.min(Math.max(this.state.energy + amount, 0), this.state.maxEnergy);
+
+		this.setState({energy});
 	}
 };
 

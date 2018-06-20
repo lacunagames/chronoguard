@@ -4,6 +4,7 @@ import './event-disc.scss';
 import React from 'react';
 
 import connect from 'game/connect';
+import utils from 'utils';
 
 class EventDisc extends React.Component {
 
@@ -11,14 +12,35 @@ class EventDisc extends React.Component {
 		super(props);
 	}
 
+	discClick(e, event) {
+		e.preventDefault();
+		this.props.dispatch('eventAction', event);
+	}
+
 	render() {
-		const {world, player, index} = this.props;
-		const event = world.events[index];
-		const positionStyle = {left: `${event.mapX}%`, top: `${event.mapY}%`};
+		const {world, player, event} = this.props;
+		const positionStyle = {left: `${event.mapX}%`, top: `${event.mapY}%`,};
+		const remaining = Math.max((event.ends - world.hour - 1) / event.duration * 100, 0);
+		const progressStyle = {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
+		const start = event.starts > world.hour;
+		const end = event.ended || event.ends <= world.hour;
 
 		return (
-			<li className="event-disc" style={positionStyle}>
-				<a href="#" title={event.name}></a>
+			<li className={utils.getClassName({
+					'event-disc': true,
+					'no-energy': player.energy < event.energy,
+					start,
+					end,
+				})}
+				style={positionStyle}>
+				<a href="#" title={event.name}
+					style={{'background-image': `url(static/images/icon-${event.name}.jpg)`}}
+					onClick={e => this.discClick(e, event)}>
+				</a>
+				<svg width="48" height="48">
+					<circle r="22" cx="24" cy="24" />
+					<circle r="22" cx="24" cy="24" className="progress" ref="progress" style={progressStyle} />
+				</svg>
 			</li>
 		);
 	}
