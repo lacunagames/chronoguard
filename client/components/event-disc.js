@@ -20,10 +20,14 @@ class EventDisc extends React.Component {
 	render() {
 		const {world, player, event} = this.props;
 		const positionStyle = {left: `${event.mapX}%`, top: `${event.mapY}%`,};
-		const remaining = Math.max((event.ends - world.hour - 1) / event.duration * 100, 0);
+		const remaining = Math.max((event.ends - world.hour - 0.25) / event.duration * 100, 0);
 		const progressStyle = {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
-		const start = event.starts > world.hour;
+		const start = event.starts >= world.hour && event.starts <= world.hour + 0.5;
 		const end = event.ended || event.ends <= world.hour;
+
+		if (event.starts > world.hour + 0.5) {
+			return null;
+		}
 
 		return (
 			<li className={utils.getClassName({
@@ -34,6 +38,7 @@ class EventDisc extends React.Component {
 				})}
 				style={positionStyle}>
 				<a href="#" title={event.name}
+					draggable="false"
 					style={{'background-image': `url(static/images/icon-${event.name}.jpg)`}}
 					onClick={e => this.discClick(e, event)}>
 				</a>
@@ -46,4 +51,4 @@ class EventDisc extends React.Component {
 	}
 }
 
-export default connect(EventDisc);
+export default EventDisc;

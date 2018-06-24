@@ -3,6 +3,7 @@ import React from 'react';
 
 import World from './world';
 import Player from './player';
+import System from './system';
 
 const stateChange = (agentName, newState) => {
 	subscribedFn.forEach(fnObj => {
@@ -17,6 +18,7 @@ let subscribedCounter = 0;
 const agents = {
 	world: new World(newState => stateChange('world', newState)),
 	player: new Player(newState => stateChange('player', newState)),
+	system: new System(newState => stateChange('system', newState)),
 };
 
 const dispatch = (action, ...args) => {
@@ -47,7 +49,7 @@ const connect = (Component, agentNames) => {
 			this.state = {};
 			agentNames.forEach(agentName => this.state[agentName] = agents[agentName].getState());
 			this.dispatch = dispatch;
-			this.timer = {};
+			this.stateChanges = {};
 		}
 
 		componentDidMount() {
@@ -63,8 +65,16 @@ const connect = (Component, agentNames) => {
 		}
 
 		onChange(agentName) {
-			clearTimeout(this.timer[agentName]);
-			this.timer[agentName] = setTimeout(() => this.setState({[agentName]: {...agents[agentName].state}}), 10);
+			this.stateChanges[agentName] = true;
+			clearTimeout(this.timer);
+			this.timer = setTimeout(() => {
+				const newState = Object.keys(this.stateChanges).reduce((obj, agentName) => {
+						return obj = {...obj, [agentName]: agents[agentName].state}
+					}, {});
+
+				this.stateChanges = {};
+				this.setState(newState);
+			}, 0);
 		}
 
 		render() {

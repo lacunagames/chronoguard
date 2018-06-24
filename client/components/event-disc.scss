@@ -1,12 +1,15 @@
 
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
 @keyframes inflate {
-	from {opacity: 0; transform: scale(0.7) translate(0, 0);}
-	70% {opacity: 0; transform: scale(0.7) translate(0, 0);}
-	to {opacity: 1; transform: scale(1) translate(0, 0);}
+	from {opacity: 0; transform: scale(0.7) translate(0, 0); pointer-events: none;}
+	35% {opacity: 0; transform: scale(0.7) translate(0, 0);}
+	to {opacity: 1; transform: scale(1) translate(0, 0); pointer-events: auto;}
 }
 @keyframes deflate {
-	from {opacity: 1; transform: scale(1) translate(0, 0);}
-	30% {opacity: 0; transform: scale(0.7) translate(0, 0);}
+	from {opacity: 1; transform: scale(1) translate(0, 0); pointer-events: none;}
+	65% {opacity: 0; transform: scale(0.7) translate(0, 0);}
 	to {opacity: 0; transform: scale(0.7) translate(0, 0);}
 }
 
@@ -23,18 +26,11 @@
 		border-radius: 50%;
 		border: 4px solid transparent;
 		background-size: cover;
-		box-shadow: 0 1px 5px 0 rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.12);
+		box-shadow: $shadow3;
 		transition: filter 0.3s ease-out;
 
-		&:after {
-			content: '';
-			position: absolute;
-			left: 0;
-			right: 0;
-			top: 0;
-			bottom: 0;
-			background-color: transparent;
-			transition: background-color 0.3s ease-out;
+		&:focus {
+			outline: none;
 		}
 	}
 
@@ -54,32 +50,19 @@
 
 	.progress {
 		stroke: #bbb;
-		transition: stroke-dasharray 1s linear;
+		transition: stroke-dasharray 0.25s linear;
 		stroke-dasharray: 138.23 138.23;
 	}
 
-	&.inactive a {
-		filter: grayscale(0.85);
-	}
-
 	&.no-energy a {
-		// background-color: rgba(155,55,0,0.5);
 		filter: grayscale(0.9);
 	}
 
-	&.start {
-		animation: inflate 1s ease-out;
-
-		a {
-			pointer-events: none;
-		}
+	&.start, &.end {
+		animation: inflate 0.5s ease-out forwards;
 	}
 
 	&.end {
-		animation: deflate 1s ease-out forwards;
-
-		a {
-			pointer-events: none;
-		}
+		animation-name: deflate;
 	}
 }

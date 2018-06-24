@@ -3,8 +3,9 @@
 	position: relative;
 	background-image: url(images/map-wow.png);
 	background-repeat: no-repeat;
-	background-size: cover;
+	background-size: 100%;
 	background-position: center;
+	overflow: hidden;
 
 	.time,
 	.skill-points {
@@ -14,14 +15,14 @@
 		padding: 15px;
 		font-size: 16px;
 		color: #fff;
-		background: #666;
+		background: rgba(0,0,0,0.6);
 		width: 150px;
 		height: 50px;
 	}
 
 	.skill-points {
 		top: 50px;
-		height: 90px;
+		height: auto;
 	}
 
 	.events {
@@ -31,6 +32,22 @@
 		transform: translateY(-50%);
 		width: 100%;
 		padding-top: 40%;
+	}
 
+	.overlay {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		background: rgba(0,0,0,0.4);
+	}
+
+	.modal {
+		position: absolute;
+		margin-top: 10%;
+		padding: 20px;
+		background: #fff;
+		border: 1px solid #ccc;
 	}
 }

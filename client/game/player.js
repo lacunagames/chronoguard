@@ -28,8 +28,18 @@ const skills = [
 
 const defaultState = {
 	skillPoints: 1,
-	energy: 40,
-	maxEnergy: 40,
+	energy: 10,
+	maxEnergy: 15,
+	energyGainRate: 1,
+	motes: {
+		fire: 0,
+		earth: 0,
+		air: 0,
+		water: 0,
+		life: 0,
+		shadow: 0,
+		light: 0,
+	},
 	skills: [],
 };
 
@@ -50,14 +60,26 @@ class Player {
 		this.subscribeState(newState);
 	}
 
-	gainSkillPoints(points) {
-		this.setState({skillPoints: this.state.skillPoints + points});
+	gainMote(type, amount) {
+		this.setState({motes: {...this.state.motes, [type]: this.state.motes[type] + amount}});
+	}
+
+	gainSkillPoints(amount) {
+		this.setState({skillPoints: this.state.skillPoints + amount});
 	}
 
 	changeEnergy(amount) {
 		const energy = Math.min(Math.max(this.state.energy + amount, 0), this.state.maxEnergy);
 
 		this.setState({energy});
+	}
+
+	changeMaxEnergy(amount) {
+		this.setState({maxEnergy: this.state.maxEnergy + amount});
+	}
+
+	changeEnergyGainRate(amount) {
+		this.setState({energyGainRate: this.state.energyGainRate + amount});
 	}
 };
 
