@@ -138,6 +138,7 @@ class Modal extends React.Component {
 				closed: !this.props.show,
 				animate: this.state.animate,
 				[this.props.size]: this.props.size,
+				[this.props.className]: this.props.className,
 			})}>
 				<div className="modal-box" ref="modal" onClick={e => e.stopPropagation()}>
 					<div className="inner">

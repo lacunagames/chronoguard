@@ -40,12 +40,13 @@ const utils = {
 	},
 
 	// Return random integer between min max values, eg. 12-14'
-	getRandom(number) {
+	getRandom(number, multiplier) {
 		const splitNumber = (number + '').replace(/\s/g, '').split('-');
 		const min = +splitNumber[0];
 		const max = +splitNumber[1];
+		const random = max ? Math.floor(Math.random() * (max - min + 1) + min) : min;
 
-		return max ? Math.floor(Math.random() * (max - min + 1) + min) : min;
+		return typeof multiplier === 'number' ? random * multiplier : random;
 	},
 
 	// Create multiple eventListeners on elem
@@ -85,6 +86,26 @@ const utils = {
 
 		return fnThrottled;
 	},
+
+	debounce: (fn, delay, preFn) => {
+		let timer;
+		let isFirst = true;
+		const fnDebounced = (...args) => {
+			clearTimeout(timer);
+			if (isFirst) {
+				isFirst = false;
+				preFn();
+			}
+			timer = setTimeout(() => {
+				fn(...args);
+				isFirst = true;
+			}, delay);
+		}
+
+		fnDebounced.clear = () => clearTimeout(timer);
+
+		return fnDebounced;
+	}
 };
 
 export default utils;

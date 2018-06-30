@@ -1,33 +1,8 @@
 
-const skills = [
-	{
-		title: 'Scorch',
-		skillPoints: 5,
-	},
-	{
-		title: 'Flame shield',
-		skillPoints: 10,
-	},
-	{
-		title: 'Fireball',
-		skillPoints: 15,
-	},
-	{
-		title: 'Phoenix Heart',
-		skillPoints: 20,
-	},
-	{
-		title: 'Summon Dragon',
-		skillPoints: 25,
-	},
-	{
-		title: 'Volcano',
-		skillPoints: 30,
-	},
-];
+import skills from './skills';
 
 const defaultState = {
-	skillPoints: 1,
+	skillPoints: 150,
 	energy: 10,
 	maxEnergy: 15,
 	energyGainRate: 1,
@@ -40,7 +15,8 @@ const defaultState = {
 		shadow: 0,
 		light: 0,
 	},
-	skills: [],
+	skills,
+	learntSkills: [],
 };
 
 class Player {
@@ -80,6 +56,22 @@ class Player {
 
 	changeEnergyGainRate(amount) {
 		this.setState({energyGainRate: this.state.energyGainRate + amount});
+	}
+
+	learnSkill(skillId) {
+		const skill = this.state.skills.find(skill => skill.id === skillId);
+
+		if (this.state.learntSkills.indexOf(skill.id) > -1 ||
+			skill.requires && skill.requires.some(id => this.state.learntSkills.indexOf(id) === -1)) {
+			return;
+		}
+		if (this.state.skillPoints < skill.skillPoints) {
+			return this.system.createMessage({type: 'notEnoughSkillPoints', name: skill.name, value: skill.skillPoints});
+		}
+		this.setState({
+			learntSkills: [...this.state.learntSkills, skill.id],
+			skillPoints: this.state.skillPoints - skill.skillPoints,
+		});
 	}
 };
 

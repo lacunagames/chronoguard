@@ -4,6 +4,10 @@ const messageTypes = {
 		duration: 10,
 		message: (name, value) => `Not enough energy for ${name} action. Required: ${value}.`,
 	},
+	notEnoughSkillPoints: {
+		duration: 10,
+		message: (name, value) => `Not enough skill points for ${name} skill. Requires: ${value}`,
+	}
 };
 
 const defaultState = {

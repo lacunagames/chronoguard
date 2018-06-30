@@ -10,11 +10,12 @@ class EventDisc extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.eventid = this.props.event.id;
 	}
 
 	discClick(e, event) {
 		e.preventDefault();
-		this.props.dispatch('eventAction', event);
+		this.props.dispatch('eventAction', event.id);
 	}
 
 	render() {
@@ -24,6 +25,11 @@ class EventDisc extends React.Component {
 		const progressStyle = {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
 		const start = event.starts >= world.hour && event.starts <= world.hour + 0.5;
 		const end = event.ended || event.ends <= world.hour;
+
+		if (this.eventid && event.id !== this.eventid) {
+			console.log('umm: ', event, this.eventid);
+			this.eventid = event.id;
+		}
 
 		if (event.starts > world.hour + 0.5) {
 			return null;

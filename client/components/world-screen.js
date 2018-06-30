@@ -23,18 +23,17 @@ class WorldScreen extends React.Component {
 	}
 
 	componentDidMount() {
-		utils.onEvent(window, 'keydown', this.throttleToggle);
+		utils.onEvent(window, 'keydown', this.throttlePause);
 		utils.onEvent(document, 'visibilitychange', this.toggleVisiblePause);
 	}
 
 	componentWillUnmount() {
-		utils.offEvent(window, 'keydown', this.throttleToggle);
+		utils.offEvent(window, 'keydown', this.throttlePause);
 		utils.offEvent(document, 'visibilitychange', this.toggleVisiblePause);
 		this.throttleToggle.clear();
 	}
 
 	toggleVisiblePause() {
-		console.log(document.hidden, ' hidden')
 		this.props.dispatch(document.hidden ? 'pauseGame' : 'unpauseGame');
 	}
 
@@ -56,7 +55,7 @@ class WorldScreen extends React.Component {
 		return (
 			<div className="screen world-screen">
 				<div className="time">{`Day ${world.day}, ${Math.floor(world.hour) % 24}:00`}</div>
-				<div className="skill-points" onClick={() => dispatch('gainSkillPoints', 1)}>
+				<div className="skill-points">
 					Skill points: {player.skillPoints}<br />
 					Energy: {Math.floor(player.energy)}<br />
 					Fire: {player.motes.fire}<br />
@@ -65,14 +64,14 @@ class WorldScreen extends React.Component {
 					Earth: {player.motes.earth}<br />
 					Light: {player.motes.light}<br />
 					Shadow: {player.motes.shadow}<br />
-					Life: {player.motes.life}<br>
-					<button onClick={this.toggleSkillModal}>Skills</button>
+					Life: {player.motes.life}<br />
+					<button onClick={this.throttleSkillModal}>Skills</button>
 				</div>
 				<ul className="events">{events}</ul>
-				<Modal show={this.state.pauseModalOpen} locked={false} onClose={this.throttleToggle} {...{dispatch}}>
+				<Modal show={this.state.pauseModalOpen} locked={false} onClose={this.throttlePause} {...{dispatch}}>
 					<h2 data-modal-head>Game has been paused.</h2>
 				</Modal>
-				<SkillModal show={this.state.skillModalOpen} onClose={this.toggleSkillModal} {...this.props} />
+				<SkillModal show={this.state.skillModalOpen} onClose={this.throttleSkillModal} {...this.props} />
 			</div>
 		);
 	}

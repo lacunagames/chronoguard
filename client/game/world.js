@@ -29,7 +29,6 @@ class World {
 		this.subscribeState = subscribeState;
 		this.state = {};
 		this.setState(defaultState);
-		defaultState.events.push(this._createEvent('life'));
 		this.changeInterval = setInterval(this._worldChange, 250);
 	}
 
@@ -61,8 +60,8 @@ class World {
 
 		this.state.events.forEach(event => {
 			if (event.ends === hour && !event.ended) {
+				event = this._updateEvent(event.id, {ended: true});
 				this._massDispatch(event.onEnd);
-				this._updateEvent(event.id, {ended: true});
 			}
 			if (!event.removed && event.ends >= hour) {
 				events.push(event);
@@ -110,21 +109,30 @@ class World {
 		const events = this.state.events.map(event => event.id === eventId ? {...event, ...updates} : event);
 
 		this.setState({events});
+		return events.find(event => event.id === eventId);
 	}
 
 	queueItem({type, id, delay}) {
 		const newItem = {id, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1, type};
-
 		this.setState({queue: [...this.state.queue, newItem]});
+// const nuAll = this.state.queue.filter(item => item.id === id).length + this.state.events.filter(event => event.name.toLowerCase() === id && !event.ended).length;
 	}
 
-	eventAction(event) {
-		if (event.ended) {
+	eventAction(eventId) {
+		const event = this.state.events.find(event => event.id === eventId);
+
+		if (!event || event.ended) {
 			return;
 		}
 		if (this.player.state.energy < event.energy) {
 			return this.system.createMessage({type: 'notEnoughEnergy', name: event.name, value: event.energy});
 		}
+		if (this.isClicking) {
+			return console.log(eventId + ' clicked');
+		}
+		this.isClicking = true;
+		setTimeout(() => this.isClicking = false, 200);
+
 		this.player.changeEnergy(-event.energy);
 		this._updateEvent(event.id, {ended: true});
 		setTimeout(() => this._updateEvent(event.id, {removed: true}), 1000);

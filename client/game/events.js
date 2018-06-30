@@ -6,6 +6,7 @@ const events = {
 		energy: 5,
 		onAction: {
 			gainMote: ['fire', 1],
+			gainSkillPoints: 1,
 		},
 		onEnd: {
 			queueItem: {type: 'createEvent', id: 'fire', delay: '6-10'},
@@ -29,10 +30,11 @@ const events = {
 		energy: 5,
 		onAction: {
 			gainMote: ['air', 1],
+			gainSkillPoints: 1,
 		},
 		onEnd: {
 			queueItem: {type: 'createEvent', id: 'air', delay: '5-8'},
-		}
+		},
 	},
 	life: {
 		name: 'Life',

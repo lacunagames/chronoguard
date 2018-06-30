@@ -25,9 +25,9 @@
 		background: #aaa;
 		border-radius: 50%;
 		border: 4px solid transparent;
-		background-size: cover;
 		box-shadow: $shadow3;
-		transition: filter 0.3s ease-out;
+		background-size: cover;
+		transition: all 0.3s ease-out;
 
 		&:focus {
 			outline: none;
@@ -55,7 +55,7 @@
 	}
 
 	&.no-energy a {
-		filter: grayscale(0.9);
+		filter: grayscale(0.85);
 	}
 
 	&.start, &.end {

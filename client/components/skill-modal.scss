@@ -1,3 +1,94 @@
 
-.skills-modal {
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+.skill-tree {
+	position: relative;
+	min-height: 400px;
+
+	li {
+		position: absolute;
+	}
+
+	a {
+		display: inline-block;
+		width: 54px;
+		height: 54px;
+		border-radius: 3px;
+		border: 4px solid #ccc;
+		box-shadow: $shadow1;
+		position: relative;
+		transition: all 0.3s ease-out;
+
+		&:before {
+			content: '';
+			position: absolute;
+			left: -4px;
+			top: -4px;
+			right: -4px;
+			bottom: -4px;
+			border: 1px solid #333;
+			border-radius: 3px;
+		}
+
+		&:after {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			border: 1px solid #333;
+			border-radius: 2px;
+		}
+
+		span {
+			position: relative;
+			display: inline-block;
+			width: 46px;
+			height: 46px;
+			background-size: cover;
+			background-position: center;
+			transition: all 0.3s ease-out;
+		}
+		.color-filter {
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
+	}
+
+	.no-skill-points:not(.learnt):not(.inactive) a span {
+		filter: grayscale(0.85);
+	}
+
+	.inactive a {
+		border-color: #aaa;
+		cursor: default;
+		box-shadow: none;
+
+		span {
+			filter: grayscale(1) contrast(1.2);
+		}
+	}
+
+	.learnt a {
+		border-color: #0eb00e;
+		cursor: default;
+
+		span {
+			filter: none;
+		}
+	}
+
+	.arrows {
+		position: absolute;
+		top: 0;
+		left: 0;
+		filter: drop-shadow(1px 1px 0px #333);
+	}
+
+	.arrow-line {
+		transition: stroke 0.3s ease-out;
+	}
 }
