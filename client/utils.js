@@ -94,7 +94,7 @@ const utils = {
 			clearTimeout(timer);
 			if (isFirst) {
 				isFirst = false;
-				preFn();
+				preFn && preFn();
 			}
 			timer = setTimeout(() => {
 				fn(...args);

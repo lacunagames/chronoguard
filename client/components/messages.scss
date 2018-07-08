@@ -1,0 +1,66 @@
+
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+.message-box {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+
+	li {
+		position: absolute;
+		z-index: 1200;
+		left: 7px;
+		right: 7px;
+		display: block;
+		text-align: center;
+		transition: all $animFast;
+
+		&.starting {
+			opacity: 0;
+			transform: translateX(250px);
+		}
+
+		&.ending {
+			opacity: 0;
+			transform: translateX(-250px);
+		}
+
+		a {
+			margin-bottom: 5px;
+			max-width: 600px;
+			display: inline-block;
+			padding: 10px 20px;
+			background: rgba($cBgInverse, 0.8);
+			color: $cBg;
+			text-transform: capitalize;
+			border-radius: 3px;
+			cursor: pointer;
+			transition: filter $animFast;
+
+			&:hover, &:focus {
+				text-decoration: none;
+				filter: brightness(1.2);
+			}
+		}
+
+		&:not(.dismissable) a {
+			cursor: default;
+
+			&:hover, &:focus {
+				filter: none;
+			}
+		}
+
+		.button-small {
+			margin: -3px 0 -2px 14px;
+		}
+
+		.tab-active & .button-small:focus {
+			margin: -5px -2px -4px 12px;
+		}
+	}
+
+}

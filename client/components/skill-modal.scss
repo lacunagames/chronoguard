@@ -15,10 +15,10 @@
 		width: 54px;
 		height: 54px;
 		border-radius: 3px;
-		border: 4px solid #ccc;
+		border: 4px solid $cActive;
 		box-shadow: $shadow1;
 		position: relative;
-		transition: all 0.3s ease-out;
+		transition: all $animFast;
 
 		&:before {
 			content: '';
@@ -27,7 +27,7 @@
 			top: -4px;
 			right: -4px;
 			bottom: -4px;
-			border: 1px solid #333;
+			border: 1px solid $cText;
 			border-radius: 3px;
 		}
 
@@ -38,7 +38,7 @@
 			top: 0;
 			right: 0;
 			bottom: 0;
-			border: 1px solid #333;
+			border: 1px solid $cText;
 			border-radius: 2px;
 		}
 
@@ -49,8 +49,19 @@
 			height: 46px;
 			background-size: cover;
 			background-position: center;
-			transition: all 0.3s ease-out;
+			transition: all $animFast;
 		}
+
+		&:hover, &:focus {
+			filter: brightness(1.1);
+			box-shadow: $shadow2;
+		}
+
+		.tab-active &:focus:before {
+			border: 3px solid $cTab;
+			margin: -2px;
+		}
+
 		.color-filter {
 			position: absolute;
 			left: 0;
@@ -63,8 +74,7 @@
 	}
 
 	.inactive a {
-		border-color: #aaa;
-		cursor: default;
+		border-color: #5a5a44;
 		box-shadow: none;
 
 		span {
@@ -73,8 +83,7 @@
 	}
 
 	.learnt a {
-		border-color: #0eb00e;
-		cursor: default;
+		border-color: #43b200;
 
 		span {
 			filter: none;
@@ -89,6 +98,6 @@
 	}
 
 	.arrow-line {
-		transition: stroke 0.3s ease-out;
+		transition: all 0.3s ease-out;
 	}
 }

@@ -48,20 +48,15 @@ class SkillModal extends React.Component {
 	}
 
 	renderArrows(skills) {
-		const colors = {active: '#666', learnt: '#0eb00e', inactive: '#aaa'};
+		const offset = 27; // Half of skill box width
+		const colors = {active: '#cece5e', learnt: '#43b200', inactive: '#adac8b'};
 		const {svgWidth, svgHeight} = this.state;
-		const offsets = {left: [-7, 28], right: [57, 28], top: [28, -5], bottom: [28, 60]};
-		const directions = [
-				[{from: 'bottom', to: 'top'}, {from: 'top', to: 'bottom'}],
-				[{from: 'right', to: 'left'}, {from: 'left', to: 'right'}],
-			];
 
 		if (svgWidth === 0) {
 			return null;
 		}
 
 		const paths = [];
-
 		skills.forEach(skill => {
 			const isLearnt = this.props.player.learntSkills.find(name => skill.id === name);
 
@@ -70,20 +65,22 @@ class SkillModal extends React.Component {
 				const isActive = this.props.player.learntSkills.find(learntName => learntName === name);
 				const type = isLearnt ? 'learnt' : isActive ? 'active' : 'inactive';
 				const pos = {
-					fromX: fromSkill.treeX * svgWidth / 100, fromY: fromSkill.treeY * svgHeight / 100,
-					toX: skill.treeX * svgWidth / 100, toY: skill.treeY * svgHeight / 100,
+					fromX: fromSkill.treeX * svgWidth / 100 + offset, fromY: fromSkill.treeY * svgHeight / 100 + offset,
+					toX: skill.treeX * svgWidth / 100 + offset, toY: skill.treeY * svgHeight / 100 + offset,
 				};
-				const isVertical = Math.abs(pos.toX - pos.fromX) >= Math.abs(pos.toY - pos.fromY);
-				const isNegative = isVertical ? pos.toX < pos.fromX : pos.toY < pos.fromY;
-				const fromOffset = offsets[directions[+isVertical][+isNegative].from];
-				const toOffset = offsets[directions[+isVertical][+isNegative].to];
+				const angle = Math.atan2(pos.toY - pos.fromY, pos.toX - pos.fromX);
+				const distance = offset / Math.max(Math.abs(Math.cos(angle)), Math.abs(Math.sin(angle))) + 4;
+				const offPos = {
+					fromX: distance * Math.cos(angle), fromY: distance * Math.sin(angle),
+					toX: (distance + 5) * Math.cos(angle - Math.PI), toY: (distance + 5) * Math.sin(angle - Math.PI),
+				};
 
 				paths.push((
 						<path className="arrow-line"
 							style={{'marker-end': `url(#head-${type})`}}
-							stroke-width="6" fill="none" stroke={colors[type]}
-							d={`M${pos.fromX + fromOffset[0]},${pos.fromY + fromOffset[1]}
-								L${pos.toX + toOffset[0]},${pos.toY + toOffset[1]}`} />
+							stroke-width="4" fill="none" stroke={colors[type]}
+							d={`M${pos.fromX + offPos.fromX},${pos.fromY + offPos.fromY}
+								L${pos.toX + offPos.toX},${pos.toY + offPos.toY}`} />
 					));
 			});
 		});

@@ -2,7 +2,7 @@
 import skills from './skills';
 
 const defaultState = {
-	skillPoints: 150,
+	skillPoints: 50,
 	energy: 10,
 	maxEnergy: 15,
 	energyGainRate: 1,
@@ -61,12 +61,17 @@ class Player {
 	learnSkill(skillId) {
 		const skill = this.state.skills.find(skill => skill.id === skillId);
 
-		if (this.state.learntSkills.indexOf(skill.id) > -1 ||
-			skill.requires && skill.requires.some(id => this.state.learntSkills.indexOf(id) === -1)) {
-			return;
+		if (this.state.learntSkills.indexOf(skill.id) > -1) {
+			return  this.system.createMessage({type: 'skillAlreadyLearnt', name: skill.title});
+		}
+		if (skill.requires && skill.requires.some(id => this.state.learntSkills.indexOf(id) === -1)) {
+			const required = this.state.skills.find(skillSearch => {
+				return skill.requires.indexOf(skillSearch.id) > -1 && this.state.learntSkills.indexOf(skillSearch.id) === -1;
+			});
+			return this.system.createMessage({type: 'requiresSkill', name: skill.title, value: required.title});
 		}
 		if (this.state.skillPoints < skill.skillPoints) {
-			return this.system.createMessage({type: 'notEnoughSkillPoints', name: skill.name, value: skill.skillPoints});
+			return this.system.createMessage({type: 'notEnoughSkillPoints', name: skill.title, value: skill.skillPoints});
 		}
 		this.setState({
 			learntSkills: [...this.state.learntSkills, skill.id],

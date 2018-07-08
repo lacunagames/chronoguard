@@ -8,18 +8,18 @@ $mediaSizes: (
 );
 
 @mixin media($breakPoint) {
-    @media (min-width: map-get($mediaSizes, $breakPoint)) { @content }
+	@media (min-width: map-get($mediaSizes, $breakPoint)) { @content }
 }
 
 @mixin clearfix {
-  &:after {
-    content: '';
-    display: table;
-    clear: both;
-  }
+	&:after {
+		content: '';
+		display: table;
+		clear: both;
+	}
 }
 
 @mixin access {
-    position: absolute;
-    left: -9999em;
+	position: absolute;
+	left: -9999em;
 }

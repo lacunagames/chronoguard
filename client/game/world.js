@@ -18,6 +18,7 @@ const defaultState = {
 	],
 	hour: 0,
 	day: 1,
+	map: [],
 };
 
 let eventCounter = 0;
@@ -49,7 +50,7 @@ class World {
 		const day = hour % 24 === 0 ? this.state.day + 1 : this.state.day;
 
 		this.setState({hour, day});
-		this.system.updateMessages();
+		this.system.updateWorldMessages();
 		this.player.changeEnergy(0.25 * this.player.state.energyGainRate);
 
 		if (hour % 1 !== 0) {
@@ -61,7 +62,7 @@ class World {
 		this.state.events.forEach(event => {
 			if (event.ends === hour && !event.ended) {
 				event = this._updateEvent(event.id, {ended: true});
-				this._massDispatch(event.onEnd);
+				this.system.massDispatch(event.onEnd);
 			}
 			if (!event.removed && event.ends >= hour) {
 				events.push(event);
@@ -97,14 +98,6 @@ class World {
 		return event;
 	}
 
-	_massDispatch(actionObj) {
-		Object.keys(actionObj).forEach(actionName => {
-			const args = actionObj[actionName] instanceof Array ? actionObj[actionName] : [actionObj[actionName]];
-
-			this.dispatch(actionName, ...args);
-		});
-	}
-
 	_updateEvent(eventId, updates) {
 		const events = this.state.events.map(event => event.id === eventId ? {...event, ...updates} : event);
 
@@ -136,8 +129,8 @@ class World {
 		this.player.changeEnergy(-event.energy);
 		this._updateEvent(event.id, {ended: true});
 		setTimeout(() => this._updateEvent(event.id, {removed: true}), 1000);
-		this._massDispatch(event.onAction);
-		this._massDispatch(event.onEnd);
+		this.system.massDispatch(event.onAction);
+		this.system.massDispatch(event.onEnd);
 	}
 };
 

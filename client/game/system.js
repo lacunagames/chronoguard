@@ -1,14 +1,5 @@
 
-const messageTypes = {
-	notEnoughEnergy: {
-		duration: 10,
-		message: (name, value) => `Not enough energy for ${name} action. Required: ${value}.`,
-	},
-	notEnoughSkillPoints: {
-		duration: 10,
-		message: (name, value) => `Not enough skill points for ${name} skill. Requires: ${value}`,
-	}
-};
+import messageTypes from './message-types';
 
 const defaultState = {
 	paused: false,
@@ -46,21 +37,64 @@ class System {
 	}
 
 	createMessage({type, name, value}) {
+		const {worldTime, duration, text, unique, dismissable, buttons, group} = messageTypes[type];
+		const calcDuration = duration === 0 ? false : duration || 6;
+		const id = messageCounter;
+		const oldMessage = !unique && this.state.messages.find(message => {
+			return (message.type === type || group && message.group === group) && !message.ending;
+		});
 		const newMessage = {
+			...messageTypes[type],
 			type,
-			id: messageCounter,
-			message: messageTypes[type].message(name, value),
-			ends: this.world.state.hour + messageTypes[type].duration,
+			id,
+			dismissable: typeof dismissable === 'undefined' || dismissable,
+			text: typeof text === 'function' ? text(name, value) : text,
+			ends: worldTime && calcDuration && this.world.state.hour + calcDuration,
+			timer: !worldTime && calcDuration && setTimeout(() => this.endMessage(id), calcDuration * 1000),
+			starting: true,
 		};
 
+		if (oldMessage && !oldMessage.ending) {
+			clearTimeout(oldMessage.timer);
+			this.endMessage(oldMessage.id);
+		}
 		messageCounter++;
-		this.setState({messages: [...this.state.messages, ...newMessage]});
+		setTimeout(() => this._updateMessage(newMessage.id, {starting: false}), 50);
+
+		this.setState({messages: [...this.state.messages, newMessage]});
 	}
 
-	updateMessages() {
-		const messages = this.state.messages.filter(message => message.ends > this.world.state.hour);
+	_updateMessage(id, updates) {
+		const messages = this.state.messages.map(message => message.id === id ? {...message, ...updates} : message);
 
 		this.setState({messages});
+		return this.state.messages.find(message => message.id === id);
+	}
+
+	endMessage(id) {
+		const message = this.state.messages.find(message => message.id === id);
+
+		if (!message || message.ending) {
+			return;
+		}
+		this._updateMessage(id, {ending: true});
+		setTimeout(() => this.setState({messages: this.state.messages.filter(message => message.id !== id)}), 500);
+	}
+
+	updateWorldMessages() {
+		this.state.messages.forEach(message => {
+			if (message.ends && message.ends <= this.world.state.hour) {
+				this.endMessage(message.id);
+			}
+		});
+	}
+
+	massDispatch(actionObj) {
+		Object.keys(actionObj).forEach(actionName => {
+			const args = actionObj[actionName] instanceof Array ? actionObj[actionName] : [actionObj[actionName]];
+
+			this.dispatch(actionName, ...args);
+		});
 	}
 };
 

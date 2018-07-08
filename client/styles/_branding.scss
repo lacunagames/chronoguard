@@ -1,30 +1,21 @@
 
-// Colors
-$cGrey3: #333;
-$cGrey6: #666;
-$cGrey: #808080; // Light text
-$cGrey9: #999;
-$cGreyB: #bbb;
-$cGreyC: #ccc;
-$cGreyD: #ddd;
-$cGreyE: #eee;
+$cError: #e00025;
+$cSuccess: #4c7732;
+$cBg: #fbfbdb;
+$cBgInverse: #211b00;
+$cActive: #cece5e;
+$cText: #383105;
+$cTextLight: lighten($cText, 20%);
+$cLink: #245eff;
+$cLinkHover: darken($cLink, 20%);
+$cPrimary: #ffcc34;
+$cSecondary: #cecbb2;
+$cTab: darken($cLink, 20%);
 
-$cYellow: #fbe122;
-$cError: #ce0037;
-$cLightError: #cb5363;
-$cDarkBlue: #1f2a44;
-$cGreen: #43b02a;
-$cLightGreen: #66be6d;
-$cBlue: #2379A4;
-$cIconButton: #4C5569;
-$cLightBlue: #41B6E6;
-$cOrange: #F78964;
-$cButton: #f3f3f3;
-$cButtonHover: #fdfdfd;
 
 // Fonts
-$font: sans-serif;
-$fontLight: sans-serif;
+$font: 'Roboto Condensed', sans-serif;
+$fontHeading: 'Alegreya', serif;
 
 // Shadows
 $shadow0: 0 2px 1px -1px rgba(0, 0, 0, 0.12);
@@ -39,5 +30,5 @@ $shadowText: 1px 1px 2px rgba(0, 0, 0, 0.2);
 $spacing: 15px;
 $spacingLg: 30px;
 
-// Others
-$border: 1px solid #eee;
+// Transitions
+$animFast: 0.2s ease-out;

@@ -19,6 +19,7 @@ const events = {
 		onAction: {
 			gainMote: ['water', 1],
 			changeMaxEnergy: 0.5,
+			createMessage: {type: 'testEventAction', name: 'Water'},
 		},
 		onEnd: {
 			queueItem: {type: 'createEvent', id: 'water', delay: '8-12'},

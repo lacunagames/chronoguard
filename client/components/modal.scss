@@ -17,8 +17,8 @@ body.modal-open {
 	z-index: 1000;
 	padding: 10px;
 	cursor: pointer;
-	background-color: rgba(0,0,0,0.6);
-	transition: opacity 0.2s ease-out;
+	background-color: rgba($cBgInverse, 0.6);
+	transition: opacity $animFast;
 
 	&.locked {
 		cursor: default;
@@ -61,10 +61,10 @@ body.modal-open {
 	border-radius: 3px;
 	display: inline-block;
 	margin: 10px auto;
-	background-color: #fff;
+	background-color: $cBg;
 	box-shadow: $shadow5;
 	width: auto;
-	min-width: 285px;
+	min-width: 300px;
 	max-width: 95%;
 	position: relative;
 	text-align: left;
@@ -87,27 +87,9 @@ body.modal-open {
 		}
 	}
 
-	.row-buttons {
-		padding-bottom: 0;
-	}
-
 	.close-button {
 		position: absolute;
-		top: 0;
+		top: 3px;
 		right: 0;
-		border-radius: 0 4px 0 4px;
-
-		&:before {
-			content: '×';
-			font-size: 18px;
-			color: #333;
-		}
-
-		.tab-active &:focus {
-			position: absolute;
-			left: auto;
-			top: 0;
-			right: 0;
-		}
 	}
 }

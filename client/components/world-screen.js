@@ -4,9 +4,11 @@ import './world-screen.scss';
 import React from 'react';
 
 import connect from 'game/connect';
+import Screen from './screen';
 import EventDisc from './event-disc';
 import Modal from './modal';
 import SkillModal from './skill-modal';
+import Messages from './messages';
 import utils from 'utils';
 
 class WorldScreen extends React.Component {
@@ -53,26 +55,27 @@ class WorldScreen extends React.Component {
 		const events = world.events.map((event, index) => <EventDisc key={event.id} {...{event, world, player, dispatch}} />) || '';
 
 		return (
-			<div className="screen world-screen">
+			<Screen className="world-screen">
 				<div className="time">{`Day ${world.day}, ${Math.floor(world.hour) % 24}:00`}</div>
 				<div className="skill-points">
 					Skill points: {player.skillPoints}<br />
 					Energy: {Math.floor(player.energy)}<br />
-					Fire: {player.motes.fire}<br />
+					{/*Fire: {player.motes.fire}<br />
 					Water: {player.motes.water}<br />
 					Air: {player.motes.air}<br />
 					Earth: {player.motes.earth}<br />
 					Light: {player.motes.light}<br />
 					Shadow: {player.motes.shadow}<br />
-					Life: {player.motes.life}<br />
+					Life: {player.motes.life}<br />*/}<br />
 					<button onClick={this.throttleSkillModal}>Skills</button>
 				</div>
 				<ul className="events">{events}</ul>
+				<Messages messages={system.messages} dispatch={dispatch} />
 				<Modal show={this.state.pauseModalOpen} locked={false} onClose={this.throttlePause} {...{dispatch}}>
 					<h2 data-modal-head>Game has been paused.</h2>
 				</Modal>
 				<SkillModal show={this.state.skillModalOpen} onClose={this.throttleSkillModal} {...this.props} />
-			</div>
+			</Screen>
 		);
 	}
 }

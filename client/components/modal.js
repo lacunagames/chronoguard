@@ -143,8 +143,9 @@ class Modal extends React.Component {
 				<div className="modal-box" ref="modal" onClick={e => e.stopPropagation()}>
 					<div className="inner">
 						{!this.props.locked &&
-							<button onClick={this.props.onClose} className="close-button">
+							<button onClick={this.props.onClose} className="icon button close-button">
 								<div className="access">Close modal</div>
+								<i>close</i>
 							</button>
 						}
 						{headerChildren.length > 0 &&

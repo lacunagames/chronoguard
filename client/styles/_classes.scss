@@ -1,100 +1,86 @@
 
 .invisible {
-    opacity: 0;
+	opacity: 0;
 }
 
 .hidden {
-    display: none !important;
+	display: none !important;
 }
 
 @media (max-width: map-get($mediaSizes, 's') - 1) {
-    .hide-xs {
-        display: none !important;
-    }
+	.hide-xs {
+		display: none !important;
+	}
  }
 
 @include media(s) {
-    .hide-gt-xs {
-        display: none !important;
-    }
+	.hide-gt-xs {
+		display: none !important;
+	}
 }
 
 @media (min-width: map-get($mediaSizes, 's')) and (max-width: map-get($mediaSizes, 'm') - 1) {
-    .hide-s {
-        display: none !important;
-    }
+	.hide-s {
+		display: none !important;
+	}
  }
 
 @include media(m) {
-    .hide-gt-s {
-        display: none !important;
-    }
+	.hide-gt-s {
+		display: none !important;
+	}
 }
 
 @media (min-width: map-get($mediaSizes, 'm')) and (max-width: map-get($mediaSizes, 'l') - 1) {
-    .hide-m {
-        display: none !important;
-    }
+	.hide-m {
+		display: none !important;
+	}
  }
 
 @include media(l) {
-    .hide-gt-m {
-        display: none !important;
-    }
+	.hide-gt-m {
+		display: none !important;
+	}
 }
 
 @media (min-width: map-get($mediaSizes, 'l')) and (max-width: map-get($mediaSizes, 'xl') - 1) {
-    .hide-l {
-        display: none !important;
-    }
+	.hide-l {
+		display: none !important;
+	}
  }
 
 @include media(xl) {
-    .hide-xl, .hide-gt-l {
-        display: none !important;
-    }
+	.hide-xl, .hide-gt-l {
+		display: none !important;
+	}
 }
 
 
 
 .access {
-    @include access;
+	@include access;
 }
 
 .c-error {
-    color: $cError;
+	color: $cError;
 }
 
 .c-success {
-    color: $cGreen;
+	color: $cSuccess;
 }
 
-.c-info {
-    color: $cBlue;
-}
-
-.asterisk:before {
-    content: '*';
-    color: $cError;
-    font-size: 18px;
-    line-height: 14px;
-    font-family: $font;
-    padding: 0 4px;
+.c-text-light {
+	color: $cTextLight;
 }
 
 .text-right {
-    text-align: right;
+	text-align: right;
 }
 
 .text-center {
-    text-align: center;
+	text-align: center;
 }
 
 .pull-up {
-    margin-top: -10px;
+	margin-top: -10px;
 }
-
-.comma-span span:not(:last-child):not(:empty):after {
-    content: ' | ';
-}
-

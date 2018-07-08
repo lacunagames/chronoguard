@@ -16,6 +16,10 @@
 .event-disc {
 	position: absolute;
 
+	li {
+		padding: 0;
+	}
+
 	a {
 		position: relative;
 		display: inline-block;
@@ -25,12 +29,13 @@
 		background: #aaa;
 		border-radius: 50%;
 		border: 4px solid transparent;
-		box-shadow: $shadow3;
+		box-shadow: $shadow1;
 		background-size: cover;
-		transition: all 0.3s ease-out;
+		transition: all $animFast;
 
-		&:focus {
-			outline: none;
+		&:hover, &:focus {
+			filter: grayscale(0) brightness(1.1);
+			box-shadow: $shadow3;
 		}
 	}
 
@@ -45,17 +50,25 @@
 	circle {
 		fill: none;
 		stroke-width: 4;
-		stroke: #333;
+		stroke: $cText;
 	}
 
 	.progress {
-		stroke: #bbb;
-		transition: stroke-dasharray 0.25s linear;
+		stroke: $cSecondary;
+		transition: stroke-dasharray 0.25s linear, stroke $animFast;
 		stroke-dasharray: 138.23 138.23;
+	}
+
+	a:hover + svg .progress {
+		stroke: lighten($cSecondary, 10%);
 	}
 
 	&.no-energy a {
 		filter: grayscale(0.85);
+
+		&:hover, &:focus {
+			filter: grayscale(0.85) brightness(1.1);
+		}
 	}
 
 	&.start, &.end {
