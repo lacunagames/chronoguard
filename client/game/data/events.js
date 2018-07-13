@@ -19,7 +19,6 @@ const events = {
 		onAction: {
 			gainMote: ['water', 1],
 			changeMaxEnergy: 0.5,
-			createMessage: {type: 'testEventAction', name: 'Water'},
 		},
 		onEnd: {
 			queueItem: {type: 'createEvent', id: 'water', delay: '8-12'},
@@ -47,6 +46,14 @@ const events = {
 		},
 		onEnd: {
 			queueItem: {type: 'createEvent', id: 'life', delay: '7-9'},
+			checkCondition: {
+				requires: 'motes.life >= 1',
+				actions: {
+					createMapObj: {name: 'forest2', posX: 680, posY: 428,},
+					createMessage: {type: 'free', name: 'Double forest!'},
+					removeCondition: 'life',
+				}
+			},
 		}
 	},
 	earth: {

@@ -1,5 +1,6 @@
 
-import messageTypes from './message-types';
+import messageTypes from './data/message-types';
+import Agent from './agent';
 
 const defaultState = {
 	paused: false,
@@ -9,21 +10,11 @@ const defaultState = {
 
 let messageCounter = 0;
 
-class System {
+class System extends Agent {
 
 	constructor(subscribeState) {
-		this.subscribeState = subscribeState;
-		this.state = {};
+		super(subscribeState);
 		this.setState(defaultState);
-	}
-
-	getState() {
-		return this.state;
-	}
-
-	setState(newState) {
-		this.state = {...this.state, ...newState};
-		this.subscribeState(newState);
 	}
 
 	pauseGame(forced) {
@@ -59,16 +50,9 @@ class System {
 			this.endMessage(oldMessage.id);
 		}
 		messageCounter++;
-		setTimeout(() => this._updateMessage(newMessage.id, {starting: false}), 50);
+		setTimeout(() => this._updateStateObj('messages', newMessage.id, {starting: false}), 50);
 
 		this.setState({messages: [...this.state.messages, newMessage]});
-	}
-
-	_updateMessage(id, updates) {
-		const messages = this.state.messages.map(message => message.id === id ? {...message, ...updates} : message);
-
-		this.setState({messages});
-		return this.state.messages.find(message => message.id === id);
 	}
 
 	endMessage(id) {
@@ -77,7 +61,7 @@ class System {
 		if (!message || message.ending) {
 			return;
 		}
-		this._updateMessage(id, {ending: true});
+		this._updateStateObj('messages', id, {ending: true});
 		setTimeout(() => this.setState({messages: this.state.messages.filter(message => message.id !== id)}), 500);
 	}
 
@@ -87,6 +71,15 @@ class System {
 				this.endMessage(message.id);
 			}
 		});
+	}
+
+	setAgentValue(agentName, attribute, newValue) {
+		const agent = agentName === 'system' ? this : this[agentName];
+
+		if (typeof agent.state[attribute] === 'undefined') {
+			return console.warn(`Error: ${attribute} not found in ${agentName} state.`);
+		}
+		agent.setState({[attribute]: newValue});
 	}
 
 	massDispatch(actionObj) {

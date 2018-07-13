@@ -1,5 +1,5 @@
 
-import skills from './skills';
+import skills from './data/skills';
 
 const defaultState = {
 	skillPoints: 50,

@@ -45,7 +45,7 @@ class Messages extends React.Component {
 			positions[message.id] = height;
 		});
 		this.setState({positions, disableAnimate}, () => {
-			this.animTimer =  disableAnimate && setTimeout(() => this.setState({disableAnimate: false}), 100);
+			this.animTimer = disableAnimate && setTimeout(() => this.setState({disableAnimate: false}), 100);
 		});
 	}
 

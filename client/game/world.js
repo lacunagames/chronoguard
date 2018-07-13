@@ -1,6 +1,7 @@
 
 import utils from 'utils';
-import events from './events';
+import events from './data/events';
+import Agent from './agent';
 
 const defaultState = {
 	events: [],
@@ -18,28 +19,32 @@ const defaultState = {
 	],
 	hour: 0,
 	day: 1,
-	map: [],
+	map: [{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: ''}],
+	conditions: [
+		{
+			id: 0,
+			requires: 'motes.life >= 2',
+			actions: {
+				createMapObj: {name: 'forest', posX: 685, posY: 440,},
+				createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'},
+				removeCondition: 0,
+			},
+		},
+	],
 };
 
 let eventCounter = 0;
+let mapCounter = 1;
+let conditionCounter = 1;
 
-class World {
+class World extends Agent {
 
 	constructor(subscribeState) {
+		super(subscribeState);
 		utils.bindThis(this, ['_worldChange', 'eventAction']);
-		this.subscribeState = subscribeState;
 		this.state = {};
 		this.setState(defaultState);
 		this.changeInterval = setInterval(this._worldChange, 250);
-	}
-
-	getState() {
-		return this.state;
-	}
-
-	setState(newState) {
-		this.state = {...this.state, ...newState};
-		this.subscribeState(newState);
 	}
 
 	_worldChange() {
@@ -57,11 +62,13 @@ class World {
 			return;
 		}
 
+		this.state.conditions.forEach(condition => this.checkCondition(condition));
+
 		const events = [];
 
 		this.state.events.forEach(event => {
 			if (event.ends === hour && !event.ended) {
-				event = this._updateEvent(event.id, {ended: true});
+				event = this._updateStateObj('events', event.id, {ended: true});
 				this.system.massDispatch(event.onEnd);
 			}
 			if (!event.removed && event.ends >= hour) {
@@ -98,17 +105,9 @@ class World {
 		return event;
 	}
 
-	_updateEvent(eventId, updates) {
-		const events = this.state.events.map(event => event.id === eventId ? {...event, ...updates} : event);
-
-		this.setState({events});
-		return events.find(event => event.id === eventId);
-	}
-
 	queueItem({type, id, delay}) {
 		const newItem = {id, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1, type};
 		this.setState({queue: [...this.state.queue, newItem]});
-// const nuAll = this.state.queue.filter(item => item.id === id).length + this.state.events.filter(event => event.name.toLowerCase() === id && !event.ended).length;
 	}
 
 	eventAction(eventId) {
@@ -127,10 +126,85 @@ class World {
 		setTimeout(() => this.isClicking = false, 200);
 
 		this.player.changeEnergy(-event.energy);
-		this._updateEvent(event.id, {ended: true});
-		setTimeout(() => this._updateEvent(event.id, {removed: true}), 1000);
+		this._updateStateObj('events', event.id, {ended: true});
+		setTimeout(() => this._updateStateObj('events', event.id, {removed: true}), 1000);
 		this.system.massDispatch(event.onAction);
 		this.system.massDispatch(event.onEnd);
+	}
+
+	createMapObj(mapObj) {
+		const newObj = {id: mapCounter, animation: 'create', state: '', ...mapObj};
+
+		mapCounter++;
+		this.setState({map: [...this.state.map, newObj]});
+	}
+
+	removeCondition(id) {
+		if (typeof id === 'number') {
+			this._removeStateObj('conditions', id);
+		} else if (events[id]) {
+			delete events[id].onEnd.checkCondition;
+			delete events[id].onAction.checkCondition;
+		}
+	}
+
+	checkCondition(condition) {
+		const parts = condition.requires.replace(/(\[\')/g, '').replace(/(\'\])/g, '.').split(/(\s|>=|==|===|<=|<|>|\.)/g);
+		const compare = {sides: [], operator: ''};
+		const agents = [this, this.player, this.system];
+		const matchSides = () => {
+			switch (compare.operator) {
+				case '<': return compare.sides[0] < compare.sides[1];
+				case '<=': return compare.sides[0] <= compare.sides[1];
+				case '>': return compare.sides[0] > compare.sides[1];
+				case '>=': return compare.sides[0] >= compare.sides[1];
+				case '==': return compare.sides[0] == compare.sides[1];
+				case '===': return compare.sides[0] === compare.sides[1];
+			}
+		};
+		let stateProp;
+
+		parts.forEach((part, i) => {
+			if (['', ' ', '.'].indexOf(part) > -1) {
+				return;
+			}
+			if (typeof +part === 'number' && !isNaN(+part)) {
+				compare.sides.push(+part);
+			} else if (/(>=|==|===|<=|<|>)/g.test(part)) {
+				compare.operator = part;
+			} else {
+				if (typeof stateProp === 'undefined') {
+					const agent = agents.find(agent => agent.state.hasOwnProperty(part));
+
+					if (!agent) {
+						return console.warn(`Error: condition '${condition.requires}' is not a valid condition.`);
+					}
+					stateProp = agent.state[part];
+				} else {
+					stateProp = stateProp[part];
+					if (parts[i + 1] !== '.') {
+						compare.sides.push(stateProp);
+						stateProp = undefined;
+					}
+				}
+			}
+		});
+		if (matchSides()) {
+			this.system.massDispatch(condition.actions);
+		}
+	}
+
+	animationEnded(id) {
+		const mapObj = this.state.map.find(obj => obj.id === id);
+
+		// Remove mapObj after fadeOut
+		if (mapObj.animation === 'destroy') {
+			const map = this.state.map.filter(mapObj => mapObj.id !== id);
+
+			this.setState({map});
+		} else {
+			this._updateStateObj('map', id, {animation: '', state: mapObj.animation === 'hide' ? 'hidden' : ''});
+		}
 	}
 };
 

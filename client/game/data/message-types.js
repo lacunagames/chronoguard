@@ -39,6 +39,9 @@ const messageTypes = {
 			}
 		],
 	},
+	free: {
+		text: name => `${name}`,
+	}
 };
 
 export default messageTypes;
