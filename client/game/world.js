@@ -1,21 +1,47 @@
 
 import utils from 'utils';
-import events from './data/events';
+import config from 'config';
+import allEvents from './data/events';
 import Agent from './agent';
+import allAssets from './data/assets';
+
+const actionTypes = ['onEnd', 'onAction', 'onSuccess', 'onFail'];
 
 const defaultState = {
 	events: [],
 	queue: [
-		{type: 'createEvent', id: 'fire', activates: 1,},
-		{type: 'createEvent', id: 'water', activates: 3,},
-		{type: 'createEvent', id: 'air', activates: 4,},
-		{type: 'createEvent', id: 'life', activates: 8,},
-		{type: 'createEvent', id: 'earth', activates: 11,},
-		{type: 'createEvent', id: 'fire', activates: 3,},
-		{type: 'createEvent', id: 'water', activates: 2,},
-		{type: 'createEvent', id: 'air', activates: 6,},
-		{type: 'createEvent', id: 'life', activates: 7,},
-		{type: 'createEvent', id: 'earth', activates: 2,},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'water', activates: 3,},
+		{type: 'createEvent', value: 'air', activates: 4,},
+		{type: 'createEvent', value: 'life', activates: 8,},
+		{type: 'createEvent', value: 'earth', activates: 11,},
+		{type: 'createEvent', value: 'fire', activates: 3,},
+		{type: 'createEvent', value: 'water', activates: 2,},
+		{type: 'createEvent', value: 'air', activates: 6,},
+		{type: 'createEvent', value: 'life', activates: 7,},
+		{type: 'createEvent', value: 'earth', activates: 2,},
+		{type: 'createEvent', value: 'inspireFarming', activates: 1},
 	],
 	hour: 0,
 	day: 1,
@@ -23,12 +49,12 @@ const defaultState = {
 	conditions: [
 		{
 			id: 0,
-			requires: 'motes.life >= 2',
-			actions: {
-				createMapObj: {name: 'forest', posX: 685, posY: 440,},
-				createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'},
-				removeCondition: 0,
-			},
+			requires: 'motes.life >= 1',
+			actions: [
+				{createMapObj: {name: 'forest', posX: 685, posY: 440,}},
+				{createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'}},
+				{removeCondition: 0},
+			],
 		},
 	],
 };
@@ -62,6 +88,18 @@ class World extends Agent {
 			return;
 		}
 
+		const forest = this.state.map.find(obj => obj.name === 'forest2');
+
+		// if (forest) {
+
+		// 	if (hour % 3 === 1) {
+		// 		this._updateStateObj('map', forest.id, {animation: 'hide'});
+		// 	}
+		// 	if (hour % 3 === 0) {
+		// 		this._updateStateObj('map', forest.id, {animation: 'show', state: ''});
+		// 	}
+		// }
+
 		this.state.conditions.forEach(condition => this.checkCondition(condition));
 
 		const events = [];
@@ -70,6 +108,9 @@ class World extends Agent {
 			if (event.ends === hour && !event.ended) {
 				event = this._updateStateObj('events', event.id, {ended: true});
 				this.system.massDispatch(event.onEnd);
+				if (event.hasOwnProperty('chance')) {
+					this.system.massDispatch(event.chance >= 100 ? event.onSuccess : event.onFail);
+				}
 			}
 			if (!event.removed && event.ends >= hour) {
 				events.push(event);
@@ -78,8 +119,16 @@ class World extends Agent {
 
 		const queue = this.state.queue.filter(item => {
 			if (item.activates === hour) {
-				if (item.type === 'createEvent') {
-					events.push(this._createEvent(item.id));
+				switch (item.type) {
+					case 'createEvent':
+						events.push(this._createEvent(item.value, events));
+						break;
+
+					case 'createMapObj':
+						const {type, activates, ...mapObj} = item;
+
+						this.createMapObj(mapObj);
+						break;
 				}
 				return false;
 			}
@@ -89,29 +138,73 @@ class World extends Agent {
 		this.setState({events, queue});
 	}
 
-	_createEvent(eventId) {
-		const duration = utils.getRandom(events[eventId].duration);
-		const event = {...events[eventId], ...{
-			mapX: Math.floor(Math.random() * 80 + 10),
-			mapY: Math.floor(Math.random() * 80 + 10),
+	_getSafeCoords(point, distance, events) {
+		const getDistance = (c1, c2) => Math.abs(Math.sqrt(Math.pow(c1.x - c2.x, 2) + Math.pow(c1.y - c2.y, 2)));
+		let unsafe;
+		let tries = 0;
+		let coords = {};
+		let angle, radius;
+
+		do {
+			tries++;
+			if (point) {
+				angle = Math.random() * 2 * Math.PI;
+				radius = distance * Math.sqrt(Math.random());
+			}
+			coords.x = point ? point.x + radius * Math.cos(angle) : Math.floor(Math.random() * 90 + 5);
+			coords.y = point ? point.y + radius * Math.sin(angle) : Math.floor(Math.random() * 90 + 5);
+			unsafe = events.some(event => getDistance({x: event.mapX, y: event.mapY}, coords) < 7);
+		} while (unsafe && tries < 500);
+		if (tries === 500) console.log('fail safe coords');
+		return coords;
+	}
+
+	_createEvent(eventId, events) {
+		const duration = utils.getRandom(allEvents[eventId].duration);
+		const coords = this._getSafeCoords({x: 50, y: 50}, 45, events || thtis.state.events);
+		const event = {...utils.deepClone(allEvents[eventId]), ...{
+			mapX: coords.x,
+			mapY: coords.y,
 			starts: Math.floor(this.state.hour) + 1,
 			ends: Math.floor(this.state.hour) + duration + 1,
 			duration,
+			type: eventId,
 			id: eventCounter,
 			ended: false,
 		}};
+
+		actionTypes.forEach(actionType => {
+			const actions = event[actionType];
+
+			actions && actions.forEach((action, index) => {
+				const actionName = Object.keys(action)[0];
+
+				if (typeof action[actionName] !== 'object' || action[actionName] instanceof Array) {
+					return;
+				}
+
+				if (action[actionName].posX === 'eventPosX') {
+					action[actionName].posX = event.mapX * config.mapWidth / 100;
+				}
+				if (action[actionName].posY === 'eventPosY') {
+					action[actionName].posY = event.mapY * config.mapHeight / 100;
+				}
+			});
+		});
 
 		eventCounter++;
 		return event;
 	}
 
-	queueItem({type, id, delay}) {
-		const newItem = {id, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1, type};
+	queueItem({type, value, delay}) {
+		const newItem = {type, value, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1,};
 		this.setState({queue: [...this.state.queue, newItem]});
 	}
 
 	eventAction(eventId) {
 		const event = this.state.events.find(event => event.id === eventId);
+
+		this.system.playSound('click');
 
 		if (!event || event.ended) {
 			return;
@@ -119,32 +212,41 @@ class World extends Agent {
 		if (this.player.state.energy < event.energy) {
 			return this.system.createMessage({type: 'notEnoughEnergy', name: event.name, value: event.energy});
 		}
-		if (this.isClicking) {
-			return console.log(eventId + ' clicked');
-		}
-		this.isClicking = true;
-		setTimeout(() => this.isClicking = false, 200);
+
 
 		this.player.changeEnergy(-event.energy);
 		this._updateStateObj('events', event.id, {ended: true});
 		setTimeout(() => this._updateStateObj('events', event.id, {removed: true}), 1000);
 		this.system.massDispatch(event.onAction);
 		this.system.massDispatch(event.onEnd);
+		this.increaseChance(event.type);
 	}
 
 	createMapObj(mapObj) {
-		const newObj = {id: mapCounter, animation: 'create', state: '', ...mapObj};
+		const priority = allAssets.videos[mapObj.name] ? mapCounter * 1000 : mapCounter;
+		const newObj = {id: mapCounter, animation: 'create', state: '', priority, ...mapObj};
 
 		mapCounter++;
 		this.setState({map: [...this.state.map, newObj]});
 	}
 
+	updateMapObj(id, update) {
+		this._updateStateObj('map', id, update);
+	}
+
+	removeMapObj(id) {
+		this._removeStateObj('map', id);
+	}
+
 	removeCondition(id) {
 		if (typeof id === 'number') {
 			this._removeStateObj('conditions', id);
-		} else if (events[id]) {
-			delete events[id].onEnd.checkCondition;
-			delete events[id].onAction.checkCondition;
+		} else if (allEvents[id]) {
+			actionTypes.forEach(actionType => allEvents[id][actionType] && allEvents[id][actionType].forEach((actionObj, index) => {
+				if (actionObj.hasOwnProperty('checkCondition')) {
+					allEvents[id][actionType].splice(index, 1);
+				}
+			}));
 		}
 	}
 
@@ -177,7 +279,7 @@ class World extends Agent {
 					const agent = agents.find(agent => agent.state.hasOwnProperty(part));
 
 					if (!agent) {
-						return console.warn(`Error: condition '${condition.requires}' is not a valid condition.`);
+						return console.warn(`Error: '${condition.requires}' is not a valid condition.`);
 					}
 					stateProp = agent.state[part];
 				} else {
@@ -194,17 +296,16 @@ class World extends Agent {
 		}
 	}
 
-	animationEnded(id) {
-		const mapObj = this.state.map.find(obj => obj.id === id);
+	increaseChance(type) {
+		const events = this.state.events.map(event => {
+			if (event.hasOwnProperty('chance') && event.chanceIncrease && event.chanceIncrease[type] && ! event.ended) {
+				return {...event, chance: Math.min(event.chance + utils.getRandom(event.chanceIncrease[type]), 100)};
+			} else {
+				return event;
+			}
+		});
 
-		// Remove mapObj after fadeOut
-		if (mapObj.animation === 'destroy') {
-			const map = this.state.map.filter(mapObj => mapObj.id !== id);
-
-			this.setState({map});
-		} else {
-			this._updateStateObj('map', id, {animation: '', state: mapObj.animation === 'hide' ? 'hidden' : ''});
-		}
+		this.setState({events});
 	}
 };
 

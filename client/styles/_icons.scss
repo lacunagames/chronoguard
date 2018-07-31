@@ -21,3 +21,16 @@ i {
 	-webkit-font-feature-settings: 'liga';
 	-webkit-font-smoothing: antialiased;
 }
+
+.skill-points, .energy-points {
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background-image: url(images/icon-light.jpg);
+	background-size: cover;
+}
+
+.energy-points {
+	background-image: url(images/icon-life.jpg);
+}

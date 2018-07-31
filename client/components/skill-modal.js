@@ -4,17 +4,19 @@ import './skill-modal.scss';
 import React from 'react';
 
 import Modal from './modal';
+import Tooltip from './tooltip';
 import utils from 'utils';
 
 class SkillModal extends React.Component {
 
 	constructor(props) {
 		super(props);
-		utils.bindThis(this, ['updateArrows']);
+		utils.bindThis(this, ['updateArrows', 'toggleTooltip']);
 		this.skillTreeRef = React.createRef();
 		this.state = {
 			svgWidth: 0,
 			svgHeight: 0,
+			tooltipOpen: {},
 		};
 		this.debounceUpdateArrow = utils.debounce(this.updateArrows, 500, () => this.setState({svgWidth: 0, svgHeight: 0}));
 	}
@@ -45,6 +47,10 @@ class SkillModal extends React.Component {
 	skillClick(e, skillId) {
 		e.preventDefault();
 		this.props.dispatch('learnSkill', skillId);
+	}
+
+	toggleTooltip(isOpen, skill) {
+		this.setState({tooltipOpen: {...this.state.tooltipOpen, [skill.id]: isOpen}});
 	}
 
 	renderArrows(skills) {
@@ -115,10 +121,40 @@ class SkillModal extends React.Component {
 					inactive: skill.requires && skill.requires.some(skillName => player.learntSkills.indexOf(skillName) === -1),
 					'no-skill-points': skill.skillPoints > player.skillPoints,
 				})}>
-				<a href="#" draggable="false"
-					onClick={(e) => this.skillClick(e, skill.id)}>
-					<span style={{'background-image': `url(static/images/icon-${skill.icon}.jpg)`}} />
-				</a>
+				<Tooltip show={this.state.tooltipOpen[skill.id]} toggleTooltip={isOpen => this.toggleTooltip(isOpen, skill)}>
+					<a href="#" draggable="false" data-tooltip-trigger
+						onClick={(e) => this.skillClick(e, skill.id)}>
+						<span style={utils.getIconStyle(skill.icon)} />
+					</a>
+					{this.state.tooltipOpen[skill.id] &&
+						<div>
+							<h3>{skill.title}</h3>
+							<p>{skill.desc}</p>
+							{skill.requires && skill.requires.length &&
+								<p className="capitalize">
+									Required skill{skill.requires.length > 1 ? 's: ' : ': '}
+									{skill.requires.map((skillId, index) => {
+										const requiredSkill = player.skills.find(skill => skill.id === skillId);
+										const isLearnt = player.learntSkills.indexOf(requiredSkill.id) > -1;
+
+										return (<span className={utils.getClassName({'c-success': isLearnt, 'c-error': !isLearnt,})}>
+															{requiredSkill.title}
+															{index === skill.requires.length - 1 ? '' : ', '}
+														</span>);
+									})}
+								</p>
+							}
+							{player.learntSkills.indexOf(skill.id) > -1 ?
+								<p class="c-success capitalize">Already learnt</p> :
+								<p className={utils.getClassName({
+									'c-success': player.skillPoints >= skill.skillPoints,
+									'c-error': player.skillPoints < skill.skillPoints})}>
+									<span className="skill-points" /> {skill.skillPoints}
+								</p>
+							}
+						</div>
+					}
+				</Tooltip>
 			</li>
 		));
 

@@ -4,7 +4,7 @@
 
 .message-box {
 	position: absolute;
-	bottom: 0;
+	bottom: 5px;
 	left: 0;
 	right: 0;
 	margin: 0;
@@ -17,6 +17,7 @@
 		display: block;
 		text-align: center;
 		transition: all $animFast;
+		pointer-events: none;
 
 		&.starting {
 			opacity: 0;
@@ -28,21 +29,29 @@
 			transform: translateX(-250px);
 		}
 
+		&.has-desc .text {
+			text-align: left;
+		}
+
 		a {
-			margin-bottom: 5px;
 			max-width: 600px;
 			display: inline-block;
 			padding: 10px 20px;
 			background: rgba($cBgInverse, 0.8);
+			border: 1px solid $cBgInverse;
 			color: $cBg;
 			text-transform: capitalize;
 			border-radius: 3px;
 			cursor: pointer;
 			transition: filter $animFast;
+			box-shadow: $shadow1;
+			position: relative;
+			pointer-events: auto;
 
 			&:hover, &:focus {
 				text-decoration: none;
 				filter: brightness(1.2);
+				box-shadow: $shadow3;
 			}
 		}
 
@@ -51,6 +60,62 @@
 
 			&:hover, &:focus {
 				filter: none;
+				box-shadow: $shadow1;
+			}
+		}
+
+		.text {
+			display: table;
+		}
+
+		.inner {
+			display: table-cell;
+			vertical-align: middle;
+		}
+		.inline-icon {
+			display: inline-block;
+			background-size: cover;
+			width: 20px;
+			height: 20px;
+			margin: -5px 0 -5px 3px;
+		}
+
+		.desc {
+			font-size: 12px;
+			line-height: 18px;
+			display: block;
+			margin-top: -12px;
+		}
+
+		&.icon-message {
+			a {
+				min-height: 46px;
+				margin-left: 24px;
+			}
+			.icon {
+				float: left;
+				display: block;
+				width: 50px;
+				height: 50px;
+				transform: rotate(45deg) translate(-49px, 14px);
+				overflow: hidden;
+				border: 2px solid $cBgInverse;
+				position: absolute;
+				top: 50%;
+
+				span {
+					display: block;
+					width: 65px;
+					height: 65px;
+					margin: -10px 0 0 -10px;
+					transform: rotate(-45deg);
+					background-size: cover;
+				}
+			}
+
+			.text {
+				min-height: 50px;
+				margin-left: 22px;
 			}
 		}
 

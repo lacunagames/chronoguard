@@ -7,11 +7,11 @@
 
 const messageTypes = {
 	notEnoughEnergy: {
-		text: (name, value) => `Not enough energy for ${name}. Requires ${value}.`,
+		text: (name, value) => `Not enough energy for ${name}. Requires {icon-energy-points} ${value}.`,
 		worldTime: true,
 	},
 	notEnoughSkillPoints: {
-		text: (name, value) => `Not enough skill points for ${name}. Requires ${value}.`,
+		text: (name, value) => `Not enough skill points for ${name}. Requires {icon-skill-points} ${value}.`,
 		dismissable: false,
 		group: 'skill',
 	},
@@ -41,6 +41,12 @@ const messageTypes = {
 	},
 	free: {
 		text: name => `${name}`,
+		desc: descVal => `${descVal || ''}`,
+	},
+	primary: {
+		text: name => `${name}`,
+		desc: descVal => `${descVal || ''}`,
+		duration: 0,
 	}
 };
 

@@ -37,7 +37,8 @@ class WorldScreen extends React.Component {
 	componentWillUnmount() {
 		utils.offEvent(window, 'keydown', this.throttlePause);
 		utils.offEvent(document, 'visibilitychange', this.toggleVisiblePause);
-		this.throttleToggle.clear();
+		this.throttlePause.clear();
+		this.throttleSkillModal.clear();
 	}
 
 	toggleVisiblePause() {
@@ -68,16 +69,16 @@ class WorldScreen extends React.Component {
 			<Screen className="world-screen">
 				<MapCanvas map={world.map} updateEventsPosition={this.updateEventsPosition} dispatch={dispatch} />
 				<div className="time">{`Day ${world.day}, ${Math.floor(world.hour) % 24}:00`}</div>
-				<div className="skill-points">
-					Skill points: {player.skillPoints}<br />
-					Energy: {Math.floor(player.energy)}<br />
+				<div className="player">
+					<span className="skill-points" /> {player.skillPoints}<br />
+					<span className="energy-points" /> {Math.floor(player.energy)}<br />
 					{/*Fire: {player.motes.fire}<br />
 					Water: {player.motes.water}<br />
 					Air: {player.motes.air}<br />
 					Earth: {player.motes.earth}<br />
 					Light: {player.motes.light}<br />
 					Shadow: {player.motes.shadow}<br />
-					Life: {player.motes.life}<br />*/}<br />
+					Life: {player.motes.life}<br />*/}
 					<button onClick={this.throttleSkillModal}>Skills</button>
 				</div>
 				<ul className="events" style={{

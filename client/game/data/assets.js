@@ -1,16 +1,48 @@
 
 const assets = {
-	background: {
-		url: 'static/images/bg-pattern.png',
+	images: {
+		background: {
+			url: 'images/bg-pattern.png',
+		},
+		island: {
+			url: 'images/island.png',
+		},
+		forest: {
+			url: 'images/forest.png',
+		},
+		forest2: {
+			url: 'images/forest2.png',
+		},
+		village: {
+			url: 'images/village.png',
+		},
+		farm: {
+			url: 'images/farm.png',
+		},
 	},
-	island: {
-		url: 'static/images/island.png',
+	videos: {
+		explode: {
+			url: 'effects/test-explode2.mp4',
+		},
 	},
-	forest: {
-		url: 'static/images/forest.png',
+	music: {
+		fables: {
+			url: 'sounds/Faraway-Fables.mp3',
+		},
+		town: {
+			url: 'sounds/Town-Chaos.mp3',
+		},
 	},
-	forest2: {
-		url: 'static/images/forest2.png',
+	sounds: {
+		click: {
+			url: 'sounds/button-click.mp3',
+		},
+		success: {
+			url: 'sounds/success.mp3',
+		},
+		warning: {
+			url: 'sounds/warning.mp3',
+		},
 	},
 };
 

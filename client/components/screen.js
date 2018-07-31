@@ -41,6 +41,7 @@ class Screen extends React.Component {
 				<div className={this.props.className}>
 					{this.props.children}
 				</div>
+				<div class="tooltip-container" />
 			</div>
 		);
 	}

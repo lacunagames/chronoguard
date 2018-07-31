@@ -62,6 +62,21 @@ class Messages extends React.Component {
 		button.onAction && this.props.dispatch('massDispatch', button.onAction);
 	}
 
+	renderWithIcons(str) {
+		return str.split(/\{(.*?)\}/g).map(strOrIcon => {
+			const iconName = strOrIcon.indexOf('icon-') === 0 ? strOrIcon.substr(5) : '';
+
+			switch(strOrIcon) {
+				case 'icon-skill-points':
+				case 'icon-energy-points':
+					return <span className={`inline-icon ${iconName}`} />;
+
+				default:
+					return iconName ? <span className="inline-icon" style={utils.getIconStyle(iconName)} /> : strOrIcon;
+			}
+		});
+	}
+
 	render() {
 		const messages = this.props.messages.map((message, index) => {
 
@@ -73,11 +88,25 @@ class Messages extends React.Component {
 						starting: message.starting,
 						ending: message.ending,
 						dismissable: message.dismissable,
+						'icon-message': message.icon,
+						'has-desc': message.desc,
 					})}>
-					<a href="#" draggable="false" tabIndex={message.dismissable ? 0 : -1} onClick={(e) => this.dismissMessage(e, message)}>
+					<a href="#" draggable="false" tabIndex={message.dismissable ? 0 : -1} onClick={e => this.dismissMessage(e, message)}>
+						{message.icon &&
+							<span className="icon">
+								<span style={utils.getIconStyle(message.icon)} />
+							</span>
+						}
 						<span className="text">
-							<span className="access">Dismiss message</span>
-							{message.text}
+							<span className="inner">
+								<span className="access">Dismiss message</span>
+								{this.renderWithIcons(message.text)}
+								{message.desc &&
+									<span className="desc">
+										<br />{this.renderWithIcons(message.desc)}
+									</span>
+								}
+							</span>
 						</span>
 						{message.buttons && message.buttons.length > 0 &&
 							<span className="buttons">

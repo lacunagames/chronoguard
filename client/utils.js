@@ -26,6 +26,8 @@ const utils = {
 		return classes.join(' ');
 	},
 
+	deepClone: obj => JSON.parse(JSON.stringify(obj)),
+
 	// Deep equal comparison
 	isEqual: (a, b) => {
 		if (typeof a !== typeof b) {
@@ -105,7 +107,27 @@ const utils = {
 		fnDebounced.clear = () => clearTimeout(timer);
 
 		return fnDebounced;
-	}
+	},
+
+	easeOut: (time, startVal, change, duration) => change * Math.sin(time / duration * (Math.PI / 2)) + startVal,
+
+	easeIn: (time, startVal, change, duration) => -change * Math.cos(time / duration * (Math.PI / 2)) + change + startVal,
+
+	linear: (time, startVal, change, duration) => change * time / duration + startVal,
+
+	round: (value, decimal) => {
+		const power = Math.pow(10, decimal);
+
+		return Math.round(value * power) / power;
+	},
+
+	humanizeNumber: (number, unit, preText) => {
+		number = Math.floor(number);
+
+		return number < 1 ? 'soon' : `${preText || ''} ${number.toLocaleString()} ${number > 1 ? unit + 's' : unit}`;
+	},
+
+	getIconStyle: iconName => ({'background-image': `url(static/images/icon-${iconName}.jpg)`}),
 };
 
 export default utils;

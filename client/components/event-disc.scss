@@ -30,12 +30,35 @@
 		border-radius: 50%;
 		border: 4px solid transparent;
 		box-shadow: $shadow1;
-		background-size: cover;
 		transition: all $animFast;
 
+		.crop {
+			display: inline-block;
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			border-radius: 50%;
+			overflow: hidden;
+		}
+
+		.bg, .bg-empty {
+			display: inline-block;
+			position: absolute;
+			width: 40px;
+			height: 40px;
+			left: 0;
+			top: 0;
+			background-size: cover;
+		}
+
 		&:hover, &:focus {
-			filter: grayscale(0) brightness(1.1);
 			box-shadow: $shadow3;
+
+			.bg {
+				filter: grayscale(0) brightness(1.1);
+			}
 		}
 	}
 
@@ -47,10 +70,15 @@
 		pointer-events: none;
 	}
 
-	circle {
+	circle, path {
 		fill: none;
 		stroke-width: 4;
 		stroke: $cText;
+		transition: stroke $animFast;
+	}
+
+	.thin {
+		stroke-width: 1;
 	}
 
 	.progress {
@@ -77,5 +105,60 @@
 
 	&.end {
 		animation-name: deflate;
+	}
+
+	&.chance-event {
+
+		a {
+			border-radius: 0;
+			width: 42px;
+			height: 42px;
+			margin: -21px 0 0 -21px;
+			transform: rotate(45deg);
+
+			.crop {
+				border-radius: 0;
+			}
+
+			.bg, .bg-empty {
+				left: -6px;
+				top: -6px;
+				width: 46px;
+				height: 46px;
+				transform: rotate(-45deg);
+			}
+
+			.bg-empty {
+				filter: grayscale(1);
+				transform: none;
+				transition: height $animFast;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				border-bottom: 2px solid $cPrimary;
+			}
+		}
+
+		svg {
+			transform: rotate(45deg);
+			left: -21px;
+			top: -21px;
+		}
+
+		.progress {
+			stroke-dasharray: 152px, 152px;
+			transition: stroke-dashoffset 0.25s linear, stroke $animFast;
+		}
+
+		&.chance-done {
+			path {
+				stroke: darken($cSuccessBg, 20%);
+			}
+
+			.progress {
+				stroke: $cSuccessBg;
+			}
+		}
 	}
 }

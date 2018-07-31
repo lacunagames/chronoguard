@@ -1,4 +1,5 @@
 
+import Agent from './agent';
 import skills from './data/skills';
 
 const defaultState = {
@@ -19,21 +20,13 @@ const defaultState = {
 	learntSkills: [],
 };
 
-class Player {
+class Player extends Agent {
 
 	constructor(subscribeState) {
+		super(subscribeState);
 		this.subscribeState = subscribeState;
 		this.state = {};
 		this.setState(defaultState);
-	}
-
-	getState() {
-		return this.state;
-	}
-
-	setState(newState) {
-		this.state = {...this.state, ...newState};
-		this.subscribeState(newState);
 	}
 
 	gainMote(type, amount) {
