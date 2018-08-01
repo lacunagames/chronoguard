@@ -2,8 +2,11 @@
 const events = {
 	fire: {
 		name: 'Fire',
-		duration: '6-8',
+		duration: '1-2',
 		energy: 5,
+		posX: 'villagePosX',
+		posY: 'villagePosY',
+		range: 200,
 		onAction: [
 			{gainMote: ['fire', 1]},
 		],
@@ -76,8 +79,8 @@ const events = {
 		chance: 15,
 		chanceIncrease: {air: '8-10', fire: '5-8'},
 		onSuccess: [
-			{createMapObj: {name: 'farm', posX: 'eventPosX', posY: 'eventPosY',}},
-			{createMapObj:	{name: 'explode', posX: 'eventPosX', posY: 'eventPosY',}},
+			{createMapObj: {name: 'farm', posX: 'villagePosX', posY: 'villagePosY',}},
+			{createMapObj:	{name: 'explode', posX: 'villagePosX', posY: 'villagePosY',}},
 			{createMessage: {type: 'primary', icon: 'farm', name: 'Yay! Inspire farming completed!', descVal: 'Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3'}},
 			{gainSkillPoints: 3},
 		],

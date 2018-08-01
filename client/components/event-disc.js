@@ -6,6 +6,7 @@ import React from 'react';
 import connect from 'game/connect';
 import Tooltip from './tooltip';
 import utils from 'utils';
+import config from 'config';
 import allEvents from '../game/data/events';
 
 class EventDisc extends React.Component {
@@ -37,8 +38,10 @@ class EventDisc extends React.Component {
 	render() {
 		const {world, player, event} = this.props;
 		const isChanceEvent = event.hasOwnProperty('chance');
-		const zIndex =  Math.floor(99 * (event.mapY * 1000 + event.mapX - 1) / 101000 + 1); // Downscale number to 1-100 range
-		const positionStyle = {left: `${event.mapX}%`, top: `${event.mapY}%`, zIndex};
+		const mapX = event.posX / config.mapWidth * 100;
+		const mapY = event.posY / config.mapHeight * 100;
+		const zIndex =  Math.floor(99 * (mapY * 1000 + mapX - 1) / 101000 + 1); // Downscale number to 1-100 range
+		const positionStyle = {left: `${mapX}%`, top: `${mapY}%`, zIndex};
 		const remaining = Math.max((event.ends - world.hour - 0.25) / event.duration * 100, 0);
 		const progressStyle = isChanceEvent ? {'stroke-dashoffset': 152 - remaining / 100 * 152}
 																				: {'stroke-dasharray': `${remaining * 1.3823} 138.23`};

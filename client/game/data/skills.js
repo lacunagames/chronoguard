@@ -25,8 +25,8 @@ const skills = [
 		title: 'Fireball',
 		desc: 'Increases attack power by 10.',
 		skillPoints: 15,
-		treeX: 65,
-		treeY: 40,
+		treeX: 5,
+		treeY: 30,
 	},
 	{
 		id: 'phoenixHeart',
@@ -34,8 +34,8 @@ const skills = [
 		title: 'Phoenix Heart',
 		desc: 'Increases power regeneration by 10.',
 		skillPoints: 20,
-		treeX: 45,
-		treeY: 0,
+		treeX: 25,
+		treeY: 30,
 		requires: ['fireBall'],
 	},
 	{
@@ -44,8 +44,8 @@ const skills = [
 		title: 'Summon Dragon',
 		desc: 'Increases attack power by 15.',
 		skillPoints: 25,
-		treeX: 65,
-		treeY: 0,
+		treeX: 5,
+		treeY: 60,
 	},
 	{
 		id: 'volcano',
@@ -53,8 +53,8 @@ const skills = [
 		title: 'Volcano',
 		desc: 'Increases attack power by 20.',
 		skillPoints: 30,
-		treeX: 85,
-		treeY: 0,
+		treeX: 25,
+		treeY: 60,
 		requires: ['fireBall', 'summonDragon'],
 	},
 ];

@@ -254,6 +254,7 @@ class MapCanvas extends React.Component {
 			const startY = this.offsetY + this.scale * mapObj.posY - asset.element.height * this.scale / 2;
 			const img = mapObj.animation ? this.animateImg(mapObj) : this.getScaledAsset(mapObj.name, mapObj.state);
 
+			ctx.imageSmoothingEnabled = false;
 			img && ctx.drawImage(img, startX, startY);
 		});
 		if (this.mapObjs.some(mapObj => mapObj.animation)) {

@@ -11,27 +11,27 @@ const defaultState = {
 	events: [],
 	queue: [
 		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
 		{type: 'createEvent', value: 'water', activates: 3,},
 		{type: 'createEvent', value: 'air', activates: 4,},
 		{type: 'createEvent', value: 'life', activates: 8,},
@@ -42,10 +42,12 @@ const defaultState = {
 		{type: 'createEvent', value: 'life', activates: 7,},
 		{type: 'createEvent', value: 'earth', activates: 2,},
 		{type: 'createEvent', value: 'inspireFarming', activates: 1},
+		{type: 'createMapObj', value: {name: 'village', posX: 900, posY: 280}, activates: 1},
 	],
 	hour: 0,
 	day: 1,
 	map: [{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: ''}],
+	positions: [{name: 'village', posX: 900, posY: 280}],
 	conditions: [
 		{
 			id: 0,
@@ -125,9 +127,7 @@ class World extends Agent {
 						break;
 
 					case 'createMapObj':
-						const {type, activates, ...mapObj} = item;
-
-						this.createMapObj(mapObj);
+						this.createMapObj(item.value);
 						break;
 				}
 				return false;
@@ -138,33 +138,62 @@ class World extends Agent {
 		this.setState({events, queue});
 	}
 
-	_getSafeCoords(point, distance, events) {
-		const getDistance = (c1, c2) => Math.abs(Math.sqrt(Math.pow(c1.x - c2.x, 2) + Math.pow(c1.y - c2.y, 2)));
+	_getPosValue(value, refs) {
+		if (typeof value !== 'string') {
+			return value;
+		}
+
+		switch (value) {
+			case 'eventPosX':
+				return refs && refs.event.posX;
+
+			case 'eventPosY':
+				return refs && refs.event.posY;
+
+			default:
+				const [posObjName, type] = value.split('Pos');
+				const findFn = posObj => posObj.name === posObjName;
+				// Find object
+				const posObj = this.state.positions.find(findFn) || this.state.map.find(findFn);
+
+				if (!posObj) {
+					console.warn(`Error: no position object found for ${value}.`);
+					return false;
+				}
+				return this._getPosValue(posObj[`pos${type}`]);
+		}
+	}
+
+	_getSafePos({posX, posY, range = 0}, events) {
+		const getDistance = (p1, p2) => Math.abs(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
 		let unsafe;
 		let tries = 0;
-		let coords = {};
+		let pos = {};
 		let angle, radius;
+
+		posX = this._getPosValue(posX);
+		posY = this._getPosValue(posY);
 
 		do {
 			tries++;
-			if (point) {
-				angle = Math.random() * 2 * Math.PI;
-				radius = distance * Math.sqrt(Math.random());
-			}
-			coords.x = point ? point.x + radius * Math.cos(angle) : Math.floor(Math.random() * 90 + 5);
-			coords.y = point ? point.y + radius * Math.sin(angle) : Math.floor(Math.random() * 90 + 5);
-			unsafe = events.some(event => getDistance({x: event.mapX, y: event.mapY}, coords) < 7);
+			angle = range > 0 ? Math.random() * 2 * Math.PI : 0;
+			radius = range * Math.sqrt(Math.random());
+			pos.x = posX ? posX + radius * Math.cos(angle) : Math.floor(Math.random() * (config.mapWidth - 200) + 100);
+			pos.y = posY ? posY + radius * Math.sin(angle) : Math.floor(Math.random() * (config.mapHeight - 200) + 100);
+			unsafe = (range || !posX || !posY) && events.some(event => getDistance({x: event.posX, y: event.posY}, pos) < 60);
 		} while (unsafe && tries < 500);
-		if (tries === 500) console.log('fail safe coords');
-		return coords;
+
+		if (tries === 500) console.warn('Error: getSafePos failed! Too many tries.');
+		return pos;
 	}
 
 	_createEvent(eventId, events) {
-		const duration = utils.getRandom(allEvents[eventId].duration);
-		const coords = this._getSafeCoords({x: 50, y: 50}, 45, events || thtis.state.events);
-		const event = {...utils.deepClone(allEvents[eventId]), ...{
-			mapX: coords.x,
-			mapY: coords.y,
+		const eventOrig = allEvents[eventId];
+		const duration = utils.getRandom(eventOrig.duration);
+		const pos = this._getSafePos(eventOrig, events || this.state.events);
+		const event = {...utils.deepClone(eventOrig), ...{
+			posX: pos.x,
+			posY: pos.y,
 			starts: Math.floor(this.state.hour) + 1,
 			ends: Math.floor(this.state.hour) + duration + 1,
 			duration,
@@ -182,13 +211,8 @@ class World extends Agent {
 				if (typeof action[actionName] !== 'object' || action[actionName] instanceof Array) {
 					return;
 				}
-
-				if (action[actionName].posX === 'eventPosX') {
-					action[actionName].posX = event.mapX * config.mapWidth / 100;
-				}
-				if (action[actionName].posY === 'eventPosY') {
-					action[actionName].posY = event.mapY * config.mapHeight / 100;
-				}
+				action[actionName].posX = this._getPosValue(action[actionName].posX, {event});
+				action[actionName].posY = this._getPosValue(action[actionName].posY, {event});
 			});
 		});
 
@@ -226,6 +250,8 @@ class World extends Agent {
 		const priority = allAssets.videos[mapObj.name] ? mapCounter * 1000 : mapCounter;
 		const newObj = {id: mapCounter, animation: 'create', state: '', priority, ...mapObj};
 
+		newObj.posX = this._getPosValue(newObj.posX);
+		newObj.posY = this._getPosValue(newObj.posY);
 		mapCounter++;
 		this.setState({map: [...this.state.map, newObj]});
 	}
