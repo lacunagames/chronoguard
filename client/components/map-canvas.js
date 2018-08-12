@@ -68,8 +68,10 @@ class MapCanvas extends React.Component {
 	windowResize() {
 		const canvas = this.refs.canvasFull;
 
-		canvas.width = canvas.parentElement.clientWidth;
-		canvas.height = canvas.parentElement.clientHeight;
+		canvas.width = canvas.parentElement.clientWidth * config.mapDensity;
+		canvas.height = canvas.parentElement.clientHeight * config.mapDensity;
+		canvas.style.width = `${canvas.parentElement.clientWidth}px`;
+		canvas.style.height = `${canvas.parentElement.clientHeight}px`;
 
 		// Keep 4:3 aspect ratio with horizontal or vertical padding
 		this.spanWidth = canvas.width / 4 < canvas.height / 3;
@@ -83,7 +85,7 @@ class MapCanvas extends React.Component {
 		const mapWidth = this.spanWidth ? canvas.width : utils.round(canvas.height * 4 / 3, 2);
 		const mapHeight = this.spanWidth ? utils.round(mapWidth * 3 / 4, 2) : canvas.height;
 
-		this.props.updateEventsPosition(this.offsetX, this.offsetY, mapWidth, mapHeight);
+		this.props.updateEventsPosition(this.offsetX / config.mapDensity, this.offsetY / config.mapDensity, mapWidth / config.mapDensity, mapHeight / config.mapDensity);
 		this.drawMap();
 	}
 
@@ -255,7 +257,7 @@ class MapCanvas extends React.Component {
 			const img = mapObj.animation ? this.animateImg(mapObj) : this.getScaledAsset(mapObj.name, mapObj.state);
 
 			ctx.imageSmoothingEnabled = false;
-			img && ctx.drawImage(img, startX, startY);
+			img && ctx.drawImage(img, parseInt(startX), parseInt(startY));
 		});
 		if (this.mapObjs.some(mapObj => mapObj.animation)) {
 			requestAnimationFrame(this.drawMap);

@@ -1,0 +1,481 @@
+
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+label {
+	cursor: pointer;
+	display: block;
+	font-family: $fontHeading;
+
+	&.invisible {
+		cursor: default;
+		pointer-events: none;
+	}
+}
+
+.asterisk:after {
+	content: '*';
+}
+
+.input-wrap {
+	display: inline-block;
+	width: 100%;
+}
+
+input, textarea {
+	font-size: 14px;
+	transition: border-color 0.2s ease-out;
+	border: 1px solid rgba($cText, 0.5);
+	padding: 10px 40px 10px 10px;
+	border-radius: 3px;
+	outline: none;
+
+	&[type=text],
+	&[type=file] {
+		width: 100%;
+		margin-bottom: 10px;
+		position: relative;
+		box-shadow: $shadow1In;
+
+		.tab-active &:focus {
+			border-color: $cTab;
+			border-width: 2px;
+			padding: 9px 39px 9px 9px;
+		}
+
+		.tab-active .invalid &:focus {
+			border-color: $cError;
+		}
+
+		&:disabled {
+			cursor: default;
+			border-color: $cSecondary;
+			color: $cTextLight;
+			background-color: $cBg;
+		}
+	}
+
+	&:hover, &:focus {
+		border-color: rgba($cText, 0.8);
+	}
+}
+
+textarea {
+	min-height: 100px;
+	resize: vertical;
+	width: 100%;
+	margin-bottom: 5px;
+	position: relative;
+	box-shadow: $shadow1In;
+
+	.tab-active &:focus {
+		border-width: 2px;
+		border-color: $cTab;
+		padding: 9px 39px 9px 9px;
+	}
+
+	.tab-active .invalid &:focus {
+		border-color: $cError;
+	}
+
+	&:disabled {
+		cursor: default;
+		border-color: $cSecondary;
+		color: $cTextLight;
+		background-color: $cBg;
+	}
+}
+
+input[type=radio] {
+	@include access;
+
+	+ label {
+		position: relative;
+		padding: 7px 7px 7px 34px;
+
+		&:before {
+			content: '';
+			display: inline-block;
+			position: absolute;
+			left: 2px;
+			top: 6px;
+			width: 20px;
+			height: 20px;
+			border-radius: 20px;
+			border: 1px solid $cText;
+			box-shadow: $shadow1In;
+		}
+
+		&:after {
+			content: '';
+			position: absolute;
+			left: 13px;
+			top: 17px;
+			width: 0;
+			height: 0;
+			background: $cText;
+			border-radius: 20px;
+			transition: all 0.1s ease-out;
+		}
+
+	}
+
+	.tab-active &:focus + label {
+		&:before {
+			border-width: 2px;
+			border-color: $cTab;
+			left: 1px;
+			top: 5px;
+		}
+
+		&:after {
+			background: $cBgInverse;
+		}
+	}
+
+	&:checked + label:after {
+		left: 6px;
+		top: 10px;
+		width: 14px;
+		height: 14px;
+	}
+
+	.invalid &:not(:disabled) + label:after,
+	.tab-active .invalid &:focus + label:after {
+		background-color: $cError;
+	}
+
+	&:disabled + label {
+		cursor: default;
+
+		&:before {
+			border-color: $cSecondary;
+		}
+
+		&:after {
+			background: $cSecondary;
+		}
+	}
+}
+
+.check-wrap {
+	display: inline-block;
+	width: 100%;
+	margin-bottom: 5px;
+}
+
+input[type=checkbox] {
+	@include access;
+
+	+ label {
+		position: relative;
+		padding: 7px 7px 7px 34px;
+
+		&:before {
+			content: '';
+			display: inline-block;
+			position: absolute;
+			left: 2px;
+			top: 6px;
+			width: 20px;
+			height: 20px;
+			border-radius: 3px;
+			border: 1px solid $cText;
+			box-shadow: $shadow1In;
+			background: #fff;
+			transition: background-color 0.1s ease-out;
+		}
+
+		&:after {
+			content: '\F00C';
+			position: absolute;
+			left: 12px;
+			top: 7px;
+			width: 0;
+			height: 0;
+			font-size: 0;
+			// font-family: $fontIcon;
+			transition: all 0.1s ease-out;
+			color: #fff;
+		}
+	}
+
+	&:checked + label {
+		&:before {
+			background: $cText;
+			box-shadow: none;
+		}
+
+		&:after {
+			left: 5px;
+			top: 7px;
+			width: 14px;
+			height: 14px;
+			font-size: 16px;
+		}
+	}
+
+	.invalid &:checked:not(:disabled) + label:before,
+	.tab-active .invalid &:checked:focus + label:before {
+		background-color: $cError;
+	}
+
+	.tab-active &:focus + label:before {
+		border-width: 2px;
+		border-color: $cTab;
+		left: 1px;
+		top: 5px;
+	}
+
+	.tab-active &:checked:focus + label:before {
+		background-color: $cTab;
+	}
+
+	&:disabled + label {
+		cursor: default;
+		color: $cSecondary;
+
+		&:before {
+			border-color: $cSecondary;
+		}
+	}
+
+	&:disabled:checked + label:before {
+		background-color: $cSecondary;
+	}
+}
+
+.toggle-button {
+
+	&:hover, &:focus {
+		box-shadow: $shadow1;
+	}
+
+
+	&.on {
+		box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.21) inset;
+		background-color: #ddd;
+
+		&:hover, &:focus {
+			background-color: #eee;
+		}
+	}
+}
+
+fieldset {
+	display: inline-block;
+	width: 100%;
+	margin-bottom: 5px;
+
+	legend {
+		font-family: $font;
+		margin-bottom: $spacing;
+
+	}
+
+	h3, .h3 {
+		padding-top: 30px;
+	}
+
+	div:not([class]), div[class=''] {
+		margin-bottom: 5px;
+	}
+}
+
+.row-field {
+	position: relative;
+	margin-bottom: $spacing;
+
+	&.hidden {
+		position: absolute;
+		visibility: hidden;
+	}
+
+	> label, .label {
+		font-family: $font;
+		margin-bottom: 3px;
+		transition: opacity 0.2s ease-out;
+	}
+
+	.field-value {
+		margin-bottom: 8px;
+	}
+
+	.help,
+	& + .help {
+		margin: -7px 0 5px;
+		color: $cTextLight;
+		line-height: 21px;
+
+		&.error {
+			color: $cError;
+		}
+
+		&.info {
+			color: $cText;
+		}
+	}
+
+	& + .help {
+		margin-top: -22px;
+	}
+
+	&.invalid + .help {
+		margin-top: -17px;
+	}
+
+	.valid-signs i {
+		position: absolute;
+		font-size: 30px;
+		right: 9px;
+		top: 29px;
+		transition: opacity 0.2s ease-out;
+		pointer-events: none;
+
+		&.success {
+			color: $cSuccessBg;
+		}
+
+		&.error {
+			color: $cError;
+		}
+	}
+
+	&.hide-validation .valid-signs {
+		display: none;
+	}
+
+	&.no-label .valid-signs i {
+		top: 5px;
+	}
+
+	.has-legend:not(.toggle-buttons) + .valid-signs i {
+		top: 40px;
+	}
+
+	.select-box + .valid-signs i,
+	input[type=text] + .valid-signs i {
+		top: 7px;
+	}
+
+	.autocomplete-box.selected input {
+		padding-right: 70px;
+	}
+
+	.autocomplete-box.selected + .valid-signs i {
+		right: 39px;
+	}
+
+	&.invalid .select:not(.disabled),
+	&.invalid input:not(:disabled),
+	&.invalid textarea:not(:disabled),
+	&.invalid input[type=checkbox]:not(:disabled) + label:before,
+	&.invalid input[type=radio]:not(:disabled) + label:before {
+		border-color: $cError;
+	}
+}
+
+.error-summary {
+	border: 1px solid $cError;
+	position: relative;
+	top: 10px;
+	margin-bottom: 10px;
+	border-radius: 3px;
+	padding: 0 20px 10px 60px;
+
+	&:before {
+		content: '!';
+		position: absolute;
+		left: 27px;
+		top: 50%;
+		font-size: 30px;
+		color: $cError;
+		margin-top: -13px;
+		text-shadow: $shadowText;
+	}
+
+	.h4 {
+		color: $cError;
+	}
+
+	li {
+		margin-bottom: 5px;
+	}
+
+	label, strong {
+		font-size: 12px;
+
+		span {
+			// font-family: $fontLight;
+		}
+	}
+}
+
+.row-buttons {
+	width: calc(100% + #{$spacing});
+	text-align: right;
+	padding: $spacing 0;
+}
+
+// Radio toggle buttons
+.toggle-buttons {
+
+	legend {
+		margin-bottom: 2px;
+	}
+
+	& > div, & > div > div {
+		display: inline-block;
+	}
+
+	input[type=radio] + label {
+		display: inline-block;
+		font-family: $fontHeading;
+		font-size: 18px;
+		margin: 0;
+		background-color: $cSecondary;
+		box-shadow: $shadow1;
+		border: none;
+		padding: 11px $spacing;
+		line-height: 18px;
+		text-transform: capitalize;
+		border-radius: 0;
+		color: $cText;
+		transition: background $animFast, box-shadow $animFast;
+		cursor: pointer;
+		outline: none;
+
+		&:before, &:after {
+			content: none;
+		}
+	}
+
+	& > div:first-of-type input[type=radio] + label {
+		border-radius: 3px 0 0 3px;
+	}
+
+	& > div:last-of-type input[type=radio] + label {
+		border-radius: 0 3px 3px 0;
+	}
+
+	input[type=radio] + label:hover,
+	input[type=radio]:focus {
+		background: lighten($cSecondary, 10%);
+		text-decoration: none;
+		box-shadow: $shadow1;
+	}
+
+	input[type=radio]:checked + label {
+		box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.21) inset;
+		background-color: lighten($cSecondary, 15%);
+		padding: 11px $spacing 12px;
+	}
+
+	.tab-active & input[type=radio]:focus + label {
+		border: 2px solid $cTab;
+		position: relative;
+		left: -1px;
+		margin: -2px -3px -2px -1px;
+		z-index: 2;
+	}
+}

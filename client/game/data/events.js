@@ -1,8 +1,8 @@
 
 const events = {
 	fire: {
-		name: 'Fire',
-		duration: '1-2',
+		title: 'Fire',
+		duration: '5-6',
 		energy: 5,
 		posX: 'villagePosX',
 		posY: 'villagePosY',
@@ -15,7 +15,7 @@ const events = {
 		],
 	},
 	water: {
-		name: 'Water',
+		title: 'Water',
 		duration: '7-11',
 		energy: 7,
 		onAction: [
@@ -27,9 +27,12 @@ const events = {
 		]
 	},
 	air: {
-		name: 'Air',
+		title: 'Air',
 		duration: '5-7',
 		energy: 5,
+		posX: 'villagePosX',
+		posY: 'villagePosY',
+		range: 200,
 		onAction: [
 			{gainMote: ['air', 1]},
 		],
@@ -38,7 +41,7 @@ const events = {
 		],
 	},
 	life: {
-		name: 'Life',
+		title: 'Life',
 		duration: '10-18',
 		energy: 0,
 		onAction: [
@@ -48,7 +51,7 @@ const events = {
 		onEnd: [
 			{queueItem: {type: 'createEvent', value: 'life', delay: '7-9'}},
 			{checkCondition: {
-				requires: 'motes.life >= 2',
+				requires: 'motes.life >= 6',
 				actions: [
 					{createMapObj: {name: 'forest2', posX: 680, posY: 428,}},
 					{createMessage: {type: 'free', name: 'Double forest!'}},
@@ -58,7 +61,8 @@ const events = {
 		]
 	},
 	earth: {
-		name: 'earth-my',
+		title: 'Earth',
+		icon: 'earth-my',
 		duration: '9-11',
 		energy: 10,
 		onAction: [
@@ -70,14 +74,26 @@ const events = {
 		]
 	},
 	inspireFarming: {
-		name: 'inspire-farming',
-		icon: 'farm',
 		title: 'Inspire farming',
+		icon: 'farm',
 		desc: `The village spends most of its time gathering berries and hunting nearby animals.
 			Learning to grow and harvest plants would greatly increase productivity.`,
-		duration: 50,
-		chance: 15,
+		duration: 20,
+		chance: 75,
+		posX: 'villagePosX',
+		posY: 'villagePosY',
+		posXOffset: 50,
+		posYOffset: 50,
 		chanceIncrease: {air: '8-10', fire: '5-8'},
+		onStart: [
+			{queueItem: {type: 'createEvent', value: 'air', delay: '1-3'}},
+			{queueItem: {type: 'createEvent', value: 'air', delay: '3-5'}},
+			{queueItem: {type: 'createEvent', value: 'fire', delay: '1-3'}},
+			{queueItem: {type: 'createEvent', value: 'fire', delay: '4-6'}},
+		],
+		onFullChance: [
+			{removeAllEventsByType: ['air', 'fire']},
+		],
 		onSuccess: [
 			{createMapObj: {name: 'farm', posX: 'villagePosX', posY: 'villagePosY',}},
 			{createMapObj:	{name: 'explode', posX: 'villagePosX', posY: 'villagePosY',}},
@@ -88,7 +104,8 @@ const events = {
 			{createMessage: {type: 'free', name: 'Inspire Farming Fail :('}},
 		],
 		onEnd: [
-			{queueItem: {type: 'createEvent', value: 'inspireFarming', delay: '12-15'}},
+			{queueItem: {type: 'createEvent', value: 'inspireFarming', delay: '2-5'}},
+			{removeAllEventsByType: ['air', 'fire']},
 		]
 	},
 };

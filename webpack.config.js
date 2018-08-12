@@ -4,7 +4,8 @@ const path = require('path');
 
 module.exports = {
 	entry: {
-		game: './client/index.js',
+		game: './client/game.js',
+		editor: './client/editor.js',
 	},
 	output: {
 		path: path.join(__dirname, 'static/'),
@@ -112,10 +113,6 @@ module.exports = {
 		}),
 		new ExtractTextPlugin('[name].bundle.css'),
 		new webpack.optimize.UglifyJsPlugin(),
-		new webpack.optimize.CommonsChunkPlugin({
-			name: 'game',
-			filename: 'game.bundle.js'
-		})
 	],
 };
 

@@ -115,6 +115,11 @@
 			height: 42px;
 			margin: -21px 0 0 -21px;
 			transform: rotate(45deg);
+			box-shadow: $shadow1rotate;
+
+			&:hover, &:focus {
+				box-shadow: $shadow3rotate;
+			}
 
 			.crop {
 				border-radius: 0;

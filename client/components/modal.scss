@@ -57,6 +57,34 @@ body.modal-open {
 	}
 }
 
+.transparent-backdrop {
+	background-color: transparent;
+	overflow: hidden;
+	text-align: left;
+	background-color: rgba($cBgInverse, 0.2);
+
+	.modal-box {
+		position: absolute;
+		box-shadow: $shadow3;
+		background-color: lighten($cBg, 5%);
+		margin: 0;
+		transform: none;
+		max-width: 400px;
+
+		.body {
+			max-height: 400px;
+			overflow-y: auto;
+		}
+
+
+		@include media(l) {
+			.inner {
+				padding: $spacing;
+			}
+		}
+	}
+}
+
 .modal-box {
 	border-radius: 3px;
 	display: inline-block;

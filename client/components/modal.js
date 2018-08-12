@@ -17,6 +17,8 @@ class Modal extends React.Component {
 			longModal: false,
 			show: this.props.show,
 			animate: false,
+			leftPos: undefined,
+			topPos: undefined,
 		};
 	}
 
@@ -52,7 +54,7 @@ class Modal extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if (this.refs.modal && this.oldModalHeight !== this.refs.modal.clientHeight) {
+		if (this.refs.modal && (!this.props.pos ? this.oldModalHeight !== this.refs.modal.clientHeight : this.props.pos !== this.oldPos)) {
 			this.checkLongModal(true);
 		}
 	}
@@ -66,8 +68,18 @@ class Modal extends React.Component {
 	checkLongModal(instant) {
 		const setLong = () => {
 			if (this.refs.modal) {
-				this.setState({longModal: this.refs.modal.clientHeight > window.innerHeight - 50});
-				this.oldModalHeight = this.refs.modal.clientHeight;
+				const {clientHeight, clientWidth} = this.refs.modal;
+
+				if (!this.props.pos) {
+					this.setState({longModal: clientHeight > window.innerHeight - 50});
+					this.oldModalHeight = clientHeight;
+				} else {
+					const topPos = this.props.pos.top + clientHeight + 20 > window.innerHeight ? this.props.pos.bottom - clientHeight + 10 : this.props.pos.top - 10;
+					const leftPos = this.props.pos.right + clientWidth + 20 > window.innerWidth ? this.props.pos.left - clientWidth - 10 : this.props.pos.right + 10;
+
+					this.setState({topPos: topPos + 'px', leftPos: leftPos + 'px'});
+					this.oldPos = this.props.pos;
+				}
 			}
 		};
 
@@ -132,6 +144,7 @@ class Modal extends React.Component {
 		return (
 			<div onClick={!this.props.locked && this.props.onClose} className={utils.getClassName({
 				'modal-backdrop': true,
+				'transparent-backdrop': this.props.pos,
 				locked: this.props.locked,
 				long: this.state.longModal,
 				open: this.props.show,
@@ -140,7 +153,9 @@ class Modal extends React.Component {
 				[this.props.size]: this.props.size,
 				[this.props.className]: this.props.className,
 			})}>
-				<div className="modal-box" ref="modal" onClick={e => e.stopPropagation()}>
+				<div className="modal-box" ref="modal"
+					onClick={e => e.stopPropagation()}
+					style={{left: this.state.leftPos, top: this.state.topPos}}>
 					<div className="inner">
 						{!this.props.locked &&
 							<button onClick={this.props.onClose} className="icon button close-button">

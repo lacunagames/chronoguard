@@ -37,7 +37,7 @@ class EventDisc extends React.Component {
 
 	render() {
 		const {world, player, event} = this.props;
-		const isChanceEvent = event.hasOwnProperty('chance');
+		const isChanceEvent = event.chance !== undefined;
 		const mapX = event.posX / config.mapWidth * 100;
 		const mapY = event.posY / config.mapHeight * 100;
 		const zIndex =  Math.floor(99 * (mapY * 1000 + mapX - 1) / 101000 + 1); // Downscale number to 1-100 range
@@ -46,7 +46,7 @@ class EventDisc extends React.Component {
 		const progressStyle = isChanceEvent ? {'stroke-dashoffset': 152 - remaining / 100 * 152}
 																				: {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
 		const start = event.starts >= world.hour && event.starts <= world.hour + 0.5;
-		const end = event.ended || event.ends <= world.hour;
+		const end = event.starts < world.hour && (event.ended || event.ends <= world.hour);
 		const endsIn = utils.humanizeNumber(event.ends - world.hour, 'hour', 'in');
 		const rewards = event.onSuccess && event.onSuccess.map(actionObj => {
 			switch (Object.keys(actionObj)[0]) {
@@ -77,11 +77,11 @@ class EventDisc extends React.Component {
 						draggable="false"
 						onClick={e => this.discClick(e, event)}>
 						<span className="crop">
-							<span className="bg" style={utils.getIconStyle(event.icon || event.name)}>
+							<span className="bg" style={utils.getIconStyle(event.icon || event.title)}>
 								{isChanceEvent && event.chance < 100 &&
 									<span className="bg-empty" style={{
 											height: `${46 - 46 * event.chance / 100}px`,
-											...utils.getIconStyle(event.icon || event.name),
+											...utils.getIconStyle(event.icon || event.title),
 										}} />
 								}
 							</span>
@@ -90,7 +90,7 @@ class EventDisc extends React.Component {
 					{this.state.tooltipOpen &&
 						<div>
 							<h2>
-								{event.title || event.name}
+								{event.title}
 								{event.energy > 0 &&
 									<span className={utils.getClassName({
 										'energy': true,
@@ -117,8 +117,8 @@ class EventDisc extends React.Component {
 											const matchEvent = allEvents[eventType];
 											return (
 												<span>
-													<span style={utils.getIconStyle(matchEvent.icon || matchEvent.name)} />
-													{`${matchEvent.name}: ${event.chanceIncrease[eventType]}%`}
+													<span style={utils.getIconStyle(matchEvent.icon || matchEvent.title)} />
+													{`${matchEvent.title}: ${event.chanceIncrease[eventType]}%`}
 												</span>
 											);
 										})}

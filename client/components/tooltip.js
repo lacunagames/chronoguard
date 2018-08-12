@@ -19,19 +19,18 @@ class Tooltip extends React.Component {
 		this.state = {
 			show: this.props.show,
 			animate: false,
+			wrap: undefined,
 		};
 
-		if (!document.querySelector('.tooltip-container')) {
-			console.warn('Tooltip error: Tooltip container not found.');
-		} else {
-			this.wrap = document.createElement('div');
-			document.querySelector('.tooltip-container').appendChild(this.wrap);
-		}
 	}
 
 	toggleOnEvent(e) {
 		const isEnter = e.type === 'mouseenter' || e.type === 'focus';
 		const delay = isEnter ? 500 : 250;
+
+		if (!e.relatedTarget) {
+			return;
+		}
 
 		clearTimeout(this.hideTimer);
 		this.mouseEntered = isEnter;
@@ -39,6 +38,13 @@ class Tooltip extends React.Component {
 	}
 
 	componentDidMount() {
+		if (!document.querySelector('.tooltip-container')) {
+			console.warn('Tooltip error: Tooltip container not found.');
+		} else {
+			const wrap = document.createElement('div');
+			document.querySelector('.tooltip-container').appendChild(wrap);
+			this.setState({wrap});
+		}
 		utils.onEvent(window, 'resize', this.debounceUpdatePosition);
 		utils.onEvent(this.getTrigger(), 'mouseenter focus mouseleave blur', this.toggleOnEvent);
 	}
@@ -68,7 +74,7 @@ class Tooltip extends React.Component {
 		clearTimeout(this.holdTimer);
 		clearTimeout(this.animTimer);
 		this.debounceUpdatePosition.clear();
-		document.querySelector('.tooltip-container').removeChild(this.wrap);
+		document.querySelector('.tooltip-container').removeChild(this.state.wrap);
 	}
 
 	updatePosition() {
@@ -114,7 +120,7 @@ class Tooltip extends React.Component {
 		return (
 			<React.Fragment>
 				{trigger}
-				{this.state.show && ReactDOM.createPortal(
+				{this.state.show && this.state.wrap && ReactDOM.createPortal(
 					<div className={utils.getClassName({
 							tooltip: true,
 							open: this.props.show,
@@ -127,7 +133,7 @@ class Tooltip extends React.Component {
 						{...this.props}>
 						{contentChildren}
 					</div>,
-					this.wrap)}
+					this.state.wrap)}
 			</React.Fragment>
 		);
 	}

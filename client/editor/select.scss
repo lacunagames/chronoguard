@@ -1,0 +1,133 @@
+
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+.select-box {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	margin-bottom: 5px;
+
+	input {
+		@include access;
+	}
+
+	.select {
+		// font-family: $fontLight;
+		font-size: 14px;
+		transition: border-color 0.2s ease-in-out;
+		// border: 1px solid $cGreyC;
+		padding: 10px 45px 10px 10px;
+		border-radius: 3px;
+		outline: none;
+		width: 100%;
+		margin-bottom: 5px;
+		height: 41px;
+		position: relative;
+		box-shadow: $shadow1In;
+
+		&:hover, &:focus, &.open {
+			// border-color: $cBlue;
+		}
+
+		.invalid &:hover, .invalid &:focus, .invalid &.open {
+			border-color: $cError;
+		}
+
+		&:after {
+			content: '\f078';
+			color: #666;
+			// text-shadow: $shadowText;
+			position: absolute;
+			right: 17px;
+			top: 10px;
+			// font-family: $fontIcon;
+			background-size: contain;
+			width: 14px;
+			height: 20px;
+			transition: transform 0.2s ease-in-out;
+		}
+
+		&.open:after {
+			transform: rotate(180deg);
+			text-shadow: -1px -1px 2px rgba(0,0,0,0.2);
+		}
+
+		&.disabled {
+			cursor: default;
+			// border-color: $cGreyC;
+			color: #bbb;
+			background-color: #f6f6f6;
+		}
+	}
+
+	.tab-active & .select:focus {
+		// border-color: $cDarkBlue;
+		border-width: 2px;
+		left: -1px;
+		top: -1px;
+		width: calc(100% + 2px);
+		height: 43px;
+		margin-bottom: 3px;
+	}
+	.tab-active .invalid & .select:focus {
+		border-color: $cError;
+	}
+
+	.options {
+		position: absolute;
+		top: 45px;
+		right: 0;
+		width: 100%;
+		min-width: 100px;
+		background: #fff;
+		z-index: 10;
+		border-radius: 3px;
+		max-height: 200px;
+		overflow-y: auto;
+		box-shadow: $shadow3;
+		margin-bottom: $spacing;
+
+		&.above {
+			top: auto;
+			bottom: 36px;
+		}
+
+		li {
+			display: block;
+			// color: $cGrey3;
+			padding: 7px 10px;
+			cursor: pointer;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			outline: none;
+
+			&.disabled {
+				// color: $cGreyC;
+				cursor: default;
+			}
+
+			&:not(.disabled):hover, &:not(.disabled):focus {
+				text-decoration: none;
+				// background: $cButton;
+			}
+
+			.tab-active &:not(.disabled):focus {
+				// border: 2px solid $cDarkBlue;
+			}
+		}
+
+		.selected {
+			background: #d0d0d0;
+
+			&:not(.disabled):hover, &:not(.disabled):focus {
+				background: #d6d6d6;
+			}
+		}
+	}
+
+	.placeholder, .options .placeholder {
+		color: #888;
+	}
+}

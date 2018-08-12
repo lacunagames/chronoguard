@@ -41,10 +41,25 @@ const utils = {
 		});
 	},
 
+	// Forgiving value comparison to select object in array
+	pickWild: (array, prop, value = '') => {
+		const val = value.toLowerCase().trim();
+
+		array = array || [];
+		for (let i = 0; i < array.length; i += 1) {
+			if (array[i][prop].toLowerCase().trim() === val) {
+				return array[i];
+			}
+		}
+		return undefined;
+	},
+
+	pickWildIndex: (array, prop, value) => (array || []).indexOf(utils.pickWild(array, prop, value)),
+
 	// Return random integer between min max values, eg. 12-14'
 	getRandom(number, multiplier) {
 		const splitNumber = (number + '').replace(/\s/g, '').split('-');
-		const min = +splitNumber[0];
+		const min = isNaN(+splitNumber[0]) ? number : +splitNumber[0];
 		const max = +splitNumber[1];
 		const random = max ? Math.floor(Math.random() * (max - min + 1) + min) : min;
 
@@ -127,7 +142,10 @@ const utils = {
 		return number < 1 ? 'soon' : `${preText || ''} ${number.toLocaleString()} ${number > 1 ? unit + 's' : unit}`;
 	},
 
-	getIconStyle: iconName => ({'background-image': `url(static/images/icon-${iconName}.jpg)`}),
+	getIconStyle: iconName => {
+		iconName = iconName.toLowerCase().replace(/ /g, '-');
+		return {'background-image': `url(static/images/icon-${iconName}.jpg)`};
+	},
 };
 
 export default utils;

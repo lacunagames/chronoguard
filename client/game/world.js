@@ -5,40 +5,40 @@ import allEvents from './data/events';
 import Agent from './agent';
 import allAssets from './data/assets';
 
-const actionTypes = ['onEnd', 'onAction', 'onSuccess', 'onFail'];
+const actionTypes = ['onStart', 'onEnd', 'onAction', 'onSuccess', 'onFail', 'onFullChance'];
 
 const defaultState = {
 	events: [],
 	queue: [
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		{type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
+		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
 		{type: 'createEvent', value: 'water', activates: 3,},
-		{type: 'createEvent', value: 'air', activates: 4,},
+		// {type: 'createEvent', value: 'air', activates: 4,},
 		{type: 'createEvent', value: 'life', activates: 8,},
 		{type: 'createEvent', value: 'earth', activates: 11,},
-		{type: 'createEvent', value: 'fire', activates: 3,},
+		// {type: 'createEvent', value: 'fire', activates: 3,},
 		{type: 'createEvent', value: 'water', activates: 2,},
-		{type: 'createEvent', value: 'air', activates: 6,},
+		// {type: 'createEvent', value: 'air', activates: 6,},
 		{type: 'createEvent', value: 'life', activates: 7,},
 		{type: 'createEvent', value: 'earth', activates: 2,},
 		{type: 'createEvent', value: 'inspireFarming', activates: 1},
@@ -51,7 +51,7 @@ const defaultState = {
 	conditions: [
 		{
 			id: 0,
-			requires: 'motes.life >= 1',
+			requires: 'motes.life >= 3',
 			actions: [
 				{createMapObj: {name: 'forest', posX: 685, posY: 440,}},
 				{createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'}},
@@ -92,38 +92,41 @@ class World extends Agent {
 
 		const forest = this.state.map.find(obj => obj.name === 'forest2');
 
-		// if (forest) {
+		if (forest) {
 
-		// 	if (hour % 3 === 1) {
-		// 		this._updateStateObj('map', forest.id, {animation: 'hide'});
-		// 	}
-		// 	if (hour % 3 === 0) {
-		// 		this._updateStateObj('map', forest.id, {animation: 'show', state: ''});
-		// 	}
-		// }
+			if (hour % 3 === 1) {
+				this._updateStateObj('map', forest.id, {animation: 'hide'});
+			}
+			if (hour % 3 === 0) {
+				this._updateStateObj('map', forest.id, {animation: 'show', state: ''});
+			}
+		}
 
 		this.state.conditions.forEach(condition => this.checkCondition(condition));
 
-		const events = [];
+		for (let i = this.state.events.length - 1; i >= 0; i--) {
+			const event = this.state.events[i];
 
-		this.state.events.forEach(event => {
+			if (event.starts === hour) {
+				this.system.massDispatch(event.onStart);
+			}
 			if (event.ends === hour && !event.ended) {
-				event = this._updateStateObj('events', event.id, {ended: true});
+				this._updateStateObj('events', event.id, {ended: true});
 				this.system.massDispatch(event.onEnd);
 				if (event.hasOwnProperty('chance')) {
 					this.system.massDispatch(event.chance >= 100 ? event.onSuccess : event.onFail);
 				}
 			}
-			if (!event.removed && event.ends >= hour) {
-				events.push(event);
+			if (event.removed || event.ends < hour) {
+				this._removeStateObj('events', event.id);
 			}
-		});
+		}
 
 		const queue = this.state.queue.filter(item => {
 			if (item.activates === hour) {
 				switch (item.type) {
 					case 'createEvent':
-						events.push(this._createEvent(item.value, events));
+						this.setState({events: [...this.state.events, this._createEvent(item.value)]});
 						break;
 
 					case 'createMapObj':
@@ -135,7 +138,12 @@ class World extends Agent {
 			return true;
 		});
 
-		this.setState({events, queue});
+		this.setState({queue});
+	}
+
+	queueItem({type, value, delay}) {
+		const newItem = {type, value, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1,};
+		this.setState({queue: [...this.state.queue, newItem]});
 	}
 
 	_getPosValue(value, refs) {
@@ -164,41 +172,49 @@ class World extends Agent {
 		}
 	}
 
-	_getSafePos({posX, posY, range = 0}, events) {
+	_getSafePos({posX, posY, posXOffset, posYOffset, range = 0}) {
+		posX = this._getPosValue(posX) + (posXOffset || 0);
+		posY = this._getPosValue(posY) + (posYOffset || 0);
+
 		const getDistance = (p1, p2) => Math.abs(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
+		const fixedPos = !range && posX && posY;
+		const maxTries = 500;
 		let unsafe;
 		let tries = 0;
 		let pos = {};
 		let angle, radius;
 
-		posX = this._getPosValue(posX);
-		posY = this._getPosValue(posY);
-
 		do {
 			tries++;
-			angle = range > 0 ? Math.random() * 2 * Math.PI : 0;
+			angle =  Math.random() * 2 * Math.PI;
 			radius = range * Math.sqrt(Math.random());
 			pos.x = posX ? posX + radius * Math.cos(angle) : Math.floor(Math.random() * (config.mapWidth - 200) + 100);
 			pos.y = posY ? posY + radius * Math.sin(angle) : Math.floor(Math.random() * (config.mapHeight - 200) + 100);
-			unsafe = (range || !posX || !posY) && events.some(event => getDistance({x: event.posX, y: event.posY}, pos) < 60);
-		} while (unsafe && tries < 500);
 
-		if (tries === 500) console.warn('Error: getSafePos failed! Too many tries.');
+			unsafe = this.state.positions.some(posObj => getDistance({x: posObj.posX, y: posObj.posY}, pos) < 60);
+			unsafe = unsafe || this.state.events.some(event => getDistance({x: event.posX, y: event.posY}, pos) < 60);
+			unsafe = unsafe || pos.x < 50 || pos.x > config.mapWidth - 50 || pos.y < 50 || pos.y > config.mapHeight - 50;
+		} while (unsafe && tries < maxTries && !fixedPos);
+
+		if (tries === maxTries && unsafe) {
+			console.warn('Error: getSafePos failed! Too many tries.');
+		}
 		return pos;
 	}
 
-	_createEvent(eventId, events) {
-		const eventOrig = allEvents[eventId];
+	_createEvent(eventType) {
+		const eventOrig = allEvents[eventType];
 		const duration = utils.getRandom(eventOrig.duration);
-		const pos = this._getSafePos(eventOrig, events || this.state.events);
+		const pos = this._getSafePos(eventOrig);
 		const event = {...utils.deepClone(eventOrig), ...{
 			posX: pos.x,
 			posY: pos.y,
 			starts: Math.floor(this.state.hour) + 1,
 			ends: Math.floor(this.state.hour) + duration + 1,
 			duration,
-			type: eventId,
+			type: eventType,
 			id: eventCounter,
+			chance: utils.getRandom(eventOrig.chance),
 			ended: false,
 		}};
 
@@ -220,9 +236,11 @@ class World extends Agent {
 		return event;
 	}
 
-	queueItem({type, value, delay}) {
-		const newItem = {type, value, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1,};
-		this.setState({queue: [...this.state.queue, newItem]});
+	removeAllEventsByType(...eventTypes) {
+		const queue = this.state.queue.filter(item => item.type !== 'createEvent' || !eventTypes.includes(item.value));
+		const events = this.state.events.map(event => eventTypes.includes(event.type) ? {...event, onEnd: [], ended: true} : event);
+
+		this.setState({queue, events});
 	}
 
 	eventAction(eventId) {
@@ -234,7 +252,7 @@ class World extends Agent {
 			return;
 		}
 		if (this.player.state.energy < event.energy) {
-			return this.system.createMessage({type: 'notEnoughEnergy', name: event.name, value: event.energy});
+			return this.system.createMessage({type: 'notEnoughEnergy', name: event.title, value: event.energy});
 		}
 
 
@@ -250,8 +268,8 @@ class World extends Agent {
 		const priority = allAssets.videos[mapObj.name] ? mapCounter * 1000 : mapCounter;
 		const newObj = {id: mapCounter, animation: 'create', state: '', priority, ...mapObj};
 
-		newObj.posX = this._getPosValue(newObj.posX);
-		newObj.posY = this._getPosValue(newObj.posY);
+		newObj.posX = this._getPosValue(newObj.posX) + (newObj.posXOffset || 0);
+		newObj.posY = this._getPosValue(newObj.posY) + (newObj.posYOffset || 0);
 		mapCounter++;
 		this.setState({map: [...this.state.map, newObj]});
 	}
@@ -323,15 +341,22 @@ class World extends Agent {
 	}
 
 	increaseChance(type) {
+		const reachedFull = [];
 		const events = this.state.events.map(event => {
-			if (event.hasOwnProperty('chance') && event.chanceIncrease && event.chanceIncrease[type] && ! event.ended) {
-				return {...event, chance: Math.min(event.chance + utils.getRandom(event.chanceIncrease[type]), 100)};
+			if (event.hasOwnProperty('chance') && event.chanceIncrease && event.chanceIncrease[type] && !event.ended) {
+				const newChance = Math.min(event.chance + utils.getRandom(event.chanceIncrease[type]), 100);
+
+				if (event.chance < 100 && newChance === 100) {
+					reachedFull.push(event.id);
+				}
+				return {...event, chance: newChance};
 			} else {
 				return event;
 			}
 		});
 
 		this.setState({events});
+		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id).onFullChance));
 	}
 };
 
