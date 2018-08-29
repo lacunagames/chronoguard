@@ -111,12 +111,17 @@ class AutocompleteDropdown extends React.Component {
 									placeholder: !option.value,
 									disabled: option.disabled,
 									special: option.special,
+									valid: option.valid,
+									invalid: option.valid === false,
 								})}
 								onClick={(e) => this.onClick(e, option)}
 								ref={el => this.setOptionsRef(el, index)}
 								tabIndex={option.disabled ? -1 : 0}
 								id={this.props.inputId + '-' + option.value}
 								role="option">
+								{option.valid === false &&
+									<i className="validity">warning</i>
+								}
 								{option.icon &&
 									<span className={`auto-icon ${option.iconStyle || ''}`}>
 										<span style={utils.getIconStyle(option.icon)} />

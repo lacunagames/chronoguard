@@ -74,7 +74,7 @@ class Tooltip extends React.Component {
 		clearTimeout(this.holdTimer);
 		clearTimeout(this.animTimer);
 		this.debounceUpdatePosition.clear();
-		document.querySelector('.tooltip-container').removeChild(this.state.wrap);
+		this.state.wrap && document.querySelector('.tooltip-container').removeChild(this.state.wrap);
 	}
 
 	updatePosition() {
@@ -107,7 +107,7 @@ class Tooltip extends React.Component {
 
 	render() {
 		const children = React.Children.toArray(this.props.children);
-		const trigger = children.find(el => el.props['data-tooltip-trigger']);
+		const trigger = children.find(el => el.props['data-tooltip-trigger']) || children[0];
 		let contentChildren = children.filter(el => el !== trigger);
 
 		// Still render last tooltip content when playing close animation

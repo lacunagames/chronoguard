@@ -69,6 +69,9 @@ const events = {
 			{gainMote: ['earth', 1]},
 			{changeEnergyGainRate: 0.05},
 		],
+		onNoAction: [
+			{createMapObj: {name: 'explode', posX: 'eventPosX', posY: 'eventPosY'}}
+		],
 		onEnd: [
 			{queueItem: {type: 'createEvent', value: 'earth', delay: '15-25'}},
 		]
@@ -82,8 +85,8 @@ const events = {
 		chance: 75,
 		posX: 'villagePosX',
 		posY: 'villagePosY',
-		posXOffset: 50,
-		posYOffset: 50,
+		offsetX: 50,
+		offsetY: 50,
 		chanceIncrease: {air: '8-10', fire: '5-8'},
 		onStart: [
 			{queueItem: {type: 'createEvent', value: 'air', delay: '1-3'}},

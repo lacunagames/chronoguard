@@ -34,6 +34,15 @@ app.post('/save-event', (req, resp) => {
 	resp.send({[eventName]: event});
 });
 
+app.get('/remove-event', (req, resp) => {
+	const eventName = req.query.type;
+	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
+
+	delete data.events[eventName];
+	fs.writeFileSync(dataJsonUrl, JSON.stringify(data));
+	resp.send({message: 'Successfully removed event', eventName});
+});
+
 const getData = () => {
 	const dataFile = fs.readFileSync(dataJsonUrl);
 	const data = JSON.parse(dataFile);

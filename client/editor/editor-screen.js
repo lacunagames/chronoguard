@@ -6,9 +6,83 @@ import React from 'react';
 import Screen from '../components/screen';
 import utils from 'utils';
 import Editor from './editor';
-import {formWithValidation, ErrorSummary, Field} from './form';
+import {formWithValidation, Field} from './form';
 import Tooltip from '../components/tooltip';
 import Modal from '../components/modal';
+import config from '../config';
+
+const actionFieldConfig = {
+	fields: {
+		selectAction: {
+			id: 'select-action',
+			type: 'select',
+			value: '',
+			label: 'Select action',
+			options: [
+				{value: '', title: 'Select action', icon: 'default', disabled: true},
+				{value: 'queueEvent', title: 'Queue event', icon: 'queue'},
+				{value: 'createMapObj', title: 'Create map item', icon: 'map'},
+				{value: 'createMessage', title: 'Create message', icon: 'message'},
+			],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		queueEvent: {
+			id: 'chance-event',
+			type: 'autocomplete',
+			value: '',
+			label: 'Select event',
+			options: [],
+			hidden: {field: 'selectAction', fieldValueNot: 'queueEvent'},
+			rules: [
+				{type: 'required'},
+				{type: 'matchOption'},
+			],
+		},
+		delay: {
+			id: 'delay',
+			type: 'text',
+			value: '',
+			label: 'Delay',
+			hidden: {field: 'selectAction', fieldValueNot: 'queueEvent'},
+			rules: [
+				{type: 'required'},
+				{type: 'range'},
+			],
+		},
+	},
+	data: {},
+	getOptionsData: {
+		queueEvent: (data) => Object.keys(data.events || {})
+														.map(eventName => ({
+															value: eventName,
+															title: data.events[eventName].title,
+															icon: data.events[eventName].icon,
+															iconStyle: data.events[eventName].behaviour === 'chance' ? 'rhombus' : 'circle',
+														}))
+	},
+	display: {
+		selectAction: {type: 'icon'},
+		delay: {pre: 'Delay: '}
+	},
+	renderForm: fields => (
+		<React.Fragment>
+			<div className="row">
+				<div className="col-100">
+					<Field config={fields.selectAction} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.queueEvent} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.delay} />
+				</div>
+			</div>
+		</React.Fragment>
+	),
+
+};
 
 const fields = {
 	selectEvent: {
@@ -35,7 +109,7 @@ const fields = {
 		label: 'Event title',
 		rules: [
 			{type: 'required'},
-			{type: 'minLength', minLength: 3},
+			{type: 'minLength', value: 3},
 			{type: 'unique', others: [], errorText: 'This value already exists, title has to be unique'},
 		],
 		propOrig: 'title',
@@ -61,15 +135,86 @@ const fields = {
 		],
 		value: 'pop',
 		rules: [],
-		propOrig: 'behaviour',
+	},
+	location: {
+		id: 'location',
+		type: 'select',
+		label: 'Location',
+		options: [
+			{value: 'any', title: '- Anywhere'},
+			{value: 'fixed', title: '- Fixed location'},
+			{value: 'village', title: 'Village'},
+		],
+		value: 'any',
+		rules: [],
+	},
+	posX: {
+		id: 'posx',
+		type: 'text',
+		value: '100',
+		label: 'X position',
+		rules: [
+			{type: 'required'},
+			{type: 'wholeNumber'},
+			{type: 'min', value: 100},
+			{type: 'max', value: config.mapWidth - 100},
+		],
+		hidden: {field: 'location', fieldValueNot: 'fixed',},
+		propOrig: 'fixedPosX',
+	},
+	posY: {
+		id: 'posy',
+		type: 'text',
+		value: '100',
+		label: 'Y position',
+		rules: [
+			{type: 'required'},
+			{type: 'wholeNumber'},
+			{type: 'min', value: 100},
+			{type: 'max', value: config.mapHeight - 100},
+		],
+		hidden: {field: 'location', fieldValueNot: 'fixed',},
+		propOrig: 'fixedPosY',
+	},
+	offsetX: {
+		id: 'offsetx',
+		type: 'text',
+		value: '',
+		label: 'X offset',
+		rules: [
+			{type: 'wholeNumber'},
+		],
+		hidden: {field: 'location', fieldValue: ['fixed', 'any']},
+	},
+	offsetY: {
+		id: 'offsety',
+		type: 'text',
+		value: '',
+		label: 'Y offset',
+		rules: [
+			{type: 'wholeNumber'},
+		],
+		hidden: {field: 'location', fieldValue: ['fixed', 'any']},
+	},
+	range: {
+		id: 'range',
+		type: 'text',
+		value: '',
+		label: 'Range',
+		rules: [
+			{type: 'wholeNumber'},
+			{type: 'min', value: 20},
+		],
+		hidden: {field: 'location', fieldValue: 'any',},
 	},
 	energyCost: {
-		id: 'energyCost',
+		id: 'energy-cost',
 		type: 'text',
 		value: '',
 		label: 'Energy cost',
 		rules: [
-			{type: 'positiveInteger'},
+			{type: 'wholeNumber'},
+			{type: 'min', value: 0},
 		],
 		hidden: {field: 'behaviour', fieldValue: 'chance',},
 		propOrig: 'energy',
@@ -80,7 +225,7 @@ const fields = {
 		value: '',
 		label: 'Event description',
 		rules: [
-			{type: 'minLength', minLength: 3},
+			{type: 'minLength', value: 3},
 		],
 		propOrig: 'desc',
 	},
@@ -88,13 +233,140 @@ const fields = {
 		id: 'chance',
 		type: 'text',
 		value: '',
-		label: 'Starting chance (%)',
+		label: 'Base chance (%)',
 		rules: [
 			{type: 'range'},
 		],
-		propOrig: 'chance',
 		hidden: {field: 'behaviour', fieldValue: 'pop',},
 	},
+	chanceIncrease: {
+		id: 'chance-increase',
+		type: 'multiAdd',
+		value: [],
+		label: 'Chance increase',
+		rules: [{type: 'allValidValues'}],
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+		propOrig: 'chanceIncreaseEdit',
+		config: {
+			fields: {
+				chanceEvent: {
+					id: 'chance-event',
+					type: 'autocomplete',
+					value: '',
+					label: 'Select pop event',
+					options: [],
+					rules: [
+						{type: 'required'},
+						{type: 'matchOption'},
+					],
+				},
+				increase: {
+					id: 'increase',
+					type: 'text',
+					value: '',
+					label: 'Chance increase (%)',
+					rules: [
+						{type: 'required'},
+						{type: 'range'},
+					],
+				},
+			},
+			display: {increase: {post: '%'}},
+			uniqueOptionField: 'chanceEvent',
+			getOptionsData: {
+				chanceEvent: (data, values) => Object.keys(data.events || {})
+																				.filter(name => data.events[name].behaviour === 'pop' && !values.includes(name))
+																				.map(eventName => ({
+																					value: eventName,
+																					title: data.events[eventName].title,
+																					icon: data.events[eventName].icon,
+																					iconStyle: 'circle',
+																				}))},
+			data: {},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.chanceEvent} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.increase} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	},
+	onStart: {
+		id: 'on-start',
+		type: 'multiAdd',
+		value: [],
+		label: 'onStart',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onStartEdit',
+		config: actionFieldConfig,
+	},
+	onEnd: {
+		id: 'on-end',
+		type: 'multiAdd',
+		value: [],
+		label: 'onEnd',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onEndEdit',
+		config: actionFieldConfig,
+	},
+	onAction: {
+		id: 'on-action',
+		type: 'multiAdd',
+		value: [],
+		label: 'onAction',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onActionEdit',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'chance',},
+	},
+	onNoAction: {
+		id: 'on-no-action',
+		type: 'multiAdd',
+		value: [],
+		label: 'onNoAction',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onNoActionEdit',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'chance',},
+	},
+	onSuccess: {
+		id: 'on-success',
+		type: 'multiAdd',
+		value: [],
+		label: 'onSuccess',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onSuccessEdit',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	},
+	onFail: {
+		id: 'on-fail',
+		type: 'multiAdd',
+		value: [],
+		label: 'onFail',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onFailEdit',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	},
+	onFullChance: {
+		id: 'on-full-chance',
+		type: 'multiAdd',
+		value: [],
+		label: 'onFullChance',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onFullChanceEdit',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	}
 };
 
 const defaultNewEvent = {
@@ -115,6 +387,7 @@ class EditorScreen extends React.Component {
 			'toggleIconModal',
 			'handleFieldChange',
 			'validateFields',
+			'removeEvent',
 		]);
 
 		this.state = {
@@ -130,11 +403,20 @@ class EditorScreen extends React.Component {
 			isValidAll: true,
 		};
 		this.data = {};
+		this.props.chanceIncrease
 		this.loadCallbacks = [];
 		this.newEvents = {};
 		this.editor = new Editor(this.dataChange);
 		this.props.formMethods.onFieldChange(this.handleFieldChange);
-		this.props.formMethods.onValidityChange(isValidAll => this.setState({isValidAll}));
+		this.props.formMethods.onValidityChange(isValidAll => {
+			const options = [...this.props.fields.selectEvent.options];
+			const matchingOption = this.props.fields.selectEvent.matchingOption;
+			const index = options.findIndex(option => matchingOption && option.value === matchingOption.value);
+
+			this.setState({isValidAll});
+			options[index] = {...options[index], valid: isValidAll};
+			this.props.formMethods.updateOptions('selectEvent', options);
+		});
 	}
 
 	componentWillUnmout() {
@@ -142,12 +424,11 @@ class EditorScreen extends React.Component {
 	}
 
 	handleFieldChange(fieldName, field) {
+		const event = this.state.events[(this.props.fields.selectEvent.matchingOption || {}).value];
 		if (!this.props.fields.selectEvent.matchingOption) {
-			return;
+			return this.setState({isValidAll: true});
 		}
 		const eventType = this.props.fields.selectEvent.matchingOption.value;
-		const event = this.state.events[this.props.fields.selectEvent.matchingOption.value];
-
 		if (fieldName === 'selectEvent') {
 			this.props.formMethods.updateFields({
 				eventTitle: event.title,
@@ -157,6 +438,13 @@ class EditorScreen extends React.Component {
 				eventIcon: event.icon,
 				energyCost: event.energy || '',
 				chance: event.chance || '',
+				location: event.location || 'any',
+				posX: event.fixedPosX || '100',
+				posY: event.fixedPosY || '100',
+				offsetX: event.offsetX || '',
+				offsetY: event.offsetY || '',
+				range: event.range || '',
+				chanceIncrease: event.chanceIncreaseEdit,
 			}, () => {
 				const uniqueRule = this.props.fields.eventTitle.rules.find(rule => rule.type === 'unique');
 				uniqueRule.others = Object.keys(this.state.events)
@@ -166,14 +454,15 @@ class EditorScreen extends React.Component {
 					const {selectEvent, ...otherFields} = this.props.fields;
 					this.props.formMethods.clearValidity(otherFields);
 				});
-			});
-		} else if (event[field.propOrig] !== field.value) {
-			const eventUpdate = {...event, [field.propOrig]: field.value};
-			this.setState({events: {...this.state.events, [eventType]: eventUpdate}}, () => {
+			}, true);
+		} else if (event[field.propOrig || fieldName] !== field.value) {
+			const eventUpdate = {...event, [field.propOrig || fieldName]: field.value};
+			this.setState({events: {...this.state.events, [eventType]: eventUpdate}, isValidAll: this.props.formMethods.isValidAll(this.props.fields)}, () => {
 				if (this.props.formMethods.isValidAll(this.props.fields)) {
 					this.setState({saving: true});
 					this.editor.saveEvent(eventType, this.state.events[eventType]).then(() => {
 						this.setState({saving: false});
+						this.data.events[eventType] = this.state.events[eventType];
 					});
 				}
 				if (['eventIcon', 'eventTitle', 'eventDesc', 'behaviour'].includes(fieldName)) {
@@ -202,7 +491,10 @@ class EditorScreen extends React.Component {
 				if (isNewEvents) {
 					const selectOptions = Object.keys(this.state.events).map(eventType => {
 						const event = this.state.events[eventType];
+
 						return {
+							valid: true,
+							...(this.props.fields.selectEvent.options.find(option => option.value === eventType) || {}),
 							value: eventType,
 							title: event.title,
 							desc: event.desc || '',
@@ -222,6 +514,8 @@ class EditorScreen extends React.Component {
 		};
 
 		this.data = {...this.data, ...newData};
+		this.props.fields.chanceIncrease.config.data = this.data;
+		actionFieldConfig.data = this.data;
 		if (callback) {
 			this.loadCallbacks.push(callback);
 		}
@@ -233,14 +527,17 @@ class EditorScreen extends React.Component {
 	createNewEvent() {
 		const baseEvent = this.state.events[(this.props.fields.selectEvent.matchingOption || {}).value] || defaultNewEvent;
 		let i = 1;
-		while (this.newEvents[`newEvent${i}`] || this.state.events[`newEvent${i}`]) {i++};
+		while (this.state.events[`eventType${i}`]) {i++};
 
-		this.newEvents[`newEvent${i}`] = {...baseEvent, ...{
+		const newEventType = `eventType${i}`;
+		const newEvent = {...baseEvent, ...{
 			title: `New event ${i}`,
 		}};
-		this.dataChange({events: {...this.data.events, ...this.newEvents}}, () => {
-			this.props.formMethods.updateFields({selectEvent: this.newEvents[`newEvent${i}`].title}, () => {
-				this.props.formMethods.validateAll({selectEvent: this.props.fields.selectEvent});
+		this.dataChange({events: {...this.data.events, [newEventType]: newEvent}}, () => {
+			this.setState({saving: true});
+			this.props.formMethods.updateFields({selectEvent: newEvent.title}, null, true);
+			this.editor.saveEvent(newEventType, this.state.events[newEventType]).then(() => {
+				this.setState({saving: false});
 			});
 		});
 	}
@@ -249,7 +546,8 @@ class EditorScreen extends React.Component {
 		this.setState({[`${type}Tooltip`]: isOpen});
 	}
 
-	toggleIconModal() {
+	toggleIconModal(e) {
+		e.preventDefault();
 		this.setState({
 			iconsModalOpen: !this.state.iconsModalOpen,
 			iconsModalPos: this.refs.iconsModalButton.getBoundingClientRect(),
@@ -260,9 +558,31 @@ class EditorScreen extends React.Component {
 		this.props.formMethods.updateFields({eventIcon: iconName}, null, true);
 	}
 
-	validateFields() {
+	validateFields(e) {
 		const {selectEvent, ...otherFields} = this.props.fields;
-		this.props.formMethods.validateAll(otherFields);
+
+		e.preventDefault();
+		this.setState({saving: this.state.saving || false}, () => {
+			this.props.formMethods.validateAll(otherFields);
+		});
+	}
+
+	removeEvent() {
+		const eventType = this.props.fields.selectEvent.matchingOption.value;
+
+		this.setState({saving: true, isValidAll: true}, () => {
+			this.editor.removeEvent(eventType).then(() => {
+				this.props.formMethods.updateFields({selectEvent: ''}, () => {
+					const {[eventType]: deleted, ...restOfEvents} = this.data.events;
+					const {[eventType]: deleted2, ...restOfStateEvents} = this.state.events;
+
+					this.setState({events: restOfStateEvents, saving: false}, () => {
+						this.data.events = restOfEvents;
+						this.dataChange({events: {...restOfEvents}});
+					});
+				});
+			});
+		});
 	}
 
 	render() {
@@ -271,7 +591,8 @@ class EditorScreen extends React.Component {
 
 		return (
 			<Screen className="editor-screen">
-				<form>
+				<form onSubmit={this.validateFields}>
+					<input type="submit" className="access" tabindex="-1" />
 					<div className="header">
 						<div className="row">
 							<div className="col-30 col-l-20">
@@ -282,17 +603,23 @@ class EditorScreen extends React.Component {
 									<Tooltip show={this.state.validateFieldsTooltip}
 										toggleTooltip={isOpen => this.toggleTooltip('validateFields', isOpen)}>
 										<button data-tooltip-trigger type="button" className="icon validate-fields" onClick={this.validateFields}>
-											{!saving && isValidAll && <i className="success">done</i>}
-											{!isValidAll && <i className="error">feedback</i>}
-											{saving && isValidAll && <i>sms</i>}
+											{!saving && isValidAll && <i className="done">done</i>}
+											{!isValidAll && <i className="invalid">warning</i>}
+											{saving && isValidAll && <i className="saving">sync</i>}
 										</button>
-										<p>{isValidAll ? 'All fields are valid' : 'Validate fields'}</p>
+										<p>
+											{!isValidAll && 'Some fields are invalid. Changes cannot be saved.'}
+											{saving === false && isValidAll && ' All changes saved.'}
+										</p>
 									</Tooltip>
 								}
 								<Field config={fields.selectEvent} />
 								<Tooltip show={this.state.createNewEventTooltip}
 									toggleTooltip={isOpen => this.toggleTooltip('createNewEvent', isOpen)}>
-									<button data-tooltip-trigger type="button" className="primary icon add-event" onClick={this.createNewEvent}>
+									<button data-tooltip-trigger
+										disabled={!this.state.isValidAll}
+										type="button" className="icon-raised primary add-event"
+										onClick={this.createNewEvent}>
 										<i>add</i>
 									</button>
 									<p>Create new event</p>
@@ -308,7 +635,7 @@ class EditorScreen extends React.Component {
 									<Tooltip show={this.state.changeIconTooltip} toggleTooltip={isOpen => this.toggleTooltip('changeIcon', isOpen)}>
 										<button data-tooltip-trigger
 											type="button"
-											className={utils.getClassName({'primary icon select-icon': true, rhombus: fields.behaviour.value === 'chance'})}
+											className={utils.getClassName({'primary icon-raised select-icon': true, rhombus: fields.behaviour.value === 'chance'})}
 											ref="iconsModalButton"
 											onClick={this.toggleIconModal}>
 											<span style={utils.getIconStyle(fields.eventIcon.value)} />
@@ -317,7 +644,7 @@ class EditorScreen extends React.Component {
 									</Tooltip>
 									<Field config={fields.eventTitle} />
 								</div>
-								<div className="col-33 col-l-25">
+								<div className="col-33 col-l-35">
 									<Field config={fields.behaviour} />
 								</div>
 							</div>
@@ -330,13 +657,64 @@ class EditorScreen extends React.Component {
 								</div>
 							</div>
 							<div className="row">
-								<div className="col-50 col-l-35">
-									{fields.behaviour.value === 'pop' &&
-										<Field config={fields.energyCost} />
-									}
-									{fields.behaviour.value === 'chance' &&
-										<Field config={fields.chance} />
-									}
+								<div className="col-40 col-l-25">
+									<Field config={fields.location} />
+								</div>
+								{fields.location.value !== 'any' &&
+									<React.Fragment>
+										<div className="col-20 col-l-15">
+											<Field config={fields.posX} />
+											<Field config={fields.offsetX} />
+										</div>
+										<div className="col-20 col-l-15">
+											<Field config={fields.posY} />
+											<Field config={fields.offsetY} />
+										</div>
+										<div className="col-20 col-l-15">
+											<Field config={fields.range} />
+										</div>
+									</React.Fragment>
+								}
+							</div>
+							<div className="row">
+								<div className="col-50 col-l-25">
+									<Field config={fields.energyCost} />
+									<Field config={fields.chance} />
+								</div>
+								<div className="col-50 col-l-45">
+									<Field config={fields.chanceIncrease} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-50 col-l-25">
+									<Field config={fields.onStart} />
+								</div>
+								<div className="col-50 col-l-45">
+									<Field config={fields.onEnd} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-50 col-l-25">
+									<Field config={fields.onSuccess} />
+									<Field config={fields.onAction} />
+								</div>
+								<div className="col-50 col-l-45">
+									<Field config={fields.onFail} />
+									<Field config={fields.onNoAction} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-50 col-l-25">
+									<Field config={fields.onFullChance} />
+								</div>
+								<div className="col-50 col-l-45">
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-100 col-l-70">
+									<div className="row-buttons">
+										<button type="button" className="error" onClick={this.removeEvent}>Remove event</button>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -344,25 +722,28 @@ class EditorScreen extends React.Component {
 				</form>
 				<Modal show={this.state.iconsModalOpen} pos={this.state.iconsModalPos} locked={false} onClose={this.toggleIconModal}>
 					<h3 data-modal-head>Change event icon</h3>
-					<fieldset className="icon-radios">
-						{icons && icons.map(iconName => (
-							<Tooltip show={this.state[`${iconName}IconTooltip`]}
-								toggleTooltip={isOpen => this.toggleTooltip(`${iconName}Icon`, isOpen)}>
-								<div key={iconName} data-tooltip-trigger>
-									<input type="radio"
-										value={iconName}
-										name="icon-radios"
-										id={iconName}
-										checked={fields.eventIcon.value === iconName}
-										onChange={() => this.iconSelect(iconName)} />
-									<label htmlFor={iconName} className={fields.behaviour.value === 'chance' ? 'rhombus' : ''}>
-										<span style={utils.getIconStyle(iconName)}>{iconName}</span>
-									</label>
-								</div>
-								<p>{iconName}</p>
-							</Tooltip>
-						))}
-					</fieldset>
+					<form onSubmit={this.toggleIconModal}>
+						<input type="submit" className="access" tabindex="-1" />
+						<fieldset className="icon-radios">
+							{icons && icons.map(iconName => (
+								<Tooltip show={this.state[`${iconName}IconTooltip`]}
+									toggleTooltip={isOpen => this.toggleTooltip(`${iconName}Icon`, isOpen)}>
+									<div key={iconName} data-tooltip-trigger>
+										<input type="radio"
+											value={iconName}
+											name="icon-radios"
+											id={iconName}
+											checked={fields.eventIcon.value === iconName}
+											onChange={() => this.iconSelect(iconName)} />
+										<label htmlFor={iconName} className={fields.behaviour.value === 'chance' ? 'rhombus' : ''}>
+											<span style={utils.getIconStyle(iconName)}>{iconName}</span>
+										</label>
+									</div>
+									<p>{iconName}</p>
+								</Tooltip>
+							))}
+						</fieldset>
+					</form>
 				</Modal>
 			</Screen>
 		);

@@ -42,6 +42,7 @@ class Screen extends React.Component {
 					{this.props.children}
 				</div>
 				<div class="tooltip-container" />
+				<div class="modal-container" />
 			</div>
 		);
 	}

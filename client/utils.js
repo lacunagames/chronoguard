@@ -29,14 +29,14 @@ const utils = {
 	deepClone: obj => JSON.parse(JSON.stringify(obj)),
 
 	// Deep equal comparison
-	isEqual: (a, b) => {
+	isEqual: (a, b, extendedAllowed) => {
 		if (typeof a !== typeof b) {
 			return false;
 		}
 		if (typeof a !== 'object') {
 			return a === b;
 		}
-		return Object.keys(a).length === Object.keys(b).length && !Object.keys(a).some((key) => {
+		return (extendedAllowed || Object.keys(a).length === Object.keys(b).length) && !Object.keys(a).some(key => {
 			return !utils.isEqual(a[key], b[key]);
 		});
 	},
@@ -144,7 +144,7 @@ const utils = {
 
 	getIconStyle: iconName => {
 		iconName = iconName.toLowerCase().replace(/ /g, '-');
-		return {'background-image': `url(static/images/icon-${iconName}.jpg)`};
+		return {'background-image': `url(static/images/icon-${iconName || 'default'}.jpg)`};
 	},
 };
 

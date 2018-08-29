@@ -22,6 +22,46 @@ i {
 	-webkit-font-smoothing: antialiased;
 }
 
+.auto-icon {
+	display: inline-block;
+	width: 28px;
+	height: 28px;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	overflow: hidden;
+	pointer-events: none;
+
+	span {
+		display: inline-block;
+		width: 26px;
+		height: 26px;
+		border-radius: 3px;
+		background-size: cover;
+	}
+
+	&.circle span {
+		border-radius: 50%;
+	}
+
+	&.rhombus {
+		transform: rotate(45deg);
+		width: 25px;
+		height: 25px;
+		margin: 1px 0 0 3px;
+		border-radius: 0;
+
+		span {
+			transform: rotate(-45deg);
+			position: relative;
+			border-radius: 0;
+			width: 34px;
+			height: 34px;
+			top: -5px;
+			left: -5px;
+		}
+	}
+}
+
 .skill-points, .energy-points {
 	display: inline-block;
 	width: 40px;

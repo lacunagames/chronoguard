@@ -13,11 +13,11 @@
 	}
 
 	.select {
-		// font-family: $fontLight;
+		background-color: #fff;
 		font-size: 14px;
 		transition: border-color 0.2s ease-in-out;
-		// border: 1px solid $cGreyC;
-		padding: 10px 45px 10px 10px;
+		border: 1px solid rgba($cText, 0.5);
+		padding: 10px 60px 10px 10px;
 		border-radius: 3px;
 		outline: none;
 		width: 100%;
@@ -25,50 +25,71 @@
 		height: 41px;
 		position: relative;
 		box-shadow: $shadow1In;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		cursor: pointer;
 
 		&:hover, &:focus, &.open {
-			// border-color: $cBlue;
+			border-color: rgba($cText, 0.8);
 		}
 
 		.invalid &:hover, .invalid &:focus, .invalid &.open {
 			border-color: $cError;
 		}
 
-		&:after {
-			content: '\f078';
-			color: #666;
-			// text-shadow: $shadowText;
+		i {
+			color: $cText;
+			text-shadow: $shadowText;
 			position: absolute;
-			right: 17px;
-			top: 10px;
-			// font-family: $fontIcon;
-			background-size: contain;
-			width: 14px;
-			height: 20px;
+			right: 7px;
+			top: 8px;
 			transition: transform 0.2s ease-in-out;
+			pointer-events: none;
 		}
 
-		&.open:after {
+		&.open i {
 			transform: rotate(180deg);
 			text-shadow: -1px -1px 2px rgba(0,0,0,0.2);
 		}
 
 		&.disabled {
 			cursor: default;
-			// border-color: $cGreyC;
-			color: #bbb;
-			background-color: #f6f6f6;
+			border-color: $cSecondary;
+			color: $cDisabled;
+			background-color: $cBg;
+		}
+
+
+		&.has-icon {
+			padding-left: 45px;
+
+			.auto-icon {
+				position: absolute;
+				left: 8px;
+				top: 6px;
+			}
 		}
 	}
 
 	.tab-active & .select:focus {
-		// border-color: $cDarkBlue;
+		border-color: $cTab;
 		border-width: 2px;
-		left: -1px;
-		top: -1px;
-		width: calc(100% + 2px);
-		height: 43px;
-		margin-bottom: 3px;
+		padding: 9px 59px 9px 9px;
+
+		&.has-icon {
+			padding-left: 44px;
+
+			.auto-icon {
+				left: 7px;
+				top: 5px;
+			}
+		}
+
+		i {
+			top: 7px;
+			right: 6px;
+		}
 	}
 	.tab-active .invalid & .select:focus {
 		border-color: $cError;
@@ -88,6 +109,10 @@
 		box-shadow: $shadow3;
 		margin-bottom: $spacing;
 
+		ul {
+			margin-bottom: 0;
+		}
+
 		&.above {
 			top: auto;
 			bottom: 36px;
@@ -95,7 +120,7 @@
 
 		li {
 			display: block;
-			// color: $cGrey3;
+			color: $cText;
 			padding: 7px 10px;
 			cursor: pointer;
 			white-space: nowrap;
@@ -104,30 +129,43 @@
 			outline: none;
 
 			&.disabled {
-				// color: $cGreyC;
+				color: $cDisabled;
 				cursor: default;
+
+				.auto-icon {
+					opacity: 0.6;
+				}
 			}
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
 				text-decoration: none;
-				// background: $cButton;
+				background: $cBg;
 			}
 
 			.tab-active &:not(.disabled):focus {
-				// border: 2px solid $cDarkBlue;
+				border: 2px solid $cTab;
+				padding: 5px 8px;
 			}
 		}
 
 		.selected {
-			background: #d0d0d0;
+			background: lighten($cPrimary, 10%);
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
-				background: #d6d6d6;
+				background: lighten($cPrimary, 15%);
+			}
+		}
+
+		.auto-icon {
+			margin: -10px 10px -10px 2px;
+
+			&.rhombus {
+				margin: -8px 10px -8px 4px;
 			}
 		}
 	}
 
 	.placeholder, .options .placeholder {
-		color: #888;
+		color: $cTextLight;
 	}
 }

@@ -104,7 +104,7 @@ class Autocomplete extends React.Component {
 
 		} else {
 			const filteredOptions = this.props.options.filter(item => {
-				return item.title.toLowerCase().trim().indexOf(wildValue) > -1 || item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
+				return item.title.toLowerCase().trim().indexOf(wildValue) > -1 || item.desc && item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
 			});
 
 			if (filteredOptions.length === 0) {
@@ -121,9 +121,18 @@ class Autocomplete extends React.Component {
 	}
 
 	onInputClick(e) {
+		const eType = e.type;
+
+		if (e.type === 'blur') {
+			return this.inputFocused = false;
+		}
 		this.setState({
-			isOpen: true,
+			isOpen: e.type === 'focus' || !this.inputFocused || !this.state.isOpen,
 			options: this.state.selected ? this.props.options : this.state.options,
+		}, () => {
+			if (eType === 'click') {
+				this.inputFocused = true;
+			}
 		});
 	}
 
@@ -165,6 +174,7 @@ class Autocomplete extends React.Component {
 		e.preventDefault();
 		this.props.onChange({target: {value: ''}, type: 'change', matchingOption: undefined});
 		this.setState({selected: undefined});
+		this.inputFocused = true;
 		this.refs.input.focus();
 	}
 
@@ -177,11 +187,14 @@ class Autocomplete extends React.Component {
 					'autocomplete-box': true,
 					selected: selected && selected.value,
 					'has-icon': selected && selected.icon,
+					'has-invalids': options.find(option => option.valid === false),
 				})}>
 				<input
+					autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
 					value={this.props.value}
 					id={this.props.inputId}
 					onFocus={this.onInputClick}
+					onBlur={this.onInputClick}
 					onClick={this.onInputClick}
 					onChange={this.onInputChange}
 					onKeyDown={this.onInputKeyDown}

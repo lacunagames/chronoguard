@@ -28,7 +28,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			]);
 			this.state = fieldsConfig;
 			this.fillState();
-			this.oldValid = false;
+			this.oldValid = undefined;
 			this.pendingFields = [];
 			this.subscribedValidityFn = [];
 			this.subscribedChangeFn = [];
@@ -42,6 +42,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				onFieldChange: this.subscribeFieldChange,
 				updateFields: this.updateFields,
 				updateOptions: this.updateOptions,
+				isHiddenField: this.isHiddenField,
 			};
 
 		}
@@ -55,7 +56,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 						if (!rule.errorText) {
 							let text = defaultErrorTexts[rule.type] || '';
 
-							text = text.replace(/{minLength}/g, rule.minLength);
+							text = text.replace(/{(minLength|value)}/g, rule.minLength || rule.value);
 							rule.errorText = text;
 						}
 					});
@@ -64,7 +65,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 
 				// Add asterisk to mark required for select
 				if ((field.type === 'select' || field.type === 'autocomplete') && field.rules.find(rule => rule.type === 'required')) {
-					const emptyOption = field.options.find(option => option.value === '');
+					const emptyOption = field.options.find(option => option.value === '' && option.title[option.title.length - 1] !== '*');
 
 					(emptyOption || {}).title += ' *';
 				}
@@ -81,9 +82,11 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			});
 		}
 
-		fieldChange(fieldName, e) {
+		fieldChange(fieldName, e, callback) {
 			const cloneField = {...this.state[fieldName]};
-			const skipValidate = e.type === 'change' && ['text', 'autocomplete'].includes(cloneField.type) && typeof cloneField.invalid === 'undefined';
+			const skipValidate = e.type === 'change'
+															&& ['text', 'autocomplete', 'multiAdd'].includes(cloneField.type)
+															&& typeof cloneField.invalid === 'undefined';
 
 			switch (cloneField.type) {
 				case 'checkbox':
@@ -103,9 +106,11 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					break;
 
 				case 'autocomplete':
+				case 'select':
 					cloneField.value = e.target.value;
 					cloneField.options = e.options || cloneField.options;
-					cloneField.matchingOption = e.matchingOption || utils.pickWild(cloneField.options, 'title', cloneField.value);
+					cloneField.matchingOption = e.matchingOption ||
+						utils.pickWild(cloneField.options, cloneField.type === 'autocomplete' ? 'title' : 'value', cloneField.value);
 					if (cloneField.dynamicHelpText) {
 						cloneField.helpText = cloneField.matchingOption ? cloneField.dynamicHelpText(cloneField) : '';
 					}
@@ -118,14 +123,17 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			if (!skipValidate) {
 				cloneField.invalid = this.checkValidity(cloneField);
 			}
+
 			this.setState({[fieldName]: cloneField}, () => {
 				const pendingIndex = this.pendingFields.indexOf(fieldName);
 
 				if (pendingIndex > -1) {
 					this.pendingFields.splice(pendingIndex, 1);
 				}
-				const fieldsToValidate = {};
+
 				if (cloneField.validateOnChange) {
+					const fieldsToValidate = {};
+
 					cloneField.validateOnChange.forEach(fieldName => {
 						!this.pendingFields.includes(fieldName) && this.pendingFields.push(fieldName);
 						fieldsToValidate[fieldName] = this.state[fieldName];
@@ -141,13 +149,13 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				hasFieldsToUpdate && this.updateFields(fieldsToUpdate, () => {
 					Object.keys(fieldsToUpdate).forEach(fieldName => this.pendingFields.splice(this.pendingFields.indexOf(fieldName), 1));
 					if (this.pendingFields.length === 0) {
-						this.isValidityChange();
+						callback ? callback() : this.isValidityChange();
 					}
 					this.subscribedChangeFn.forEach(fn => fn(fieldName, cloneField));
 				});
 
 				if (this.pendingFields.length === 0) {
-					this.isValidityChange();
+					callback ? callback() : this.isValidityChange();
 				}
 				!hasFieldsToUpdate && this.subscribedChangeFn.forEach(fn => fn(fieldName, cloneField));
 			});
@@ -159,10 +167,17 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				return false;
 			}
 
-			const fieldValue = this.state[field.hidden.field].value;
-			const matchValue = field.hidden.fieldValue;
+			let isHidden = false;
+			const matchValue = this.state[field.hidden.field].value;
+			const {fieldValue, fieldValueNot} = field.hidden;
 
-			return typeof matchValue === 'object' ? matchValue.indexOf(fieldValue) > -1 : fieldValue === matchValue;
+			if (fieldValue !== undefined) {
+				isHidden = typeof fieldValue === 'object' ? fieldValue.indexOf(matchValue) > -1 : fieldValue === matchValue;
+			}
+			if (fieldValueNot !== undefined && !isHidden) {
+				isHidden = typeof fieldValueNot === 'object' ? fieldValueNot.indexOf(matchValue) === -1 : fieldValueNot !== matchValue;
+			}
+			return isHidden;
 		}
 
 		checkValidity(field) {
@@ -210,6 +225,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				cloneField.invalid = undefined;
 				this.setState({[fieldName]: cloneField});
 			}
+			this.oldValid = undefined;
 		}
 
 		isValidityChange() {
@@ -231,9 +247,15 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 
 		updateFields(fields, callback, triggerChange) {
 			const fieldNames = Object.keys(fields).filter(fieldName => this.state.hasOwnProperty(fieldName));
+			let counter = fieldNames.length;
 
 			if (triggerChange) {
-				return fieldNames.forEach(fieldName => this.fieldChange(fieldName, {target: {value: fields[fieldName]}}));
+				fieldNames.forEach(fieldName => this.fieldChange(fieldName, {target: {value: fields[fieldName]}}), () => {
+					counter--;
+					if (counter === 0) {
+						callback();
+					}
+				});
 			}
 
 			let updatedCount = 0;
@@ -242,11 +264,11 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					const value = type === 'value' ? fields[fieldName] : this.isHiddenField(this.state[fieldName]);
 					const updatedField = {...this.state[fieldName], [type]: value};
 
-					if (type === 'value' && updatedField.type === 'autocomplete') {
+					if (type === 'value' && ['autocomplete', 'select'].includes(updatedField.type)) {
 						if (updatedField.asyncOptions) {
 							updatedField.options = fields[`$${fieldName}Options`] || [];
 						}
-						updatedField.matchingOption = utils.pickWild(updatedField.options, 'title', updatedField.value);
+						updatedField.matchingOption = utils.pickWild(updatedField.options, updatedField.type === 'autocomplete' ? 'title' : 'value', updatedField.value);
 						if (updatedField.dynamicHelpText) {
 							updatedField.helpText = updatedField.matchingOption ? updatedField.dynamicHelpText(updatedField) : '';
 						}

@@ -12,7 +12,7 @@ class SelectDropdown extends React.Component {
 	}
 
 	componentDidMount() {
-		const selectedIndex = utils.pickObjIndex(this.props.options, 'value', this.props.selected.value);
+		const selectedIndex = this.props.options.findIndex(option => option.value === this.props.selected.value);
 
 		window.addEventListener('focusout', this.focusout);
 		this.setFocus(selectedIndex || 0);
@@ -30,7 +30,7 @@ class SelectDropdown extends React.Component {
 
 	focusout(e) {
 		this.timer = setTimeout(() => {
-			if (this.refs.menu && !this.refs.menu.contains(document.activeElement)) {
+			if (this.refs.menu && !this.refs.menu.contains(document.activeElement) && document.activeElement !== this.props.selectRef) {
 				this.props.onClick();
 			}
 		}, 100);
@@ -93,7 +93,15 @@ class SelectDropdown extends React.Component {
 							tabIndex={option.disabled ? -1 : 0}
 							id={this.props.selectId + '-' + option.value}
 							role="option">
+							{option.icon &&
+								<span className={`auto-icon ${option.iconStyle || ''}`}>
+									<span style={utils.getIconStyle(option.icon)} />
+								</span>
+							}
 							{option.title || option.value}
+							{option.desc &&
+								<span className="desc">{option.desc}</span>
+							}
 						</li>
 					))}
 				</ul>

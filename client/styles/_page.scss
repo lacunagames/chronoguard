@@ -129,6 +129,14 @@ button, input[type=button], input[type=submit], .button {
 	outline: none;
 	box-shadow: $shadow1;
 
+	&:disabled, &.disabled,
+	&:disabled:hover, &.disabled:hover {
+		background: lighten($cSecondary, 15%);
+		color: rgba($cText, 0.4);
+		cursor: default;
+		box-shadow: none;
+	}
+
 	&:hover, &:focus {
 		background: lighten($cSecondary, 10%);
 		outline: none;
@@ -146,8 +154,22 @@ button, input[type=button], input[type=submit], .button {
 	&.primary {
 		background: $cPrimary;
 
+		&:disabled, &.disabled, &:disabled:hover, &.disabled:hover {
+			background: lighten($cPrimary, 15%);
+		}
+
 		&:hover, &:focus {
 			background: lighten($cPrimary, 10%);
+		}
+	}
+
+	&.error {
+		background: $cError;
+		color: #fff;
+
+		&:hover, &:focus {
+			background: lighten($cError, 10%);
+			color: #fff;
 		}
 	}
 
@@ -162,8 +184,8 @@ button, input[type=button], input[type=submit], .button {
 		margin: -2px 3px 0 0;
 	}
 
-	&.icon {
-		padding: 11px 4px 9px;
+	&.icon, &.icon-raised {
+		padding: 10px 4px 10px;
 
 		i {
 			margin-right: 0;
@@ -171,13 +193,15 @@ button, input[type=button], input[type=submit], .button {
 		}
 	}
 
-	&.icon:not(.primary) {
-		background: none;
+	&.icon {
+		background: transparent;
 		color: $cText;
 		box-shadow: none;
 
 		&:hover, &:focus {
-			color: $cTextLight;
+			background: lighten($cSecondary, 15%);
+			color: lighten($cText, 10%);
+			box-shadow: none;
 		}
 	}
 }

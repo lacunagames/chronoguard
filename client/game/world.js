@@ -5,40 +5,15 @@ import allEvents from './data/events';
 import Agent from './agent';
 import allAssets from './data/assets';
 
-const actionTypes = ['onStart', 'onEnd', 'onAction', 'onSuccess', 'onFail', 'onFullChance'];
+const actionTypes = ['onStart', 'onEnd', 'onAction', 'onNoAction', 'onSuccess', 'onFail', 'onFullChance'];
 
 const defaultState = {
 	events: [],
 	queue: [
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
-		// {type: 'createEvent', value: 'fire', activates: utils.getRandom('1-2'),},
 		{type: 'createEvent', value: 'water', activates: 3,},
-		// {type: 'createEvent', value: 'air', activates: 4,},
 		{type: 'createEvent', value: 'life', activates: 8,},
 		{type: 'createEvent', value: 'earth', activates: 11,},
-		// {type: 'createEvent', value: 'fire', activates: 3,},
 		{type: 'createEvent', value: 'water', activates: 2,},
-		// {type: 'createEvent', value: 'air', activates: 6,},
 		{type: 'createEvent', value: 'life', activates: 7,},
 		{type: 'createEvent', value: 'earth', activates: 2,},
 		{type: 'createEvent', value: 'inspireFarming', activates: 1},
@@ -112,6 +87,7 @@ class World extends Agent {
 			}
 			if (event.ends === hour && !event.ended) {
 				this._updateStateObj('events', event.id, {ended: true});
+				this.system.massDispatch(event.onNoAction);
 				this.system.massDispatch(event.onEnd);
 				if (event.hasOwnProperty('chance')) {
 					this.system.massDispatch(event.chance >= 100 ? event.onSuccess : event.onFail);
@@ -172,9 +148,9 @@ class World extends Agent {
 		}
 	}
 
-	_getSafePos({posX, posY, posXOffset, posYOffset, range = 0}) {
-		posX = this._getPosValue(posX) + (posXOffset || 0);
-		posY = this._getPosValue(posY) + (posYOffset || 0);
+	_getSafePos({posX, posY, offsetX, offsetY, range = 0}) {
+		posX = this._getPosValue(posX) + (offsetX || 0);
+		posY = this._getPosValue(posY) + (offsetY || 0);
 
 		const getDistance = (p1, p2) => Math.abs(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
 		const fixedPos = !range && posX && posY;
@@ -268,8 +244,8 @@ class World extends Agent {
 		const priority = allAssets.videos[mapObj.name] ? mapCounter * 1000 : mapCounter;
 		const newObj = {id: mapCounter, animation: 'create', state: '', priority, ...mapObj};
 
-		newObj.posX = this._getPosValue(newObj.posX) + (newObj.posXOffset || 0);
-		newObj.posY = this._getPosValue(newObj.posY) + (newObj.posYOffset || 0);
+		newObj.posX = this._getPosValue(newObj.posX) + (newObj.offsetX || 0);
+		newObj.posY = this._getPosValue(newObj.posY) + (newObj.offsetY || 0);
 		mapCounter++;
 		this.setState({map: [...this.state.map, newObj]});
 	}

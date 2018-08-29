@@ -2,7 +2,6 @@
 import './select.scss';
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import SelectDropdown from './select-dropdown';
 import utils from 'utils';
@@ -15,8 +14,14 @@ class Select extends React.Component {
 		utils.bindThis(this, ['keydown', 'clickSelect', 'clickOption']);
 		this.state = {
 			isOpen: false,
-			selected: utils.pickObj(this.props.options, 'value', this.props.defaultValue) || this.props.options[0]
+			selected: this.props.options.find(option => option.value === this.props.value) || this.props.options[0]
 		};
+	}
+
+	componentWillReceiveProps(nextProps) {
+		if (this.props.options !== nextProps.options || this.props.value !== nextProps.value) {
+			this.setState({selected: nextProps.options.find(option => option.value === nextProps.value) || nextProps.options[0]});
+		}
 	}
 
 	keydown(e) {
@@ -27,7 +32,7 @@ class Select extends React.Component {
 		}
 	}
 
-	clickSelect() {
+	clickSelect(e) {
 		if (!this.props.disabled) {
 			this.setState({isOpen: !this.state.isOpen});
 		}
@@ -36,9 +41,7 @@ class Select extends React.Component {
 	clickOption(selected) {
 		if (typeof selected === 'object') {
 			this.setState({selected}, () => {
-				const e = {target: {value: selected.value}};
-
-				this.props.onChange(e);
+				this.props.onChange({target: {value: selected.value}, matchingOption: selected});
 			});
 			this.refs.select.focus();
 		}
@@ -46,29 +49,37 @@ class Select extends React.Component {
 	}
 
 	render() {
-		const options = this.props.options;
+		const {options, selectId, disabled} = this.props;
+		const {selected, isOpen} = this.state;
 
 		return (
-			<div className="select-box" role="listbox" aria-activedescendant={this.props.selectId + '-' + this.state.selected.value}>
-				<input defaultValue={this.state.selected.value} id={this.props.selectId} onClick={this.clickSelect} tabIndex="-1" />
+			<div className="select-box" role="listbox" aria-activedescendant={selectId + '-' + selected.value}>
+				<input value={selected.value} id={selectId} onClick={this.clickSelect} tabIndex="-1" />
 				<div className={utils.getClassName({
 						select: true,
-						open: this.state.isOpen,
-						placeholder: !this.state.selected.value,
-						disabled: this.props.disabled
+						open: isOpen,
+						placeholder: !selected.value,
+						'has-icon': selected.icon,
+						disabled,
 					})}
 					onClick={this.clickSelect}
 					onKeyDown={this.keydown}
-					tabIndex={this.props.disabled ? -1 : 0}
+					tabIndex={disabled ? -1 : 0}
 					ref="select">
-					{this.state.selected.title || this.state.selected.value}
+					{selected && selected.icon &&
+						<span className={`auto-icon ${selected.iconStyle || ''}`}>
+							<span style={utils.getIconStyle(selected.icon)} />
+						</span>
+					}
+					{selected.title || selected.value}
+					<i>expand_more</i>
 				</div>
-				{this.state.isOpen &&
+				{isOpen &&
 					<SelectDropdown
-						options={this.props.options}
-						selectId={this.props.selectId}
+						options={options}
+						selectId={selectId}
 						selectRef={this.refs.select}
-						selected={this.state.selected}
+						selected={selected}
 						onClick={this.clickOption} />
 				}
 			</div>

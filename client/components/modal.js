@@ -2,6 +2,7 @@
 import './modal.scss';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import utils from 'utils';
 
@@ -74,8 +75,9 @@ class Modal extends React.Component {
 					this.setState({longModal: clientHeight > window.innerHeight - 50});
 					this.oldModalHeight = clientHeight;
 				} else {
-					const topPos = this.props.pos.top + clientHeight + 20 > window.innerHeight ? this.props.pos.bottom - clientHeight + 10 : this.props.pos.top - 10;
-					const leftPos = this.props.pos.right + clientWidth + 20 > window.innerWidth ? this.props.pos.left - clientWidth - 10 : this.props.pos.right + 10;
+					const {left, right, bottom, top} = this.props.pos;
+					const topPos = top + clientHeight + 20 > window.innerHeight ? Math.max(15, bottom - clientHeight + 10) : top - 10;
+					const leftPos = right + clientWidth + 20 > window.innerWidth ? Math.max(15, left - clientWidth - 10) : right + 10;
 
 					this.setState({topPos: topPos + 'px', leftPos: leftPos + 'px'});
 					this.oldPos = this.props.pos;
@@ -84,7 +86,7 @@ class Modal extends React.Component {
 		};
 
 		clearTimeout(this.longTimer);
-		this.longTimer = typeof instant !== 'boolean' || !instant ? setTimeout(setLong, 300) : setLong();
+		this.longTimer = typeof instant !== 'boolean' || !instant ? setTimeout(setLong.bind(this), 300) : setLong();
 	}
 
 	toggleOutsideFocus(isDisable) {
@@ -141,50 +143,51 @@ class Modal extends React.Component {
 			}
 		});
 
-		return (
-			<div onClick={!this.props.locked && this.props.onClose} className={utils.getClassName({
-				'modal-backdrop': true,
-				'transparent-backdrop': this.props.pos,
-				locked: this.props.locked,
-				long: this.state.longModal,
-				open: this.props.show,
-				closed: !this.props.show,
-				animate: this.state.animate,
-				[this.props.size]: this.props.size,
-				[this.props.className]: this.props.className,
-			})}>
-				<div className="modal-box" ref="modal"
-					onClick={e => e.stopPropagation()}
-					style={{left: this.state.leftPos, top: this.state.topPos}}>
-					<div className="inner">
-						{!this.props.locked &&
-							<button onClick={this.props.onClose} className="icon button close-button">
-								<div className="access">Close modal</div>
-								<i>close</i>
-							</button>
-						}
-						{headerChildren.length > 0 &&
-							<div className="head">
-								{headerChildren}
-							</div>
-						}
-						{contentChildren.length > 0 &&
-							<div className="body">
-								{contentChildren}
-							</div>
-						}
-						{footerChildren.length > 0 &&
-							<div className="foot">
-								{footerChildren}
-							</div>
-						}
-						{this.props.loading &&
-							<div className="disabled-overlay"><span>Loading...</span></div>
-						}
+		return ReactDOM.createPortal(
+				<div onClick={!this.props.locked && this.props.onClose} className={utils.getClassName({
+					'modal-backdrop': true,
+					'transparent-backdrop': this.props.pos,
+					locked: this.props.locked,
+					long: this.state.longModal,
+					open: this.props.show,
+					closed: !this.props.show,
+					animate: this.state.animate,
+					[this.props.size]: this.props.size,
+					[this.props.className]: this.props.className,
+				})}>
+					<div className="modal-box" ref="modal"
+						onClick={e => e.stopPropagation()}
+						style={{left: this.state.leftPos, top: this.state.topPos}}>
+						<div className="inner">
+							{!this.props.locked &&
+								<button onClick={this.props.onClose} className="icon button close-button">
+									<div className="access">Close modal</div>
+									<i>close</i>
+								</button>
+							}
+							{headerChildren.length > 0 &&
+								<div className="head">
+									{headerChildren}
+								</div>
+							}
+							{contentChildren.length > 0 &&
+								<div className="body">
+									{contentChildren}
+								</div>
+							}
+							{footerChildren.length > 0 &&
+								<div className="foot">
+									{footerChildren}
+								</div>
+							}
+							{this.props.loading &&
+								<div className="disabled-overlay"><span>Loading...</span></div>
+							}
+						</div>
 					</div>
-				</div>
-			</div>
-		);
+				</div>,
+				document.querySelector('.modal-container')
+			);
 	}
 }
 

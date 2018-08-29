@@ -1,0 +1,91 @@
+
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+.multi-add {
+	margin: -1px 0 5px;
+	padding-right: 40px;
+
+	.multi-button {
+		padding: 0;
+		font-size: 16px;
+		overflow: hidden;
+		white-space: nowrap;
+
+		.tab-active &:focus > span {
+			background: lighten($cSecondary, 10%);
+		}
+
+		& > span {
+			display: inline-block;
+			padding: 10px 7px;
+			background: $cSecondary;
+			transition: background $animFast, color $animFast;
+			line-height: 18px;
+
+			&:hover {
+				background: lighten($cSecondary, 10%);
+			}
+
+			&:not(:last-child) {
+				border-right: 1px solid darken($cSecondary, 10%);
+			}
+		}
+
+		&.invalid {
+
+			& > span {
+			background: #eaa0a0;
+
+				&:hover {
+					background: #ffc9c9;
+				}
+
+				&:not(:last-child) {
+					border-right-color: #f0bfbf;
+				}
+			}
+
+			.tab-active &:hover > span {
+				background: #eaa0a0;
+			}
+		}
+
+		& > span.remove {
+			padding: 10px 2px 10px 4px;
+
+			&:hover {
+				background: lighten($cError, 10%);
+				color: #fff;
+			}
+
+			i {
+				font-size: 18px;
+			}
+		}
+
+		.auto-icon {
+			margin: -5px 4px -9px 0;
+
+			&.no-text {
+				margin: -14px -10px -14px;
+				padding: 10px 7px;
+				pointer-events: auto;
+				width: 48px;
+				height: 42px;
+			}
+		}
+	}
+}
+
+.multi-add-modal .modal-box {
+	width: 400px;
+
+	.body {
+		overflow-y: visible;
+	}
+
+	.row-buttons {
+		padding-bottom: 0;
+	}
+}

@@ -4,9 +4,9 @@ import React from 'react';
 import utils from 'utils';
 import Select from './select';
 import Autocomplete from './autocomplete';
+import MultiAdd from './multi-add';
 
 class Field extends React.Component {
-
 
 	render() {
 		const field = this.props.config || {};
@@ -14,6 +14,21 @@ class Field extends React.Component {
 		const invalidRuleIndex = field.invalid && field.rules.findIndex(rule => rule.type === field.invalid);
 		const renderFieldType = () => {
 			switch (field.type) {
+
+				case 'multiAdd':
+					return (
+						<MultiAdd
+							id={field.id}
+							onChange={field.onChange}
+							value={field.value}
+							label={field.label}
+							config={field.config}
+							disabled={field.disabled}
+							maxLength={field.maxLength}
+							dataChange={field.dataChangeCount} />
+					);
+
+
 				case 'select':
 					return (
 						<Select
@@ -31,7 +46,7 @@ class Field extends React.Component {
 							options={field.options}
 							asyncOptions={field.asyncOptions}
 							asyncMinLength={field.asyncMinLength}
-							placeholder={`${field.placeholder || field.label} ${isRequired ? '*' : ''}`}
+							placeholder={`${field.placeholder || field.label} ${isRequired ? ' *' : ''}`}
 							onChange={field.onChange}
 							disabled={field.disabled}
 							value={field.value}
