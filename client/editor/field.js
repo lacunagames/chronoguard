@@ -4,6 +4,7 @@ import React from 'react';
 import utils from 'utils';
 import Select from './select';
 import Autocomplete from './autocomplete';
+import Multicomplete from './multicomplete';
 import MultiAdd from './multi-add';
 
 class Field extends React.Component {
@@ -51,6 +52,17 @@ class Field extends React.Component {
 							disabled={field.disabled}
 							value={field.value}
 							matchingOption={field.matchingOption} />
+					);
+
+				case 'multicomplete':
+					return (
+						<Multicomplete
+							inputId={field.id}
+							options={field.options}
+							placeholder={`${field.placeholder || field.label} ${isRequired ? ' *' : ''}`}
+							onChange={field.onChange}
+							disabled={field.disabled}
+							value={field.value} />
 					);
 
 				case 'radio':

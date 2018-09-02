@@ -30,7 +30,7 @@ app.post('/save-event', (req, resp) => {
 	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
 
 	data = {...data, events: {...data.events, [eventName]: event}};
-	fs.writeFileSync(dataJsonUrl, JSON.stringify(data));
+	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
 	resp.send({[eventName]: event});
 });
 
@@ -39,7 +39,7 @@ app.get('/remove-event', (req, resp) => {
 	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
 
 	delete data.events[eventName];
-	fs.writeFileSync(dataJsonUrl, JSON.stringify(data));
+	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
 	resp.send({message: 'Successfully removed event', eventName});
 });
 

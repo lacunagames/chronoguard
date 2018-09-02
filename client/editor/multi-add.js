@@ -32,6 +32,7 @@ class MultiAdd extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.value !== this.props.value) {
 			this.validateOptionFields(nextProps.value);
+			typeof this.state.modalPos === 'object' && this.setState({modalPos: {...this.state.modalPos}});
 		}
 	}
 
@@ -43,7 +44,7 @@ class MultiAdd extends React.Component {
 			for (let fieldName in getOptionsData) {
 				value.forEach((valObj, index) => {
 					const allOptions = getOptionsData[fieldName](data, []);
-					if (typeof valObj[fieldName] === 'object') {
+					if (utils.isObj(valObj[fieldName])) {
 						const optionValue = allOptions.find(optObj => optObj.value === valObj[fieldName].value);
 
 						if (!utils.isEqual(valObj[fieldName], optionValue)) {
@@ -74,9 +75,11 @@ class MultiAdd extends React.Component {
 			this.setState({isModalOpen: false});
 
 		} else {
+			const {top, bottom, left, right} = e.currentTarget.getBoundingClientRect();
+
 			this.setState({
 				isModalOpen: true,
-				modalPos: e.currentTarget.getBoundingClientRect(),
+				modalPos: typeof top !== 'undefined' && {top, bottom, left, right},
 				openIndex,
 				focusField,
 				optionsData: Object.keys(getOptionsData || {}).reduce((obj, fieldName) => {
@@ -114,29 +117,57 @@ class MultiAdd extends React.Component {
 
 	render() {
 		const valueButtons = this.props.value.map(valObj => {
-			const valueText = Object.keys(valObj).filter(fieldName => fieldName[0] !== '_').map(fieldName => {
-				const displayConfig = this.props.config.display[fieldName] || {};
-				const displayText = (displayConfig.pre || '') +
-					(typeof valObj[fieldName] === 'string' && (valObj[fieldName] || '??') || '') +
-					(typeof valObj[fieldName] === 'object' && (valObj[fieldName].title || valObj[fieldName].value) || '') +
-					(displayConfig.post || '');
+			const valueText = Object.keys(valObj).filter(fieldName => {
+				const hasValue = utils.isObj(valObj[fieldName]) ? valObj[fieldName].value
+																												: valObj[fieldName] instanceof Array 	? valObj[fieldName].length
+																																															: valObj[fieldName];
 
-				return <span onClick={e => this.toggleModal(e, valObj._index, fieldName)}>
+				return fieldName[0] !== '_' && (!valObj._isValid || hasValue);
+			}).map(fieldName => {
+				const displayConfig = this.props.config.display[fieldName] || {};
+				const displayText = (
+					<span>
+						{displayConfig.pre || ''}
+						{valObj[fieldName] instanceof Array && (valObj[fieldName].length > 0 && valObj[fieldName].map(item => {
+							return (
+								<span className="multi-val">
+									{item.icon &&
+										<span className={`auto-icon ${item.iconStyle || ''}`}>
+											<span style={utils.getIconStyle(item.icon)} />
+										</span>
+									}
+									{item.title || icon.value}
+								</span>
+							);
+						}) || '??')}
+						{typeof valObj[fieldName] === 'string' && (valObj[fieldName] || '??') || ''}
+						{typeof valObj[fieldName] === 'object' && (valObj[fieldName].title || valObj[fieldName].value) || ''}
+						{displayConfig.post || ''}
+					</span>
+				);
+
+				return <span
+					onClick={e => this.toggleModal(e, valObj._index, fieldName)}
+					className={displayConfig.type === 'icon' ? 'no-text' : ''}>
 					{typeof valObj[fieldName] === 'object' && valObj[fieldName].icon && displayConfig.type !== 'icon' &&
-						<span class={`auto-icon ${valObj[fieldName].iconStyle || ''}`}>
+						<span className={`auto-icon ${valObj[fieldName].iconStyle || ''}`}>
 							<span style={utils.getIconStyle(valObj[fieldName].icon)} />
 						</span>
 					}
 					{displayConfig.type === 'icon' &&
 						<Tooltip show={this.state[`tooltipIcon${valObj._index}`]}
 							toggleTooltip={isOpen => this.setState({[`tooltipIcon${valObj._index}`]: isOpen})}>
-							<span class={`auto-icon no-text ${valObj[fieldName].iconStyle || ''}`}>
+							<span className={`auto-icon ${valObj[fieldName].iconStyle || ''}`}>
 								<span style={utils.getIconStyle(valObj[fieldName].icon)} />
 							</span>
 							<p>{displayText}</p>
 						</Tooltip>
 					}
-					{(displayConfig.type === 'text' || typeof displayConfig.type === 'undefined') && displayText}
+					{(displayConfig.type === 'text' || typeof displayConfig.type === 'undefined') &&
+						<span>
+							{displayText}
+						</span>
+					}
 				</span>
 			});
 

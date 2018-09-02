@@ -1,1 +1,1044 @@
-{"events":{"fire":{"title":"Fire","duration":"5-6","posX":"villagePosX","posY":"villagePosY","range":200,"onAction":[{"gainMote":["fire",1]}],"onEnd":[{"queueItem":{"type":"createEvent","value":"fire","delay":"3-6"}}],"icon":"fire","desc":"","onStartEdit":[{"selectAction":{"value":"queueEvent","title":"Queue event","icon":"queue"},"queueEvent":{"value":"eventType3","title":"Inspire Discovery","icon":"map","iconStyle":"circle"},"delay":"10-12","_isValid":true,"_index":1}],"onEndEdit":[],"onFullChanceEdit":[],"energy":0},"water":{"title":"Water","duration":"7-11","onAction":[{"gainMote":["water",1]},{"changeMaxEnergy":0.5}],"onEnd":[{"queueItem":{"type":"createEvent","value":"water","delay":"8-12"}}],"icon":"water","desc":"","posX":100,"posY":100,"onStartEdit":[{"selectAction":{"value":"createMessage","title":"Create message","icon":"message"},"_isValid":true,"_index":1},{"selectAction":{"value":"queueItem","title":"Queue item","icon":"queue"},"_isValid":true,"_index":2}],"chance":0,"chanceIncrease":{}},"air":{"title":"Air","duration":"5-7","energy":"5","posX":"villagePosX","posY":"villagePosY","range":200,"onAction":[{"gainMote":["air",1]}],"onEnd":[{"queueItem":{"type":"createEvent","value":"air","delay":"5-8"}}],"icon":"air","desc":""},"life":{"title":"Life","duration":"10-18","energy":0,"onAction":[{"gainMote":["life",1]},{"changeEnergy":4}],"onEnd":[{"queueItem":{"type":"createEvent","value":"life","delay":"7-9"}},{"checkCondition":{"requires":"motes.life >= 6","actions":[{"createMapObj":{"name":"forest2","posX":680,"posY":428}},{"createMessage":{"type":"free","name":"Double forest!"}},{"removeCondition":"life"}]}}]},"earth":{"title":"Earth","icon":"earth-my","duration":"9-11","onAction":[{"gainMote":["earth",1]},{"changeEnergyGainRate":0.05}],"onEnd":[{"queueItem":{"type":"createEvent","value":"earth","delay":"15-25"}}],"desc":"","energy":0},"inspireFarming":{"title":"Inspire farming","icon":"farm","desc":"The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.","duration":"20","chance":10,"posX":"villagePosX","posY":"villagePosY","offsetX":50,"offsetY":50,"chanceIncrease":{"air":"8-10","fire":"5-8"},"onStart":[{"queueItem":{"type":"createEvent","value":"air","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"air","delay":"3-5"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"4-6"}}],"onFullChance":[{"removeAllEventsByType":["air","fire"]}],"onSuccess":[{"createMapObj":{"name":"farm","posX":"villagePosX","posY":"villagePosY"}},{"createMapObj":{"name":"explode","posX":"villagePosX","posY":"villagePosY"}},{"createMessage":{"type":"primary","icon":"farm","name":"Yay! Inspire farming completed!","descVal":"Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"}},{"gainSkillPoints":3}],"onFail":[{"createMessage":{"type":"free","name":"Inspire Farming Fail :("}}],"onEnd":[{"queueItem":{"type":"createEvent","value":"inspireFarming","delay":"2-5"}},{"removeAllEventsByType":["air","fire"]}],"onStartEdit":[{"selectAction":{"value":"createMessage","title":"Create message","icon":"message"},"_isValid":true,"_index":1},{"selectAction":{"value":"queueItem","title":"Queue item","icon":"queue"},"_isValid":true,"_index":2},{"selectAction":{"value":"createMapObj","title":"Create map item","icon":"map"},"_isValid":true,"_index":3}],"onSuccessEdit":[{"selectAction":{"value":"createMapObj","title":"Create map item","icon":"map"},"_isValid":true,"_index":1}],"onFullChanceEdit":[{"selectAction":{"value":"queueItem","title":"Queue item","icon":"queue"},"_isValid":true,"_index":1}],"onEndEdit":[{"selectAction":{"value":"queueItem","title":"Queue item","icon":"queue"},"_isValid":true,"_index":1},{"selectAction":{"value":"createMapObj","title":"Create map item","icon":"map"},"_isValid":true,"_index":2}],"onFailEdit":[]},"eventType2":{"title":"Warder","icon":"incantate","desc":"","duration":"20","posX":"villagePosX","posY":"villagePosY","offsetX":50,"offsetY":50,"onStart":[{"queueItem":{"type":"createEvent","value":"air","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"air","delay":"3-5"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"4-6"}}],"onFullChance":[{"removeAllEventsByType":["air","fire"]}],"onSuccess":[{"createMapObj":{"name":"farm","posX":"villagePosX","posY":"villagePosY"}},{"createMapObj":{"name":"explode","posX":"villagePosX","posY":"villagePosY"}},{"createMessage":{"type":"primary","icon":"farm","name":"Yay! Inspire farming completed!","descVal":"Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"}},{"gainSkillPoints":3}],"onFail":[{"createMessage":{"type":"free","name":"Inspire Farming Fail :("}}],"onEnd":[{"queueItem":{"type":"createEvent","value":"inspireFarming","delay":"2-5"}},{"removeAllEventsByType":["air","fire"]}],"onEndEdit":[{"selectAction":{"value":"queueEvent","title":"Queue event","icon":"queue"},"_isValid":true,"_index":1}],"onStartEdit":[{"selectAction":"createMessage","_isValid":true,"_index":1}],"energy":0},"eventType1":{"title":"shield","icon":"flame-shield","desc":"","duration":"20","posX":"villagePosX","posY":"villagePosY","offsetX":50,"offsetY":50,"onStart":[{"queueItem":{"type":"createEvent","value":"air","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"air","delay":"3-5"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"4-6"}}],"onFullChance":[{"removeAllEventsByType":["air","fire"]}],"onSuccess":[{"createMapObj":{"name":"farm","posX":"villagePosX","posY":"villagePosY"}},{"createMapObj":{"name":"explode","posX":"villagePosX","posY":"villagePosY"}},{"createMessage":{"type":"primary","icon":"farm","name":"Yay! Inspire farming completed!","descVal":"Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"}},{"gainSkillPoints":3}],"onFail":[{"createMessage":{"type":"free","name":"Inspire Farming Fail :("}}],"onEnd":[{"queueItem":{"type":"createEvent","value":"inspireFarming","delay":"2-5"}},{"removeAllEventsByType":["air","fire"]}],"energy":0},"eventType3":{"title":"Inspire Discovery","icon":"map","desc":"","duration":"20","posX":"villagePosX","posY":"villagePosY","offsetX":50,"offsetY":50,"onStart":[{"queueItem":{"type":"createEvent","value":"air","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"air","delay":"3-5"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"1-3"}},{"queueItem":{"type":"createEvent","value":"fire","delay":"4-6"}}],"onFullChance":[{"removeAllEventsByType":["air","fire"]}],"onSuccess":[{"createMapObj":{"name":"farm","posX":"villagePosX","posY":"villagePosY"}},{"createMapObj":{"name":"explode","posX":"villagePosX","posY":"villagePosY"}},{"createMessage":{"type":"primary","icon":"farm","name":"Yay! Inspire farming completed!","descVal":"Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"}},{"gainSkillPoints":3}],"onFail":[{"createMessage":{"type":"free","name":"Inspire Farming Fail :("}}],"onEnd":[{"queueItem":{"type":"createEvent","value":"inspireFarming","delay":"2-5"}},{"removeAllEventsByType":["air","fire"]}],"onSuccessEdit":[],"onStartEdit":[{"selectAction":{"value":"queueEvent","title":"Queue event","icon":"queue"},"queueEvent":{"value":"water","title":"Water","icon":"water","iconStyle":"rhombus"},"delay":"12-14","_isValid":true,"_index":1},{"selectAction":{"value":"createMapObj","title":"Create map item","icon":"map"},"_isValid":true,"_index":2}],"onFullChanceEdit":[],"onFailEdit":[],"onEndEdit":[{"selectAction":{"value":"createMessage","title":"Create message","icon":"message"},"queueEvent":"","delay":"","_isValid":true,"_index":1}],"energy":0}}}
+{
+  "events": {
+    "fire": {
+      "title": "Fire",
+      "duration": "5-6",
+      "posX": "villagePosX",
+      "posY": "villagePosY",
+      "range": 200,
+      "onAction": [
+        {
+          "gainMote": [
+            "fire",
+            1
+          ]
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "3-6"
+          }
+        }
+      ],
+      "icon": "fire",
+      "desc": "",
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "messageTitle": "Grats!",
+          "messageDescription": "",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onEndEdit": [
+        {
+          "selectAction": {
+            "value": "queueEvent",
+            "title": "Queue event",
+            "icon": "queue"
+          },
+          "queueEvent": {
+            "value": "eventType4",
+            "title": "Wild growth",
+            "icon": "nature",
+            "iconStyle": "rhombus"
+          },
+          "delayEvent": "9-13",
+          "_isValid": true,
+          "_index": 1
+        },
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": [
+            {
+              "value": "inspireFarming",
+              "title": "Inspire farming",
+              "icon": "farm",
+              "iconStyle": "rhombus"
+            },
+            {
+              "value": "eventType3",
+              "title": "Inspire Discovery",
+              "icon": "map",
+              "iconStyle": "rhombus"
+            }
+          ],
+          "_isValid": true,
+          "_index": 2
+        }
+      ],
+      "onFullChanceEdit": [],
+      "onFailEdit": [],
+      "onSuccessEdit": [],
+      "onActionEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "messageTitle": "Grats!",
+          "messageDescription": "",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "energy": 0
+    },
+    "water": {
+      "title": "Water",
+      "duration": "7-11",
+      "onAction": [
+        {
+          "gainMote": [
+            "water",
+            1
+          ]
+        },
+        {
+          "changeMaxEnergy": 0.5
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "water",
+            "delay": "8-12"
+          }
+        }
+      ],
+      "icon": "water",
+      "desc": "",
+      "posX": 100,
+      "posY": 100,
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": [
+            {
+              "value": "water",
+              "title": "Water",
+              "icon": "water",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "earth",
+              "title": "Earth",
+              "icon": "earth-my",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "eventType1",
+              "title": "Shield",
+              "icon": "flame-shield",
+              "iconStyle": "circle"
+            }
+          ],
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "energy": 0,
+      "onFullChanceEdit": []
+    },
+    "air": {
+      "title": "Air",
+      "duration": "5-7",
+      "energy": "5",
+      "posX": "villagePosX",
+      "posY": "villagePosY",
+      "range": 200,
+      "onAction": [
+        {
+          "gainMote": [
+            "air",
+            1
+          ]
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "5-8"
+          }
+        }
+      ],
+      "icon": "air",
+      "desc": "",
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "createMapObj",
+            "title": "Create map item",
+            "icon": "map"
+          },
+          "selectMapObj": {
+            "value": "forest",
+            "title": "Forest",
+            "icon": "painting",
+            "disabled": false
+          },
+          "mapObjLocation": {
+            "value": "event",
+            "title": "This event"
+          },
+          "delayMapObj": "",
+          "_isValid": true,
+          "_index": 1
+        }
+      ]
+    },
+    "life": {
+      "title": "Life",
+      "duration": "10-18",
+      "energy": 0,
+      "onAction": [
+        {
+          "gainMote": [
+            "life",
+            1
+          ]
+        },
+        {
+          "changeEnergy": 4
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "life",
+            "delay": "7-9"
+          }
+        },
+        {
+          "checkCondition": {
+            "requires": "motes.life >= 6",
+            "actions": [
+              {
+                "createMapObj": {
+                  "name": "forest2",
+                  "posX": 680,
+                  "posY": 428
+                }
+              },
+              {
+                "createMessage": {
+                  "type": "free",
+                  "name": "Double forest!"
+                }
+              },
+              {
+                "removeCondition": "life"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "earth": {
+      "title": "Earth",
+      "icon": "earth-my",
+      "duration": "9-11",
+      "onAction": [
+        {
+          "gainMote": [
+            "earth",
+            1
+          ]
+        },
+        {
+          "changeEnergyGainRate": 0.05
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "earth",
+            "delay": "15-25"
+          }
+        }
+      ],
+      "desc": "",
+      "energy": 0,
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": {
+            "value": "inspireFarming",
+            "title": "Inspire farming",
+            "icon": "farm",
+            "iconStyle": "rhombus"
+          },
+          "_isValid": true,
+          "_index": 1
+        },
+        {
+          "selectAction": {
+            "value": "queueEvent",
+            "title": "Queue event",
+            "icon": "queue"
+          },
+          "queueEvent": {
+            "value": "eventType3",
+            "title": "Inspire Discovery",
+            "icon": "map",
+            "iconStyle": "circle"
+          },
+          "delayEvent": "100",
+          "_isValid": true,
+          "_index": 2
+        }
+      ]
+    },
+    "inspireFarming": {
+      "title": "Inspire farming",
+      "icon": "farm",
+      "desc": "The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.",
+      "duration": "20",
+      "chance": 10,
+      "posX": "villagePosX",
+      "posY": "villagePosY",
+      "offsetX": 50,
+      "offsetY": 50,
+      "chanceIncrease": {
+        "air": "8-10",
+        "fire": "5-8"
+      },
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "3-5"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "4-6"
+          }
+        }
+      ],
+      "onFullChance": [
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMapObj": {
+            "name": "farm",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMapObj": {
+            "name": "explode",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMessage": {
+            "type": "primary",
+            "icon": "farm",
+            "name": "Yay! Inspire farming completed!",
+            "descVal": "Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"
+          }
+        },
+        {
+          "gainSkillPoints": 3
+        }
+      ],
+      "onFail": [
+        {
+          "createMessage": {
+            "type": "free",
+            "name": "Inspire Farming Fail :("
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "inspireFarming",
+            "delay": "2-5"
+          }
+        },
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "messageTitle": "mooo",
+          "messageDescription": "The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onSuccessEdit": [
+        {
+          "selectAction": {
+            "value": "createMapObj",
+            "title": "Create map item",
+            "icon": "map"
+          },
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onFullChanceEdit": [
+        {
+          "selectAction": {
+            "value": "queueItem",
+            "title": "Queue item",
+            "icon": "queue"
+          },
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onEndEdit": [
+        {
+          "selectAction": {
+            "value": "queueItem",
+            "title": "Queue item",
+            "icon": "queue"
+          },
+          "_isValid": true,
+          "_index": 1
+        },
+        {
+          "selectAction": {
+            "value": "createMapObj",
+            "title": "Create map item",
+            "icon": "map"
+          },
+          "_isValid": true,
+          "_index": 2
+        }
+      ],
+      "onFailEdit": []
+    },
+    "eventType2": {
+      "title": "Light Aura",
+      "icon": "player",
+      "desc": "",
+      "duration": "20",
+      "posX": 1000,
+      "posY": 699,
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "3-5"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "4-6"
+          }
+        }
+      ],
+      "onFullChance": [
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMapObj": {
+            "name": "farm",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMapObj": {
+            "name": "explode",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMessage": {
+            "type": "primary",
+            "icon": "farm",
+            "name": "Yay! Inspire farming completed!",
+            "descVal": "Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"
+          }
+        },
+        {
+          "gainSkillPoints": 3
+        }
+      ],
+      "onFail": [
+        {
+          "createMessage": {
+            "type": "free",
+            "name": "Inspire Farming Fail :("
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "inspireFarming",
+            "delay": "2-5"
+          }
+        },
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onEndEdit": [
+        {
+          "selectAction": {
+            "value": "playerAttrs",
+            "title": "Player attributes",
+            "icon": "player"
+          },
+          "playerAttrs": {
+            "value": "gainSkillPoints",
+            "title": "Gain skill points"
+          },
+          "playerAttrWhole": "8",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": [
+            {
+              "value": "fire",
+              "title": "Fire",
+              "icon": "fire",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "life",
+              "title": "Life",
+              "icon": "life",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "inspireFarming",
+              "title": "Inspire farming",
+              "icon": "farm",
+              "iconStyle": "rhombus"
+            }
+          ],
+          "_isValid": true,
+          "_index": 2
+        }
+      ],
+      "onFullChanceEdit": [],
+      "chance": 0,
+      "onActionEdit": [
+        {
+          "selectAction": {
+            "value": "boxAttrs",
+            "title": "Custom values",
+            "icon": "box"
+          },
+          "boxName": {
+            "value": "fireNode",
+            "title": "fireNode"
+          },
+          "boxActionType": {
+            "value": "change",
+            "title": "Change by"
+          },
+          "boxValue": "-1.22",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "chanceIncrease": {}
+    },
+    "eventType1": {
+      "title": "Shield",
+      "icon": "flame-shield",
+      "desc": "",
+      "duration": "20",
+      "posX": "villagePosX",
+      "posY": "villagePosY",
+      "offsetX": 50,
+      "offsetY": 50,
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "3-5"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "4-6"
+          }
+        }
+      ],
+      "onFullChance": [
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMapObj": {
+            "name": "farm",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMapObj": {
+            "name": "explode",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMessage": {
+            "type": "primary",
+            "icon": "farm",
+            "name": "Yay! Inspire farming completed!",
+            "descVal": "Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"
+          }
+        },
+        {
+          "gainSkillPoints": 3
+        }
+      ],
+      "onFail": [
+        {
+          "createMessage": {
+            "type": "free",
+            "name": "Inspire Farming Fail :("
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "inspireFarming",
+            "delay": "2-5"
+          }
+        },
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "energy": 0,
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "createMapObj",
+            "title": "Create map item",
+            "icon": "map"
+          },
+          "selectMapObj": {
+            "value": "island",
+            "title": "Island",
+            "icon": "painting",
+            "disabled": false
+          },
+          "mapObjLocation": {
+            "value": "event",
+            "title": "This event"
+          },
+          "delayMapObj": "",
+          "_isValid": true,
+          "_index": 1
+        },
+        {
+          "selectAction": {
+            "value": "playerAttrs",
+            "title": "Player attributes",
+            "icon": "player"
+          },
+          "playerAttrs": {
+            "value": "gainSkillPoints",
+            "title": "Gain skill points"
+          },
+          "playerAttrWhole": "1",
+          "_isValid": true,
+          "_index": 2
+        }
+      ]
+    },
+    "eventType3": {
+      "title": "Inspire Discovery",
+      "icon": "map",
+      "desc": "",
+      "duration": "20",
+      "posX": "villagePosX",
+      "posY": "villagePosY",
+      "offsetX": 50,
+      "offsetY": 50,
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "air",
+            "delay": "3-5"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "1-3"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "4-6"
+          }
+        }
+      ],
+      "onFullChance": [
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMapObj": {
+            "name": "farm",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMapObj": {
+            "name": "explode",
+            "posX": "villagePosX",
+            "posY": "villagePosY"
+          }
+        },
+        {
+          "createMessage": {
+            "type": "primary",
+            "icon": "farm",
+            "name": "Yay! Inspire farming completed!",
+            "descVal": "Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3"
+          }
+        },
+        {
+          "gainSkillPoints": 3
+        }
+      ],
+      "onFail": [
+        {
+          "createMessage": {
+            "type": "free",
+            "name": "Inspire Farming Fail :("
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "inspireFarming",
+            "delay": "2-5"
+          }
+        },
+        {
+          "removeAllEventsByType": [
+            "air",
+            "fire"
+          ]
+        }
+      ],
+      "onSuccessEdit": [
+        {
+          "selectAction": {
+            "value": "createMapObj",
+            "title": "Create map item",
+            "icon": "map"
+          },
+          "selectMapObj": {
+            "value": "explode",
+            "title": "Explode",
+            "icon": "video",
+            "disabled": false
+          },
+          "mapObjLocation": {
+            "value": "village",
+            "title": "Village"
+          },
+          "delayMapObj": "",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "messageTitle": "Grats!",
+          "messageDescription": "",
+          "_isValid": true,
+          "_index": 1
+        },
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": [
+            {
+              "value": "fire",
+              "title": "Fire",
+              "icon": "fire",
+              "iconStyle": "circle"
+            }
+          ],
+          "_isValid": true,
+          "_index": 2
+        }
+      ],
+      "onFullChanceEdit": [],
+      "onFailEdit": [
+        {
+          "selectAction": {
+            "value": "queueEvent",
+            "title": "Queue event",
+            "icon": "queue"
+          },
+          "queueEvent": {
+            "value": "eventType4",
+            "title": "Wild growth",
+            "icon": "nature",
+            "iconStyle": "rhombus"
+          },
+          "delayEvent": "12-15",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onEndEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "messageTitle": "You Failed miserably!",
+          "messageDescription": "",
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "chance": 0,
+      "chanceIncrease": {
+        "fire": "8",
+        "air": "23-33"
+      }
+    },
+    "eventType4": {
+      "title": "Wild growth",
+      "duration": "15-20",
+      "onAction": [
+        {
+          "gainMote": [
+            "fire",
+            1
+          ]
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "fire",
+            "delay": "3-6"
+          }
+        }
+      ],
+      "icon": "nature",
+      "desc": "Nature is growing in unprecedented speed. ",
+      "onStartEdit": [
+        {
+          "selectAction": {
+            "value": "removeEvents",
+            "title": "Remove events",
+            "icon": "remove"
+          },
+          "removeEvents": [
+            {
+              "value": "fire",
+              "title": "Fire",
+              "icon": "fire",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "eventType4",
+              "title": "Wild growth",
+              "icon": "nature",
+              "iconStyle": "rhombus"
+            },
+            {
+              "value": "air",
+              "title": "Air",
+              "icon": "air",
+              "iconStyle": "circle"
+            },
+            {
+              "value": "life",
+              "title": "Life",
+              "icon": "life",
+              "iconStyle": "circle"
+            }
+          ],
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "onEndEdit": [],
+      "onFullChanceEdit": [],
+      "chance": 0,
+      "onSuccessEdit": [
+        {
+          "selectAction": {
+            "value": "createMessage",
+            "title": "Create message",
+            "icon": "message"
+          },
+          "_isValid": true,
+          "_index": 1
+        }
+      ],
+      "chanceIncrease": {
+        "earth": "8",
+        "water": "7"
+      }
+    }
+  }
+}

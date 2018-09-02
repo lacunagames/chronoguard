@@ -24,6 +24,10 @@ const validationRules = {
 		return !!field.matchingOption;
 	},
 
+	number: field => {
+		return !field.value || !isNaN(+field.value);
+	},
+
 	wholeNumber: field => {
 		return !field.value || field.value % 1 === 0;
 	},
@@ -43,10 +47,17 @@ const validationRules = {
 	range: field => {
 		const val = (field.value + '').replace(/ /g, '');
 		const [s0, s1, ...restSplit] = val.split('-');
-		const invalidRange = isNaN(+s0) || +s0 <= 0 || isNaN(+s1) || +s0 > +s1 || +s0 % 1 > 0 || +s1 % 1 > 0;
+		const invalidRange = isNaN(+s0) || +s0 < 0 || isNaN(+s1) || +s0 > +s1 || +s0 % 1 > 0 || +s1 % 1 > 0;
 
-		return !val || !isNaN(+val) && +val > 0 && +val % 1 === 0 || restSplit.length === 0 && s0.length && !invalidRange;
-	}
+		return !val || !isNaN(+val) && +val >= 0 && +val % 1 === 0 || restSplit.length === 0 && s0.length && !invalidRange;
+	},
+
+	rangeMin: (field, rule) => {
+		const val = (field.value + '').replace(/ /g, '');
+		const [s0] = val.split('-');
+
+		return !val || +s0 >= rule.value;
+	},
 };
 
 const defaultErrorTexts = {
@@ -54,8 +65,10 @@ const defaultErrorTexts = {
 	minLength: `This field has to be at least {value} characters long`,
 	maxLength: `This field can't be more than {value} characters long`,
 	matchOption: `Please enter a matching value`,
+	number: `Please enter a number, for example 3.23`,
 	wholeNumber: `Please enter a whole number, for example 3`,
 	range: `Please enter a positive whole number or range, for example: 4 or 3-12`,
+	rangeMin: `This field value has to be at least {value}`,
 	unique: `Please enter a unique value`,
 	min: `This field value has to be at least {value}`,
 	max: `This field value can't be larger than {value}`,

@@ -8,7 +8,7 @@ const events = {
 		posY: 'villagePosY',
 		range: 200,
 		onAction: [
-			{gainMote: ['fire', 1]},
+			{changeBoxAttr: ['fireNode', 1]},
 		],
 		onEnd: [
 			{queueItem: {type: 'createEvent', value: 'fire', delay: '3-6'}},
@@ -19,7 +19,7 @@ const events = {
 		duration: '7-11',
 		energy: 7,
 		onAction: [
-			{gainMote: ['water', 1]},
+			{changeBoxAttr: ['waterNode', 1]},
 			{changeMaxEnergy: 0.5},
 		],
 		onEnd: [
@@ -34,7 +34,7 @@ const events = {
 		posY: 'villagePosY',
 		range: 200,
 		onAction: [
-			{gainMote: ['air', 1]},
+			{changeBoxAttr: ['airNode', 1]},
 		],
 		onEnd: [
 			{queueItem: {type: 'createEvent', value: 'air', delay: '5-8'}},
@@ -45,19 +45,11 @@ const events = {
 		duration: '10-18',
 		energy: 0,
 		onAction: [
-			{gainMote: ['life', 1]},
+			{changeBoxAttr: ['lifeNode', 1]},
 			{changeEnergy: 4},
 		],
 		onEnd: [
 			{queueItem: {type: 'createEvent', value: 'life', delay: '7-9'}},
-			{checkCondition: {
-				requires: 'motes.life >= 6',
-				actions: [
-					{createMapObj: {name: 'forest2', posX: 680, posY: 428,}},
-					{createMessage: {type: 'free', name: 'Double forest!'}},
-					{removeCondition: 'life'},
-				],
-			}},
 		]
 	},
 	earth: {
@@ -66,7 +58,7 @@ const events = {
 		duration: '9-11',
 		energy: 10,
 		onAction: [
-			{gainMote: ['earth', 1]},
+			{changeBoxAttr: ['earthNode', 1]},
 			{changeEnergyGainRate: 0.05},
 		],
 		onNoAction: [
@@ -80,7 +72,7 @@ const events = {
 		title: 'Inspire farming',
 		icon: 'farm',
 		desc: `The village spends most of its time gathering berries and hunting nearby animals.
-			Learning to grow and harvest plants would greatly increase productivity.`,
+			Learning to grow and harvest plants would greatly increase productivity.\nWhat?`,
 		duration: 20,
 		chance: 75,
 		posX: 'villagePosX',
@@ -100,7 +92,7 @@ const events = {
 		onSuccess: [
 			{createMapObj: {name: 'farm', posX: 'villagePosX', posY: 'villagePosY',}},
 			{createMapObj:	{name: 'explode', posX: 'villagePosX', posY: 'villagePosY',}},
-			{createMessage: {type: 'primary', icon: 'farm', name: 'Yay! Inspire farming completed!', descVal: 'Bla bla bla...Bla bla bla...Bla.. {icon-skill-points} +3'}},
+			{createMessage: {type: 'primary', icon: 'farm', name: 'Yay! Inspire farming completed!', descVal: 'Bla bla bla...\nBla bla bla...Bla..moo\n{icon-skill-points} +3'}},
 			{gainSkillPoints: 3},
 		],
 		onFail: [

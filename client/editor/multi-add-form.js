@@ -18,14 +18,14 @@ const multiAddForm = (renderForm) => {
 			const {optionsData, formMethods, openIndex, fields} = this.props;
 			const updateValues = () => {
 				const valObj = this.props.values.find(valObj => valObj._index === openIndex);
-				const fieldValues = valObj && Object.keys(valObj).filter(fieldName => fieldName[0] !== '_').reduce((obj, fieldName) => {
+				const fieldValues = valObj && Object.keys(valObj).filter(name => name[0] !== '_').reduce((obj, fieldName) => {
 					const isAutoComplete = fields[fieldName].type === 'autocomplete';
 
 					return obj = {
 						...obj,
-						[fieldName]: typeof valObj[fieldName] === 'object' 	? isAutoComplete 	? valObj[fieldName].title
-																																									: valObj[fieldName].value
-																																: valObj[fieldName],
+						[fieldName]:  utils.isObj(valObj[fieldName]) 	? isAutoComplete 	? valObj[fieldName].title
+																																						: valObj[fieldName].value
+																													: valObj[fieldName],
 					};
 				}, {});
 
@@ -57,7 +57,9 @@ const multiAddForm = (renderForm) => {
 
 			const newValue = Object.keys(fields).reduce((obj, fieldName) => obj = formMethods.isHiddenField(fields[fieldName]) ? obj : {
 				...obj,
-				[fieldName]: fields[fieldName].matchingOption || fields[fieldName].value,
+				[fieldName]: fields[fieldName].matchingOption ||
+											fields[fieldName].options && fields[fieldName].options.find(option => option.value === fields[fieldName].value) ||
+											fields[fieldName].value,
 			}, {});
 
 			newValue._isValid = formMethods.isValidAll(fields);

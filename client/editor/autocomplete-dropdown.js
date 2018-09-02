@@ -36,8 +36,10 @@ class AutocompleteDropdown extends React.Component {
 
 	setFocus(index) {
 		index = Math.max(0, index);
-		this.optionsRef[index].focus();
-		this.refs.menu.scrollTop = this.optionsRef[index].offsetTop;
+		if (this.optionsRef[index]) {
+			this.optionsRef[index].focus();
+			this.refs.menu.scrollTop = this.optionsRef[index].offsetTop;
+		}
 	}
 
 	focusout(e) {

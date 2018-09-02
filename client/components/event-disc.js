@@ -104,7 +104,7 @@ class EventDisc extends React.Component {
 								<span className="ends-in small"> (Ends {endsIn})</span>
 							</h2>
 							{event.desc &&
-								<p>{event.desc}</p>
+								<p className="desc">{event.desc}</p>
 							}
 							{rewards &&
 								<p>Rewards: {rewards}</p>

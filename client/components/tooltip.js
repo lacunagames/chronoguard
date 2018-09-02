@@ -28,6 +28,7 @@ class Tooltip extends React.Component {
 		const isEnter = e.type === 'mouseenter' || e.type === 'focus';
 		const delay = isEnter ? 500 : 250;
 
+		// Don't toggle when focused by JS triggered event (eg. modal close)
 		if (!e.relatedTarget) {
 			return;
 		}

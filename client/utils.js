@@ -56,6 +56,8 @@ const utils = {
 
 	pickWildIndex: (array, prop, value) => (array || []).indexOf(utils.pickWild(array, prop, value)),
 
+	isObj: obj => typeof obj === 'object' && !(obj instanceof Array),
+
 	// Return random integer between min max values, eg. 12-14'
 	getRandom(number, multiplier) {
 		const splitNumber = (number + '').replace(/\s/g, '').split('-');

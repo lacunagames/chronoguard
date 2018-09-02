@@ -10,6 +10,7 @@ import {formWithValidation, Field} from './form';
 import Tooltip from '../components/tooltip';
 import Modal from '../components/modal';
 import config from '../config';
+import allAssets from '../game/data/assets';
 
 const actionFieldConfig = {
 	fields: {
@@ -21,15 +22,18 @@ const actionFieldConfig = {
 			options: [
 				{value: '', title: 'Select action', icon: 'default', disabled: true},
 				{value: 'queueEvent', title: 'Queue event', icon: 'queue'},
+				{value: 'removeEvents', title: 'Remove events', icon: 'remove'},
 				{value: 'createMapObj', title: 'Create map item', icon: 'map'},
 				{value: 'createMessage', title: 'Create message', icon: 'message'},
+				{value: 'playerAttrs', title: 'Player attributes', icon: 'player'},
+				{value: 'boxAttrs', title: 'Custom values', icon: 'box'},
 			],
 			rules: [
 				{type: 'required'},
 			],
 		},
 		queueEvent: {
-			id: 'chance-event',
+			id: 'queue-event',
 			type: 'autocomplete',
 			value: '',
 			label: 'Select event',
@@ -40,8 +44,19 @@ const actionFieldConfig = {
 				{type: 'matchOption'},
 			],
 		},
-		delay: {
-			id: 'delay',
+		removeEvents: {
+			id: 'remove-events',
+			type: 'multicomplete',
+			value: [],
+			label: 'Select events',
+			options: [],
+			hidden: {field: 'selectAction', fieldValueNot: 'removeEvents'},
+			rules: [
+				{type: 'required'},
+			],
+		},
+		delayEvent: {
+			id: 'delayEvent',
 			type: 'text',
 			value: '',
 			label: 'Delay',
@@ -49,12 +64,166 @@ const actionFieldConfig = {
 			rules: [
 				{type: 'required'},
 				{type: 'range'},
+				{type: 'rangeMin', value: 1},
+			],
+		},
+		selectMapObj: {
+			id: 'select-mapobj',
+			type: 'select',
+			value: '',
+			label: 'Map item',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			options: ['', ...Object.keys(allAssets.images), ...Object.keys(allAssets.videos)].map((name, index) => {
+				const isVideo = index > Object.keys(allAssets.images).length;
+
+				return {
+					value: name,
+					title: name ? name[0].toUpperCase() + name.slice(1) : 'Select map item',
+					icon: isVideo ? 'video' : 'painting',
+					disabled: !name,
+				};
+			}),
+			rules: [
+				{type: 'required'},
+			],
+		},
+		mapObjLocation: {
+			id: 'location-mapobj',
+			type: 'select',
+			label: 'Location',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			options: [
+				{value: 'event', title: 'This event'},
+				{value: 'village', title: 'Village'},
+			],
+			value: 'event',
+			rules: [{type: 'required'}],
+		},
+		delayMapObj: {
+			id: 'delayMapObj',
+			type: 'text',
+			value: '',
+			label: 'Delay',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			rules: [
+				{type: 'range'},
+			],
+		},
+		messageTitle: {
+			id: 'message-title',
+			type: 'text',
+			value: '',
+			label: 'Title',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMessage'},
+			rules: [
+				{type: 'required'},
+				{type: 'minLength', value: 3},
+			],
+		},
+		messageDescription: {
+			id: 'message-desc',
+			type: 'textarea',
+			value: '',
+			label: 'Description',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMessage'},
+			rules: [
+				{type: 'minLength', value: 3},
+			],
+		},
+		playerAttrs: {
+			id: 'player-attrs',
+			type: 'select',
+			value: '',
+			label: 'Player attributes',
+			hidden: {field: 'selectAction', fieldValueNot: 'playerAttrs'},
+			options: [
+				{value: '', title: 'Select attribute action', disabled: true},
+				{value: 'gainSkillPoints', title: 'Gain skill points'},
+				{value: 'changeEnergy', title: 'Change energy by'},
+				{value: 'changeMaxEnergy', title: 'Change maximum energy by'},
+				{value: 'changeEnergyGainRate', title: 'Change energy gain rate by'},
+			],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		playerAttrValue: {
+			id: 'player-attr-val',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: [
+				{field: 'selectAction', fieldValueNot: 'playerAttrs'},
+				{field: 'playerAttrs', fieldValue: 'gainSkillPoints'},
+			],
+			rules: [
+				{type: 'required'},
+				{type: 'number'},
+			],
+		},
+		playerAttrWhole: {
+			id: 'player-attr-whole',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: [
+				{field: 'selectAction', fieldValueNot: 'playerAttrs'},
+				{field: 'playerAttrs', fieldValueNot: 'gainSkillPoints'},
+			],
+			rules: [
+				{type: 'required'},
+				{type: 'wholeNumber'},
+				{type: 'min', value: 1},
+			],
+		},
+		boxName: {
+			id: 'box-name',
+			type: 'autocomplete',
+			value: '',
+			label: 'Name',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			options: [
+				{value: 'fireNode', title: 'fireNode'},
+				{value: 'waterNode', title: 'waterNode'},
+			],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		boxActionType: {
+			id: 'box-action-type',
+			type: 'toggle',
+			label: 'Type',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			options: [
+				{value: 'change', title: 'Change by'},
+				{value: 'set', title: 'Set to'},
+			],
+			value: 'change',
+			rules: [],
+		},
+		boxValue: {
+			id: 'box-value',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			rules: [
+				{type: 'required'},
+				{type: 'number'},
 			],
 		},
 	},
 	data: {},
 	getOptionsData: {
-		queueEvent: (data) => Object.keys(data.events || {})
+		queueEvent: data => Object.keys(data.events || {})
+														.map(eventName => ({
+															value: eventName,
+															title: data.events[eventName].title,
+															icon: data.events[eventName].icon,
+															iconStyle: data.events[eventName].behaviour === 'chance' ? 'rhombus' : 'circle',
+														})),
+		removeEvents: data => Object.keys(data.events || {})
 														.map(eventName => ({
 															value: eventName,
 															title: data.events[eventName].title,
@@ -64,7 +233,9 @@ const actionFieldConfig = {
 	},
 	display: {
 		selectAction: {type: 'icon'},
-		delay: {pre: 'Delay: '}
+		delayEvent: {pre: 'Delay: '},
+		delayMapObj: {pre: 'Delay: '},
+		mapObjLocation: {pre: 'Location: '},
 	},
 	renderForm: fields => (
 		<React.Fragment>
@@ -74,14 +245,27 @@ const actionFieldConfig = {
 				</div>
 				<div className="col-100">
 					<Field config={fields.queueEvent} />
+					<Field config={fields.removeEvents} />
+					<Field config={fields.selectMapObj} />
+					<Field config={fields.messageTitle} />
+					<Field config={fields.playerAttrs} />
+					<Field config={fields.boxName} />
 				</div>
 				<div className="col-100">
-					<Field config={fields.delay} />
+					<Field config={fields.delayEvent} />
+					<Field config={fields.mapObjLocation} />
+					<Field config={fields.messageDescription} />
+					<Field config={fields.playerAttrValue} />
+					<Field config={fields.playerAttrWhole} />
+					<Field config={fields.boxActionType} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.delayMapObj} />
+					<Field config={fields.boxValue} />
 				</div>
 			</div>
 		</React.Fragment>
 	),
-
 };
 
 const fields = {
@@ -505,6 +689,9 @@ class EditorScreen extends React.Component {
 					this.props.formMethods.updateOptions('selectEvent', selectOptions, () => {
 						this.loadCallbacks.forEach(fn => fn());
 						this.loadCallbacks = [];
+						if (!this.props.fields.selectEvent.value) {
+							this.props.formMethods.updateFields({selectEvent: selectOptions[selectOptions.length -1].title}, null, true);
+						}
 					});
 				} else {
 					this.loadCallbacks.forEach(fn => fn());
@@ -732,10 +919,10 @@ class EditorScreen extends React.Component {
 										<input type="radio"
 											value={iconName}
 											name="icon-radios"
-											id={iconName}
+											id={`icon-input-${iconName}`}
 											checked={fields.eventIcon.value === iconName}
 											onChange={() => this.iconSelect(iconName)} />
-										<label htmlFor={iconName} className={fields.behaviour.value === 'chance' ? 'rhombus' : ''}>
+										<label htmlFor={`icon-input-${iconName}`} className={fields.behaviour.value === 'chance' ? 'rhombus' : ''}>
 											<span style={utils.getIconStyle(iconName)}>{iconName}</span>
 										</label>
 									</div>

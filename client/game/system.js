@@ -93,7 +93,11 @@ class System extends Agent {
 		agent.setState({[attribute]: newValue});
 	}
 
-	massDispatch(actionArr) {
+	massDispatch(actionArr, actionType) {
+		if (actionType) {
+			this.world.state.conditions.forEach(condition => this.world.checkCondition(condition, actionArr, actionType));
+			actionArr = actionArr[actionType];
+		}
 		actionArr && actionArr.forEach(action => {
 			const actionName = Object.keys(action)[0];
 			const args = action[actionName] instanceof Array ? action[actionName] : [action[actionName]];

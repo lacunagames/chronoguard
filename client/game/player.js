@@ -7,15 +7,7 @@ const defaultState = {
 	energy: 10,
 	maxEnergy: 15,
 	energyGainRate: 1,
-	motes: {
-		fire: 0,
-		earth: 0,
-		air: 0,
-		water: 0,
-		life: 0,
-		shadow: 0,
-		light: 0,
-	},
+	box: {},
 	skills,
 	learntSkills: [],
 };
@@ -29,8 +21,14 @@ class Player extends Agent {
 		this.setState(defaultState);
 	}
 
-	gainMote(type, amount) {
-		this.setState({motes: {...this.state.motes, [type]: this.state.motes[type] + amount}});
+	setBoxAttr(type, value) {
+		this.setState({box: {...this.state.box, [type]: value}});
+	}
+
+	changeBoxAttr(type, amount) {
+		const value = (this.state.box[type] || 0) + amount;
+
+		this.setState({box: {...this.state.box, [type]: value}});
 	}
 
 	gainSkillPoints(amount) {

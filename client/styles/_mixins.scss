@@ -12,7 +12,7 @@ $mediaSizes: (
 }
 
 @mixin clearfix {
-	&:after {
+	&:after, &:before {
 		content: '';
 		display: table;
 		clear: both;

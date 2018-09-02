@@ -21,6 +21,7 @@ class Modal extends React.Component {
 			leftPos: undefined,
 			topPos: undefined,
 		};
+		this.modalRef = React.createRef();
 	}
 
 	componentDidMount() {
@@ -55,7 +56,8 @@ class Modal extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if (this.refs.modal && (!this.props.pos ? this.oldModalHeight !== this.refs.modal.clientHeight : this.props.pos !== this.oldPos)) {
+		if (this.modalRef.current && (!this.props.pos ? this.oldModalHeight !== this.modalRef.current.clientHeight
+																									: this.props.pos !== this.oldPos)) {
 			this.checkLongModal(true);
 		}
 	}
@@ -68,8 +70,8 @@ class Modal extends React.Component {
 
 	checkLongModal(instant) {
 		const setLong = () => {
-			if (this.refs.modal) {
-				const {clientHeight, clientWidth} = this.refs.modal;
+			if (this.modalRef.current) {
+				const {clientHeight, clientWidth} = this.modalRef.current;
 
 				if (!this.props.pos) {
 					this.setState({longModal: clientHeight > window.innerHeight - 50});
@@ -93,10 +95,10 @@ class Modal extends React.Component {
 		const focusableQuery = `
 				button:not(:disabled), [href]:not(:disabled),
 				input:not(:disabled), select:not(:disabled),
-				textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not([data-old-tab-index])
+				textarea:not(:disabled), [tabindex]
 			`;
 		const allFocusables = Array.from(document.body.querySelectorAll(focusableQuery));
-		const modalFocusables = Array.from(this.refs.modal.querySelectorAll(focusableQuery));
+		const modalFocusables = Array.from(this.modalRef.current.querySelectorAll(focusableQuery));
 		const focusElem = isDisable ? modalFocusables[0] : this.lastActiveElem;
 
 		allFocusables.forEach(elem => {
@@ -155,7 +157,7 @@ class Modal extends React.Component {
 					[this.props.size]: this.props.size,
 					[this.props.className]: this.props.className,
 				})}>
-					<div className="modal-box" ref="modal"
+					<div className="modal-box" ref={this.modalRef}
 						onClick={e => e.stopPropagation()}
 						style={{left: this.state.leftPos, top: this.state.topPos}}>
 						<div className="inner">

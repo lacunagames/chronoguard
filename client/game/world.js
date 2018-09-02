@@ -26,13 +26,23 @@ const defaultState = {
 	conditions: [
 		{
 			id: 0,
-			requires: 'motes.life >= 3',
+			requires: 'box.lifeNode >= 3',
 			actions: [
 				{createMapObj: {name: 'forest', posX: 685, posY: 440,}},
 				{createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'}},
 				{removeCondition: 0},
 			],
 		},
+		{
+			id: 1,
+			requires: 'box.lifeNode >= 6',
+			requiredEvent: {type: 'life', action: 'onEnd'},
+			actions: [
+				{createMapObj: {name: 'forest2', posX: 680, posY: 428,}},
+				{createMessage: {type: 'free', name: 'Double forest!'}},
+				{removeCondition: 1},
+			],
+		}
 	],
 };
 
@@ -83,14 +93,14 @@ class World extends Agent {
 			const event = this.state.events[i];
 
 			if (event.starts === hour) {
-				this.system.massDispatch(event.onStart);
+				this.system.massDispatch(event, 'onStart');
 			}
 			if (event.ends === hour && !event.ended) {
 				this._updateStateObj('events', event.id, {ended: true});
-				this.system.massDispatch(event.onNoAction);
-				this.system.massDispatch(event.onEnd);
+				this.system.massDispatch(event, 'onNoAction');
+				this.system.massDispatch(event, 'onEnd');
 				if (event.hasOwnProperty('chance')) {
-					this.system.massDispatch(event.chance >= 100 ? event.onSuccess : event.onFail);
+					this.system.massDispatch(event, event.chance >= 100 ? 'onSuccess' : 'onFail');
 				}
 			}
 			if (event.removed || event.ends < hour) {
@@ -118,7 +128,7 @@ class World extends Agent {
 	}
 
 	queueItem({type, value, delay}) {
-		const newItem = {type, value, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1,};
+		const newItem = {type, value, activates: Math.floor(this.state.hour) + utils.getRandom(delay) + 1};
 		this.setState({queue: [...this.state.queue, newItem]});
 	}
 
@@ -235,8 +245,8 @@ class World extends Agent {
 		this.player.changeEnergy(-event.energy);
 		this._updateStateObj('events', event.id, {ended: true});
 		setTimeout(() => this._updateStateObj('events', event.id, {removed: true}), 1000);
-		this.system.massDispatch(event.onAction);
-		this.system.massDispatch(event.onEnd);
+		this.system.massDispatch(event, 'onAction');
+		this.system.massDispatch(event, 'onEnd');
 		this.increaseChance(event.type);
 	}
 
@@ -270,7 +280,12 @@ class World extends Agent {
 		}
 	}
 
-	checkCondition(condition) {
+	checkCondition(condition, event, action) {
+		if (condition.requiredEvent && !event || condition.requiredEvent && event &&
+			(condition.requiredEvent.type !== event.type || condition.requiredEvent.action !== action)) {
+			return;
+		}
+
 		const parts = condition.requires.replace(/(\[\')/g, '').replace(/(\'\])/g, '.').split(/(\s|>=|==|===|<=|<|>|\.)/g);
 		const compare = {sides: [], operator: ''};
 		const agents = [this, this.player, this.system];
@@ -287,7 +302,7 @@ class World extends Agent {
 		let stateProp;
 
 		parts.forEach((part, i) => {
-			if (['', ' ', '.'].indexOf(part) > -1) {
+			if (['', ' ', '.'].includes(part)) {
 				return;
 			}
 			if (typeof +part === 'number' && !isNaN(+part)) {
@@ -332,7 +347,7 @@ class World extends Agent {
 		});
 
 		this.setState({events});
-		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id).onFullChance));
+		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id), 'onFullChance'));
 	}
 };
 

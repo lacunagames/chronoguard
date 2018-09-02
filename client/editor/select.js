@@ -27,8 +27,19 @@ class Select extends React.Component {
 	keydown(e) {
 		// Space, Up and Down
 		if (e.keyCode === 32 || e.keyCode === 38 || e.keyCode === 40) {
+
 			e.preventDefault();
-			this.clickSelect();
+			if (this.state.isOpen || e.keyCode === 32) {
+				this.clickSelect();
+			} else {
+				const {options} = this.props;
+				const index = options.findIndex(option => option.value === this.state.selected.value);
+				let newIndex = index;
+				do {
+					newIndex += e.keyCode === 38 ? -1 : 1;
+				} while (options[newIndex] && options[newIndex].disabled);
+				options[newIndex] && this.clickOption(options[newIndex]);
+			}
 		}
 	}
 
@@ -45,7 +56,7 @@ class Select extends React.Component {
 			});
 			this.refs.select.focus();
 		}
-		this.clickSelect();
+		this.state.isOpen && this.clickSelect();
 	}
 
 	render() {

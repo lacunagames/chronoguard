@@ -4,13 +4,19 @@
 
 .multi-add {
 	margin: -1px 0 5px;
-	padding-right: 40px;
+	padding-right: 45px;
+	overflow: hidden;
+	// @include clearfix;
 
 	.multi-button {
-		padding: 0;
+		position: relative;
+		padding: 0 27px 0 0;
 		font-size: 16px;
 		overflow: hidden;
 		white-space: nowrap;
+		text-overflow: ellipsis;
+		max-width: 100%;
+		float: left;
 
 		.tab-active &:focus > span {
 			background: lighten($cSecondary, 10%);
@@ -27,8 +33,8 @@
 				background: lighten($cSecondary, 10%);
 			}
 
-			&:not(:last-child) {
-				border-right: 1px solid darken($cSecondary, 10%);
+			&:not(:first-child) {
+				border-left: 1px solid darken($cSecondary, 10%);
 			}
 		}
 
@@ -41,40 +47,69 @@
 					background: #ffc9c9;
 				}
 
-				&:not(:last-child) {
-					border-right-color: #f0bfbf;
+				&:not(:first-child) {
+					border-left-color: #f0bfbf;
 				}
 			}
 
-			.tab-active &:hover > span {
+			.tab-active &:focus > span {
 				background: #eaa0a0;
 			}
 		}
 
 		& > span.remove {
-			padding: 10px 2px 10px 4px;
+			position: absolute;
+			right: -1px;
+			top: -1px;
+			bottom: -1px;
+			padding: 12px 2px 10px 4px;
 
 			&:hover {
 				background: lighten($cError, 10%);
 				color: #fff;
 			}
 
+
 			i {
 				font-size: 18px;
 			}
 		}
 
+		.tab-active &:focus > span.remove {
+			right: -2px;
+			top: -2px;
+			bottom: -2px;
+			padding: 13px 3px 11px 4px;
+		}
+
 		.auto-icon {
 			margin: -5px 4px -9px 0;
+		}
 
-			&.no-text {
-				margin: -14px -10px -14px;
-				padding: 10px 7px;
+		.no-text {
+			padding: 0;
+			vertical-align: bottom;
+
+			.auto-icon {
+				margin: 0;
+				padding: 5px;
+				width: 38px;
+				height: 38px;
 				pointer-events: auto;
-				width: 48px;
-				height: 42px;
+				overflow: hidden;
+				vertical-align: bottom;
 			}
 		}
+
+		.multi-val:not(:last-child) {
+			padding-right: 6px;
+			margin-right: 6px;
+			border-right: 1px solid darken($cSecondary, 10%);
+		}
+	}
+
+	.add-new {
+		float: left;
 	}
 }
 

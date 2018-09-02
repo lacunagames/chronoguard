@@ -142,7 +142,9 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				}
 				const fieldsToUpdate = Object.keys(this.state).filter(matchName => {
 					const hidden = this.state[matchName].hidden;
-					return hidden && hidden.field === fieldName;
+					const hiddenMatch = hidden instanceof Array && hidden.find(item => item.field === fieldName);
+
+					return hidden && (hidden.field === fieldName || hiddenMatch);
 				}).reduce((obj, name) => obj = {...obj, [name]: this.state[name].value}, {});
 				const hasFieldsToUpdate = Object.keys(fieldsToUpdate).length > 0;
 
@@ -168,15 +170,20 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			}
 
 			let isHidden = false;
-			const matchValue = this.state[field.hidden.field].value;
-			const {fieldValue, fieldValueNot} = field.hidden;
+			const items = field.hidden instanceof Array ? field.hidden : [field.hidden];
 
-			if (fieldValue !== undefined) {
-				isHidden = typeof fieldValue === 'object' ? fieldValue.indexOf(matchValue) > -1 : fieldValue === matchValue;
-			}
-			if (fieldValueNot !== undefined && !isHidden) {
-				isHidden = typeof fieldValueNot === 'object' ? fieldValueNot.indexOf(matchValue) === -1 : fieldValueNot !== matchValue;
-			}
+			items.some(item => {
+				const matchValue = this.state[item.field].value;
+				const {fieldValue, fieldValueNot} = item;
+
+				if (fieldValue !== undefined) {
+					isHidden = typeof fieldValue === 'object' ? fieldValue.indexOf(matchValue) > -1 : fieldValue === matchValue;
+				}
+				if (fieldValueNot !== undefined && !isHidden) {
+					isHidden = typeof fieldValueNot === 'object' ? fieldValueNot.indexOf(matchValue) === -1 : fieldValueNot !== matchValue;
+				}
+				return isHidden;
+			});
 			return isHidden;
 		}
 
@@ -265,9 +272,6 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					const updatedField = {...this.state[fieldName], [type]: value};
 
 					if (type === 'value' && ['autocomplete', 'select'].includes(updatedField.type)) {
-						if (updatedField.asyncOptions) {
-							updatedField.options = fields[`$${fieldName}Options`] || [];
-						}
 						updatedField.matchingOption = utils.pickWild(updatedField.options, updatedField.type === 'autocomplete' ? 'title' : 'value', updatedField.value);
 						if (updatedField.dynamicHelpText) {
 							updatedField.helpText = updatedField.matchingOption ? updatedField.dynamicHelpText(updatedField) : '';
@@ -291,12 +295,15 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 
 		updateOptions(fieldName, newOptions, callback) {
 			const field = {...this.state[fieldName]};
-			const matchingOption = utils.pickWild(newOptions, 'value', field.matchingOption ? field.matchingOption.value : field.value);
+			const isMulticomplete = field.type === 'multicomplete';
+			const matchingOption = !isMulticomplete &&
+							utils.pickWild(newOptions, 'value', field.matchingOption ? field.matchingOption.value : field.value);
+			const value = isMulticomplete ? field.value : matchingOption && matchingOption.title || '';
 
 			this.setState({[fieldName]: {
 				...field,
 				options: newOptions,
-				value: matchingOption ? matchingOption.title : '',
+				value,
 				matchingOption,
 			}}, callback);
 		}

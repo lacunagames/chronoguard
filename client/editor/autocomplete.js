@@ -26,7 +26,7 @@ class Autocomplete extends React.Component {
 		this.state = {
 			isOpen: false,
 			selected: this.props.options.find(option => option.title === this.props.value),
-			placeholder: this.props.placeholder || this.props.options.find(option => option.value === '').title,
+			placeholder: this.props.placeholder || (this.props.options.find(option => option.value === '') || {}).title || '',
 			options: this.props.options,
 			focusDropdown: false,
 		};
@@ -55,7 +55,6 @@ class Autocomplete extends React.Component {
 
 		if (matchingOption) {
 			return this.setState({
-				selected: {...matchingOption},
 				options: this.props.options,
 				isOpen: true,
 			}, () => {
@@ -73,14 +72,12 @@ class Autocomplete extends React.Component {
 
 			if (value.length < this.props.asyncMinLength) {
 				return this.setState({
-					selected: undefined,
 					options: [specialOptions.tooShort],
 				}, () => {
 					this.props.onChange({target: {value}, type: 'change'});
 				});
 			}
 			this.setState({
-				selected: undefined,
 				options: [specialOptions.loading],
 				isOpen: true,
 			}, () => {
@@ -94,7 +91,6 @@ class Autocomplete extends React.Component {
 
 						this.setState({
 							options: options.length > 0 ? options : [specialOptions.noMatch],
-							selected: matched ? {...matched} : undefined,
 						}, () => {
 							this.props.onChange({target: {value}, type: 'change', options})
 						});
@@ -111,7 +107,6 @@ class Autocomplete extends React.Component {
 				filteredOptions.push(specialOptions.noMatch);
 			}
 			this.setState({
-				selected: undefined,
 				options: filteredOptions,
 				isOpen: true,
 			}, () => {
@@ -137,6 +132,7 @@ class Autocomplete extends React.Component {
 	}
 
 	onInputKeyDown(e) {
+		// Up, Down to select neighbour items when dropdown closed
 		if ((e.keyCode === 38 || e.keyCode === 40) && this.state.selected && !this.state.isOpen) {
 			e.preventDefault();
 			const newIndex = Math.min(this.state.options.length - 1,
@@ -158,11 +154,9 @@ class Autocomplete extends React.Component {
 	clickOption(selected) {
 		if (typeof selected === 'object') {
 			selected = {...selected};
-			this.setState({selected}, () => {
-				this.props.onChange({
-					target: {value: selected.value ? selected.title || selected.value : '',},
-					matchingOption: selected,
-				});
+			this.props.onChange({
+				target: {value: selected.value ? selected.title || selected.value : '',},
+				matchingOption: selected,
 			});
 			this.refs.input.value = selected && selected.value ? selected.title || selected.value : '';
 			this.refs.input.focus();
@@ -173,7 +167,6 @@ class Autocomplete extends React.Component {
 	clearValue(e) {
 		e.preventDefault();
 		this.props.onChange({target: {value: ''}, type: 'change', matchingOption: undefined});
-		this.setState({selected: undefined});
 		this.inputFocused = true;
 		this.refs.input.focus();
 	}
