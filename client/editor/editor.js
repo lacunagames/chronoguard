@@ -1,6 +1,10 @@
 
 import Agent from '../game/agent';
+import {actionTypes} from '../game/world';
+import {actionFieldConfig} from './editor-screen-fields';
+
 import utils from 'utils';
+
 
 class Editor extends Agent {
 
@@ -42,11 +46,162 @@ class Editor extends Agent {
 		});
 	}
 
+	_actionToEditor(event, data) {
+		const returnObj = {};
+		const getOptionVal = (fieldName, value, data) => {
+			const options = data && actionFieldConfig.getOptionsData[fieldName](data) || actionFieldConfig.fields[fieldName].options;
+			const option = options.find(option => option.value === value);
+			return {[fieldName]: option};
+		}
+
+		actionTypes.forEach(actionType => {
+			const arr = returnObj[`${actionType}Editor`] = [];
+
+			event[actionType] && event[actionType].forEach((action, index) => {
+				const actionName = Object.keys(action)[0];
+				const actionValue = action[actionName];
+				let obj;
+
+				switch (actionName) {
+					case 'changeBoxAttr':
+					case 'setBoxAttr':
+						obj = {
+							...getOptionVal('selectAction', 'boxAttrs'),
+							boxName: actionValue[0],
+							...getOptionVal('boxActionType', actionName === 'changeBoxAttr' ? 'change' : 'set'),
+							boxValue: actionValue[1] + '',
+						};
+						break;
+
+					case 'queueItem':
+						if (actionValue.type === 'createEvent') {
+							obj = {
+								...getOptionVal('selectAction', 'queueEvent'),
+								...getOptionVal('queueEvent', actionValue.value, data),
+								delayEvent: actionValue.delay + '',
+							};
+						} else if (actionValue.type === 'createMapObj') {
+							obj = {
+								...getOptionVal('selectAction', 'createMapObj'),
+								...getOptionVal('selectMapObj', actionValue.value.name),
+								...getOptionVal('mapObjLocation', actionValue.value.posX.split('PosX')[0]),
+								delayMapObj: actionValue.delay + '',
+							};
+						}
+						break;
+
+					case 'changeMaxEnergy':
+					case 'changeEnergy':
+					case 'changeEnergyGainRate':
+					case 'gainSkillPoints':
+						obj = {
+							...getOptionVal('selectAction', 'playerAttrs'),
+							...getOptionVal('playerAttrs', actionName),
+							[actionName === 'gainSkillPoints' ? 'playerAttrWhole' : 'playerAttrValue']: actionValue + '',
+						};
+						break;
+
+					case 'createMapObj':
+						obj = {
+							...getOptionVal('selectAction', 'createMapObj'),
+							...getOptionVal('selectMapObj', actionValue.name),
+							...getOptionVal('mapObjLocation', actionValue.posX.split('PosX')[0]),
+							delayMapObj: '',
+						};
+						break;
+
+					case 'removeAllEventsByType':
+						obj = {
+							...getOptionVal('selectAction', 'removeEvents'),
+							removeEvents: actionValue.map(eventName => getOptionVal('removeEvents', eventName, data).removeEvents),
+						};
+						break;
+
+					case 'createMessage':
+						obj = {
+							...getOptionVal('selectAction', 'createMessage'),
+							messageTitle: actionValue.name,
+							messageDesc: actionValue.descVal,
+						};
+						break;
+				}
+
+				if (obj) {
+					obj._index = index + 1;
+					obj._isValid = true;
+					arr.push(obj);
+				}
+			});
+		});
+		return returnObj;
+	}
+
+	_actionToGame(sendEvent) {
+		actionTypes.forEach(actionType => {
+			if (sendEvent.behaviour === 'pop' && ['onSuccess', 'onFail', 'onFullChance'].includes(actionType) ||
+				sendEvent.behaviour === 'chance' && ['onAction', 'onNoAction'].includes(actionType)) {
+				return;
+			}
+			sendEvent[actionType] = [];
+
+			sendEvent[`${actionType}Editor`].forEach(actionObj => {
+				let obj;
+
+				switch (actionObj.selectAction.value) {
+					case 'queueEvent':
+						obj = {
+							queueItem: {type: 'createEvent', value: actionObj.queueEvent.value, delay: actionObj.delayEvent}
+						};
+						break;
+
+					case 'removeEvents':
+						obj = {
+							removeAllEventsByType: actionObj.removeEvents.map(eventObj => eventObj.value)
+						};
+						break;
+
+					case 'createMapObj':
+						const mapObj = {
+							name: actionObj.selectMapObj.value,
+							posX: actionObj.mapObjLocation.value + 'PosX',
+							posY: actionObj.mapObjLocation.value + 'PosY',
+						};
+						obj = actionObj.delayMapObj ? {queueItem: {type: 'createMapObj', delay: actionObj.delayMapObj, value: mapObj}}
+																				: {createMapObj: mapObj};
+						break;
+
+					case 'createMessage':
+						obj = {
+							createMessage: {
+								type: actionObj.messageDesc ? 'primary' : 'free',
+								name: actionObj.messageTitle,
+								descVal: actionObj.messageDesc,
+								icon: actionObj.messageDesc ? sendEvent.icon : undefined,
+							}
+						};
+						break;
+
+					case 'playerAttrs':
+						obj = {[actionObj.playerAttrs.value]: actionObj.playerAttrs.value === 'gainSkillPoints' ? +actionObj.playerAttrWhole
+																																																		: +actionObj.playerAttrValue};
+						break;
+
+					case 'boxAttrs':
+						obj = {
+							[actionObj.boxActionType.value === 'set' ? 'setBoxAttr' : 'changeBoxAttr']: [actionObj.boxName, +actionObj.boxValue]
+						};
+				}
+				obj && sendEvent[actionType].push(obj);
+			});
+			delete sendEvent[`${actionType}Editor`];
+		});
+	}
+
 	_loadData() {
 		this._ajax({url: '/get-data'}).then(data => {
 			Object.keys(data.events).forEach(eventName => {
 				const event = data.events[eventName];
-				const chanceIncreaseEdit = !event.chanceIncrease ? [] : Object.keys(event.chanceIncrease).map((matchEventName, index) => {
+				const chanceIncreaseEditor = !event.chanceIncrease ? [] : Object.keys(event.chanceIncrease).map((matchEventName, index) => {
 					const matchEvent = data.events[matchEventName];
 
 					return {
@@ -77,9 +232,18 @@ class Editor extends Agent {
 					offsetX: event.offsetX ? event.offsetX + '' : '',
 					offsetY: event.offsetX ? event.offsetY + '' : '',
 					range: event.range ? event.range + '' :'',
-					chanceIncreaseEdit,
+					chanceIncreaseEditor,
 				};
 			});
+
+			// Convert actionObjects last as these might rely on editor generated values
+			for (let eventName in data.events) {
+				data.events[eventName] = {
+					...data.events[eventName],
+					...this._actionToEditor(data.events[eventName], data),
+				};
+			}
+
 			this.setState({
 				...data,
 			});
@@ -106,7 +270,7 @@ class Editor extends Agent {
 			case 'chance':
 				delete sendEvent.energy;
 				sendEvent.chance = sendEvent.chance ? +sendEvent.chance : 0;
-				sendEvent.chanceIncrease = sendEvent.chanceIncreaseEdit.reduce((obj, valObj) => {
+				sendEvent.chanceIncrease = sendEvent.chanceIncreaseEditor.reduce((obj, valObj) => {
 					return obj = {...obj, [valObj.chanceEvent.value]: valObj.increase};
 				}, {});
 				break;
@@ -117,8 +281,7 @@ class Editor extends Agent {
 				sendEvent.energy = sendEvent.energy ? sendEvent.energy : 0;
 				break;
 		}
-		delete sendEvent.behaviour;
-		delete sendEvent.chanceIncreaseEdit;
+		delete sendEvent.chanceIncreaseEditor;
 
 		switch (sendEvent.location) {
 			case 'any':
@@ -147,6 +310,8 @@ class Editor extends Agent {
 		delete sendEvent.location;
 		delete sendEvent.fixedPosX;
 		delete sendEvent.fixedPosY;
+
+		this._actionToGame(sendEvent);
 
 		this.saving = '!inProgress';
 		this._ajax({url: '/save-event', type: 'post', data: {[type]: sendEvent}}).then(eventObj => {

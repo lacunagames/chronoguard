@@ -19,6 +19,12 @@ const assets = {
 		farm: {
 			url: 'images/farm.png',
 		},
+		mountain: {
+			url: 'images/mountain.png',
+		},
+		volcano: {
+			url: 'images/volcano.png',
+		},
 	},
 	videos: {
 		explode: {

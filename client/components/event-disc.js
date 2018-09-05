@@ -7,7 +7,7 @@ import connect from 'game/connect';
 import Tooltip from './tooltip';
 import utils from 'utils';
 import config from 'config';
-import allEvents from '../game/data/events';
+import {events as allEvents} from '../game/data/data.json';
 
 class EventDisc extends React.Component {
 

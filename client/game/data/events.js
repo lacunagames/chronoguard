@@ -73,8 +73,8 @@ const events = {
 		icon: 'farm',
 		desc: `The village spends most of its time gathering berries and hunting nearby animals.
 			Learning to grow and harvest plants would greatly increase productivity.\nWhat?`,
-		duration: 20,
-		chance: 75,
+		duration: 40,
+		chance: 5,
 		posX: 'villagePosX',
 		posY: 'villagePosY',
 		offsetX: 50,

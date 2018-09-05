@@ -1,7 +1,7 @@
 
 import utils from 'utils';
 import config from 'config';
-import allEvents from './data/events';
+import {events as allEvents} from './data/data.json';
 import Agent from './agent';
 import allAssets from './data/assets';
 
@@ -17,12 +17,19 @@ const defaultState = {
 		{type: 'createEvent', value: 'life', activates: 7,},
 		{type: 'createEvent', value: 'earth', activates: 2,},
 		{type: 'createEvent', value: 'inspireFarming', activates: 1},
+		{type: 'createEvent', value: 'eventType1', activates: 3},
 		{type: 'createMapObj', value: {name: 'village', posX: 900, posY: 280}, activates: 1},
+		{type: 'createMapObj', value: {name: 'mountain',	posX: 400, posY: 300}, activates: 1},
 	],
 	hour: 0,
 	day: 1,
-	map: [{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: ''}],
-	positions: [{name: 'village', posX: 900, posY: 280}],
+	map: [
+		{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: ''},
+	],
+	positions: [
+		{name: 'village', posX: 900, posY: 280},
+		{name: 'mountain', posX: 400, posY: 300},
+	],
 	conditions: [
 		{
 			id: 0,
@@ -269,15 +276,7 @@ class World extends Agent {
 	}
 
 	removeCondition(id) {
-		if (typeof id === 'number') {
-			this._removeStateObj('conditions', id);
-		} else if (allEvents[id]) {
-			actionTypes.forEach(actionType => allEvents[id][actionType] && allEvents[id][actionType].forEach((actionObj, index) => {
-				if (actionObj.hasOwnProperty('checkCondition')) {
-					allEvents[id][actionType].splice(index, 1);
-				}
-			}));
-		}
+		this._removeStateObj('conditions', id);
 	}
 
 	checkCondition(condition, event, action) {
@@ -349,6 +348,10 @@ class World extends Agent {
 		this.setState({events});
 		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id), 'onFullChance'));
 	}
+};
+
+export {
+	actionTypes,
 };
 
 export default World;
