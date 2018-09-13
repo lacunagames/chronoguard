@@ -93,24 +93,51 @@
 				min-height: 46px;
 				margin-left: 24px;
 			}
+
 			.icon {
 				float: left;
 				display: block;
-				width: 50px;
-				height: 50px;
-				transform: rotate(45deg) translate(-49px, 14px);
+				width: 60px;
+				height: 60px;
 				overflow: hidden;
 				border: 2px solid $cBgInverse;
 				position: absolute;
 				top: 50%;
+				border-radius: 50%;
+				margin: -30px 0 0 -30px;
+				left: 0;
 
 				span {
 					display: block;
-					width: 65px;
-					height: 65px;
-					margin: -10px 0 0 -10px;
-					transform: rotate(-45deg);
 					background-size: cover;
+					width: 56px;
+					height: 56px;
+					border-radius: 50%;
+				}
+
+				&.square {
+					border-radius: 5px;
+
+					span {
+						border-radius: 5px;
+					}
+				}
+
+				&.rhombus {
+					transform: rotate(45deg) translate(-49px, 14px);
+					width: 50px;
+					height: 50px;
+					left: auto;
+					margin: 0;
+					border-radius: 0;
+
+					span {
+						transform: rotate(-45deg);
+						margin: -10px 0 0 -10px;
+						width: 65px;
+						height: 65px;
+						border-radius: 0;
+					}
 				}
 			}
 

@@ -1,4 +1,6 @@
 
+import config from './config';
+
 let throttleCounter = 0;
 const isThrottled = {};
 
@@ -146,7 +148,7 @@ const utils = {
 
 	getIconStyle: iconName => {
 		iconName = iconName.toLowerCase().replace(/ /g, '-');
-		return {'background-image': `url(static/images/icon-${iconName || 'default'}.jpg)`};
+		return {'background-image': `url(static/${config.iconsPath}${iconName || 'default'}.jpg)`};
 	},
 };
 

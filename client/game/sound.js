@@ -1,7 +1,8 @@
 
-import allAssets from './data/assets';
+import {soundMusic as allMusic, soundEffects as allEffects} from './data/data.json';
+import config from '../config';
 
-const assets = {...allAssets.music, ...allAssets.sounds};
+const assets = [...allMusic, ...allEffects].map((name, index) => ({name, isMusic: index < allMusic.length}));
 const VOLUME_CHANGE_TIME = 0.5; // seconds
 
 class Sound {
@@ -13,7 +14,7 @@ class Sound {
 		this.musicVolume = musicVolume;
 		this.soundVolume = soundVolume;
 
-		this.loadAssets(Object.keys(assets)).then(() => {
+		this.loadAssets(assets).then(() => {
 			this.soundReady = true;
 			assetsLoaded();
 		});
@@ -23,16 +24,15 @@ class Sound {
 		return new Promise((resolve, reject) => {
 			let loaded = 0;
 
-			assetList.forEach(assetName => {
-				const asset = assets[assetName];
+			assetList.forEach(assetObj => {
 				const request = new XMLHttpRequest();
 
-				request.open('GET', `static/${asset.url}`, true);
+				request.open('GET', `static/${assetObj.isMusic ? config.musicPath : config.effectsPath}/${assetObj.name}.mp3`, true);
 				request.responseType = 'arraybuffer';
 
 				request.onload = () => {
 					this.ctx.decodeAudioData(request.response, buffer => {
-						asset.buffer = buffer;
+						assetObj.buffer = buffer;
 						loaded++;
 						if (loaded === assetList.length) {
 							resolve();
@@ -49,7 +49,7 @@ class Sound {
 			return console.warn(`Error: play music failed, Sound is not ready yet.`);
 		}
 
-		const asset = assets[musicName];
+		const assetObj = assets.find(assetObj => assetObj.name === musicName && assetObj.isMusic);
 
 		if (this.activeMusic) {
 			this.nextMusic = asset;
@@ -57,43 +57,43 @@ class Sound {
 			this.activeMusic.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + VOLUME_CHANGE_TIME);
 			setTimeout(() => {
 				this.activeMusic.source.stop();
-				this.activeMusic = asset;
+				this.activeMusic = assetObj;
 			}, VOLUME_CHANGE_TIME * 1000);
 		} else {
-			this.activeMusic = asset;
+			this.activeMusic = assetObj;
 		}
-		asset.source = this.ctx.createBufferSource();
-		asset.source.loop = true;
-		asset.source.buffer = asset.buffer;
+		assetObj.source = this.ctx.createBufferSource();
+		assetObj.source.loop = true;
+		assetObj.source.buffer = assetObj.buffer;
 
-		asset.gainNode = this.ctx.createGain();
-		asset.gainNode.gain.value = 0;
-		asset.gainNode.gain.linearRampToValueAtTime(this.musicVolume, this.ctx.currentTime + VOLUME_CHANGE_TIME);
-		asset.gainNode.connect(this.ctx.destination);
-		asset.source.connect(asset.gainNode);
-		asset.source.start(0);
+		assetObj.gainNode = this.ctx.createGain();
+		assetObj.gainNode.gain.value = 0;
+		assetObj.gainNode.gain.linearRampToValueAtTime(this.musicVolume, this.ctx.currentTime + VOLUME_CHANGE_TIME);
+		assetObj.gainNode.connect(this.ctx.destination);
+		assetObj.source.connect(assetObj.gainNode);
+		assetObj.source.start(0);
 	}
 
 	playSound(soundName) {
-		const asset = assets[soundName];
+		const assetObj = assets.find(assetObj => assetObj.name === soundName && !assetObj.isMusic);
 
-		asset.source = this.ctx.createBufferSource();
-		asset.source.buffer = asset.buffer;
+		assetObj.source = this.ctx.createBufferSource();
+		assetObj.source.buffer = assetObj.buffer;
 
-		asset.gainNode = this.ctx.createGain();
-		asset.gainNode.gain.value = this.soundVolume;
-		asset.gainNode.connect(this.ctx.destination);
-		asset.source.connect(asset.gainNode);
-		asset.source.start(0);
-		this.activeSounds.push(asset);
-		asset.source.onended = () => this.activeSounds = this.activeSounds.filter(match => match !== asset);
+		assetObj.gainNode = this.ctx.createGain();
+		assetObj.gainNode.gain.value = this.soundVolume;
+		assetObj.gainNode.connect(this.ctx.destination);
+		assetObj.source.connect(assetObj.gainNode);
+		assetObj.source.start(0);
+		this.activeSounds.push(assetObj);
+		assetObj.source.onended = () => this.activeSounds = this.activeSounds.filter(match => match !== assetObj);
 	}
 
 	setVolume(type, volume) {
 		if (type === 'sound') {
-			this.activeSounds.forEach(asset => {
+			this.activeSounds.forEach(assetObj => {
 				this.soundVolume = volume;
-				asset.gainNode.gain.linearRampToValueAtTime(volume, this.ctx.currentTime + VOLUME_CHANGE_TIME);
+				assetObj.gainNode.gain.linearRampToValueAtTime(volume, this.ctx.currentTime + VOLUME_CHANGE_TIME);
 			});
 		} else {
 			const activeMusic = this.activeMusic.ending ? this.nextMusic : this.activeMusic;

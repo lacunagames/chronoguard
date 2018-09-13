@@ -107,7 +107,7 @@
 		animation-name: deflate;
 	}
 
-	&.chance-event {
+	&.progress-event {
 
 		a {
 			border-radius: 0;
@@ -156,7 +156,7 @@
 			transition: stroke-dashoffset 0.25s linear, stroke $animFast;
 		}
 
-		&.chance-done {
+		&.progress-done {
 			path {
 				stroke: darken($cSuccessBg, 20%);
 			}

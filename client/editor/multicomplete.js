@@ -54,11 +54,11 @@ class Multicomplete extends React.Component {
 						<li>
 							<div>
 								{valObj.icon &&
-									<span className={`auto-icon ${valObj.iconStyle || ''}`}>
+									<span className={`auto-icon ${valObj.shape || ''}`}>
 										<span style={utils.getIconStyle(valObj.icon)} />
 									</span>
 								}
-								<span className="text">{valObj.title}</span>
+								<span className="text">{valObj.title || valObj.value}</span>
 								<button type="button" className="icon remove" onClick={e => this.removeValue(e, valObj)}><i>close</i></button>
 							</div>
 						</li>

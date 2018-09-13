@@ -37,7 +37,7 @@ body {
 }
 
 .screen {
-	overflow-x: auto;
+	overflow: hidden;
 	min-width: map-get($mediaSizes, xs);
 	min-width: 640px;
 	min-height: 480px;
@@ -113,6 +113,7 @@ a {
 }
 
 button, input[type=button], input[type=submit], .button {
+	height: 40px;
 	display: inline-block;
 	padding: 10px 13px;
 	margin: 2px 5px 5px 2px;
@@ -149,6 +150,7 @@ button, input[type=button], input[type=submit], .button {
 		outline: none;
 		border: 2px solid $cTab;
 		margin: 0 3px 3px 0;
+		height: 44px;
 	}
 
 	&.primary {

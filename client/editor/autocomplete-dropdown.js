@@ -125,7 +125,7 @@ class AutocompleteDropdown extends React.Component {
 									<i className="validity">warning</i>
 								}
 								{option.icon &&
-									<span className={`auto-icon ${option.iconStyle || ''}`}>
+									<span className={`auto-icon ${option.shape || ''}`}>
 										<span style={utils.getIconStyle(option.icon)} />
 									</span>
 								}

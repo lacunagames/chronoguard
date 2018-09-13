@@ -78,7 +78,7 @@ class Select extends React.Component {
 					tabIndex={disabled ? -1 : 0}
 					ref="select">
 					{selected && selected.icon &&
-						<span className={`auto-icon ${selected.iconStyle || ''}`}>
+						<span className={`auto-icon ${selected.shape || ''}`}>
 							<span style={utils.getIconStyle(selected.icon)} />
 						</span>
 					}

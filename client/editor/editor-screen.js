@@ -17,6 +17,8 @@ const defaultNewEvent = {
 	energy: 5,
 	duration: 5,
 	behaviour: 'pop',
+	...actionTypes.reduce((obj, actionType) => obj = {...obj, [`${actionType}Editor`]: []}, {}),
+	progressIncreaseEditor: [],
 };
 
 class EditorScreen extends React.Component {
@@ -27,7 +29,6 @@ class EditorScreen extends React.Component {
 			'dataChange',
 			'createNewEvent',
 			'toggleTooltip',
-			'toggleIconModal',
 			'handleFieldChange',
 			'validateFields',
 			'removeEvent',
@@ -35,18 +36,13 @@ class EditorScreen extends React.Component {
 
 		this.state = {
 			currentTab: 'events',
-			currentEvent: 'fire',
-			changeIconTooltip: false,
 			createNewEventTooltip: false,
-			iconsModalOpen: false,
-			iconsModalPos: undefined,
 			events: {},
-			icons: [],
 			saving: undefined,
 			isValidAll: true,
 		};
 		this.data = {};
-		this.props.chanceIncrease
+		this.props.progressIncrease
 		this.loadCallbacks = [];
 		this.newEvents = {};
 		this.editor = new Editor(this.dataChange);
@@ -73,6 +69,7 @@ class EditorScreen extends React.Component {
 		}
 		const eventType = this.props.fields.selectEvent.matchingOption.value;
 		if (fieldName === 'selectEvent') {
+			localStorage.currentEvent = eventType;
 			this.props.formMethods.updateFields({
 				eventTitle: event.title,
 				eventDuration: event.duration,
@@ -80,14 +77,14 @@ class EditorScreen extends React.Component {
 				eventDesc: event.desc || '',
 				eventIcon: event.icon,
 				energyCost: event.energy || '',
-				chance: event.chance || '',
+				progress: event.progress || '',
 				location: event.location || 'any',
 				posX: event.fixedPosX || '100',
 				posY: event.fixedPosY || '100',
 				offsetX: event.offsetX || '',
 				offsetY: event.offsetY || '',
 				range: event.range || '',
-				chanceIncrease: event.chanceIncreaseEditor,
+				progressIncrease: event.progressIncreaseEditor,
 				...actionTypes.reduce((obj, actionType) => obj = {...obj, [actionType]: event[`${actionType}Editor`]}, {}),
 			}, () => {
 				const uniqueRule = this.props.fields.eventTitle.rules.find(rule => rule.type === 'unique');
@@ -104,24 +101,58 @@ class EditorScreen extends React.Component {
 			this.setState({events: {...this.state.events, [eventType]: eventUpdate}, isValidAll: this.props.formMethods.isValidAll(this.props.fields)}, () => {
 				if (this.props.formMethods.isValidAll(this.props.fields)) {
 					this.setState({saving: true});
+					this.data.events[eventType] = this.state.events[eventType];
 					this.editor.saveEvent(eventType, this.state.events[eventType]).then(() => {
 						this.setState({saving: false});
-						this.data.events[eventType] = this.state.events[eventType];
 					});
 				}
-				if (['eventIcon', 'eventTitle', 'eventDesc', 'behaviour'].includes(fieldName)) {
-					const options = [...this.props.fields.selectEvent.options];
-					const matchValue = this.props.fields.selectEvent.matchingOption.value;
-					const index = options.findIndex(option => option.value === matchValue);
-					const event = this.state.events[matchValue];
+				if (['eventIcon', 'eventTitle', 'eventDesc', 'behaviour', ...actionTypes].includes(fieldName)) {
+					const {fields} = this.props;
 
-					options[index] = {...options[index], ...{
-						title: event.title || '-No title-',
-						desc: event.desc || '',
-						icon: event.icon,
-						iconStyle: event.behaviour === 'chance' ? 'rhombus' : 'circle',
-					}};
-					this.props.formMethods.updateOptions('selectEvent', options);
+					if (!actionTypes.includes(fieldName)) {
+						const options = [...fields.selectEvent.options];
+						const matchValue = fields.selectEvent.matchingOption.value;
+						const index = options.findIndex(option => option.value === matchValue);
+						const event = this.state.events[matchValue];
+
+						options[index] = {...options[index], ...{
+							title: event.title || '-No title-',
+							desc: event.desc || '',
+							icon: event.icon,
+							shape: event.behaviour === 'progress' ? 'rhombus' : 'circle',
+						}};
+						this.props.formMethods.updateOptions('selectEvent', options);
+					}
+
+					if (fieldName !== 'eventDesc') {
+						// Trigger event icon/shape/name validation on multi-add fields
+						this.props.formMethods.updateFields(
+							actionTypes.reduce((obj, actionType) => {
+								let values = [...fields[actionType].value];
+								values.forEach((value, index) => {
+									if (value.selectAction.value === 'createMessage' && (value.messageIconShape || {}).value === 'matchEvent') {
+										value = {
+											selectAction: value.selectAction,
+											messageTitle: value.messageTitle,
+											messageIconShape: value.messageIconShape,
+											messageIcon: {
+												value: fields.eventIcon.value,
+												icon: fields.eventIcon.value,
+												shape: fields.behaviour.value === 'progress' ? 'rhombus' : 'circle',
+											},
+											messageDesc: value.messageDesc,
+											_index: value._index,
+											_isValid: value._isValid,
+										};
+										values = [...values.slice(0, index), value, ...values.slice(index + 1)];
+									}
+								})
+								return obj = {...obj, [actionType]: [...values]};
+							}, {
+								progressIncrease: [...fields.progressIncrease.value],
+							})
+						);
+					}
 				}
 			});
 		}
@@ -143,14 +174,15 @@ class EditorScreen extends React.Component {
 							title: event.title,
 							desc: event.desc || '',
 							icon: event.icon,
-							iconStyle: event.behaviour === 'chance' ? 'rhombus' : 'circle',
+							shape: event.behaviour === 'progress' ? 'rhombus' : 'circle',
 						};
 					});
 					this.props.formMethods.updateOptions('selectEvent', selectOptions, () => {
 						this.loadCallbacks.forEach(fn => fn());
 						this.loadCallbacks = [];
 						if (!this.props.fields.selectEvent.value) {
-							this.props.formMethods.updateFields({selectEvent: selectOptions[selectOptions.length -1].title}, null, true);
+							const eventTitle = (selectOptions.find(opt => opt.value === localStorage.currentEvent) || selectOptions[selectOptions.length -1]).title;
+							this.props.formMethods.updateFields({selectEvent: eventTitle}, null, true);
 						}
 					});
 				} else {
@@ -161,7 +193,7 @@ class EditorScreen extends React.Component {
 		};
 
 		this.data = {...this.data, ...newData};
-		this.props.fields.chanceIncrease.config.data = this.data;
+		this.props.fields.progressIncrease.config.data = this.data;
 		actionFieldConfig.data = this.data;
 		if (callback) {
 			this.loadCallbacks.push(callback);
@@ -173,36 +205,22 @@ class EditorScreen extends React.Component {
 
 	createNewEvent() {
 		const baseEvent = this.state.events[(this.props.fields.selectEvent.matchingOption || {}).value] || defaultNewEvent;
-		let i = 1;
-		while (this.state.events[`eventType${i}`]) {i++};
-
-		const newEventType = `eventType${i}`;
+		const newEventType = `eventType${this.data.newEventId}`;
 		const newEvent = {...baseEvent, ...{
-			title: `New event ${i}`,
+			title: `New event ${this.data.newEventId}`,
 		}};
+		localStorage.currentEvent = newEventType;
 		this.dataChange({events: {...this.data.events, [newEventType]: newEvent}}, () => {
 			this.setState({saving: true});
-			this.props.formMethods.updateFields({selectEvent: newEvent.title}, null, true);
 			this.editor.saveEvent(newEventType, this.state.events[newEventType]).then(() => {
 				this.setState({saving: false});
+				this.data.newEventId++;
 			});
 		});
 	}
 
 	toggleTooltip(type, isOpen) {
 		this.setState({[`${type}Tooltip`]: isOpen});
-	}
-
-	toggleIconModal(e) {
-		e.preventDefault();
-		this.setState({
-			iconsModalOpen: !this.state.iconsModalOpen,
-			iconsModalPos: this.refs.iconsModalButton.getBoundingClientRect(),
-		});
-	}
-
-	iconSelect(iconName) {
-		this.props.formMethods.updateFields({eventIcon: iconName}, null, true);
 	}
 
 	validateFields(e) {
@@ -233,7 +251,7 @@ class EditorScreen extends React.Component {
 	}
 
 	render() {
-		const {events, icons, saving, isValidAll} = this.state;
+		const {events, saving, isValidAll} = this.state;
 		const {fields} = this.props;
 
 		return (
@@ -276,122 +294,89 @@ class EditorScreen extends React.Component {
 					</div>
 					{fields.selectEvent.matchingOption &&
 						<div className="form-content">
-							<div className="row">
-								<div className="col-66 col-l-35 title-col">
-									<Field config={fields.eventIcon} />
-									<Tooltip show={this.state.changeIconTooltip} toggleTooltip={isOpen => this.toggleTooltip('changeIcon', isOpen)}>
-										<button data-tooltip-trigger
-											type="button"
-											className={utils.getClassName({'primary icon-raised select-icon': true, rhombus: fields.behaviour.value === 'chance'})}
-											ref="iconsModalButton"
-											onClick={this.toggleIconModal}>
-											<span style={utils.getIconStyle(fields.eventIcon.value)} />
-										</button>
-										<p>Change event icon</p>
-									</Tooltip>
-									<Field config={fields.eventTitle} />
+							<div className="inner">
+								<div className="row">
+									<div className="col-66 col-l-35 title-row">
+										<Field config={fields.eventIcon} />
+										<Field config={fields.eventTitle} />
+									</div>
+									<div className="col-33 col-l-35">
+										<Field config={fields.behaviour} />
+									</div>
 								</div>
-								<div className="col-33 col-l-35">
-									<Field config={fields.behaviour} />
+								<div className="row">
+									<div className="col-50 col-l-35">
+										<Field config={fields.eventDuration} />
+									</div>
+									<div className="col-50 col-l-35">
+										<Field config={fields.eventDesc} />
+									</div>
 								</div>
-							</div>
-							<div className="row">
-								<div className="col-50 col-l-35">
-									<Field config={fields.eventDuration} />
+								<div className="row">
+									<div className="col-40 col-l-25">
+										<Field config={fields.location} />
+									</div>
+									{fields.location.value !== 'any' &&
+										<React.Fragment>
+											<div className="col-20 col-l-15">
+												<Field config={fields.posX} />
+												<Field config={fields.offsetX} />
+											</div>
+											<div className="col-20 col-l-15">
+												<Field config={fields.posY} />
+												<Field config={fields.offsetY} />
+											</div>
+											<div className="col-20 col-l-15">
+												<Field config={fields.range} />
+											</div>
+										</React.Fragment>
+									}
 								</div>
-								<div className="col-50 col-l-35">
-									<Field config={fields.eventDesc} />
+								<div className="row">
+									<div className="col-50 col-l-25">
+										<Field config={fields.energyCost} />
+										<Field config={fields.progress} />
+									</div>
+									<div className="col-50 col-l-45">
+										<Field config={fields.progressIncrease} />
+									</div>
 								</div>
-							</div>
-							<div className="row">
-								<div className="col-40 col-l-25">
-									<Field config={fields.location} />
+								<div className="row">
+									<div className="col-50 col-l-35">
+										<Field config={fields.onStart} />
+									</div>
+									<div className="col-50 col-l-35">
+										<Field config={fields.onEnd} />
+									</div>
 								</div>
-								{fields.location.value !== 'any' &&
-									<React.Fragment>
-										<div className="col-20 col-l-15">
-											<Field config={fields.posX} />
-											<Field config={fields.offsetX} />
+								<div className="row">
+									<div className="col-50 col-l-35">
+										<Field config={fields.onSuccess} />
+										<Field config={fields.onPop} />
+									</div>
+									<div className="col-50 col-l-35">
+										<Field config={fields.onFail} />
+										<Field config={fields.onNoPop} />
+									</div>
+								</div>
+								<div className="row">
+									<div className="col-50 col-l-35">
+										<Field config={fields.onFullProgress} />
+									</div>
+									<div className="col-50 col-l-35">
+									</div>
+								</div>
+								<div className="row">
+									<div className="col-100 col-l-70">
+										<div className="row-buttons">
+											<button type="button" className="error" onClick={this.removeEvent}>Remove event</button>
 										</div>
-										<div className="col-20 col-l-15">
-											<Field config={fields.posY} />
-											<Field config={fields.offsetY} />
-										</div>
-										<div className="col-20 col-l-15">
-											<Field config={fields.range} />
-										</div>
-									</React.Fragment>
-								}
-							</div>
-							<div className="row">
-								<div className="col-50 col-l-25">
-									<Field config={fields.energyCost} />
-									<Field config={fields.chance} />
-								</div>
-								<div className="col-50 col-l-45">
-									<Field config={fields.chanceIncrease} />
-								</div>
-							</div>
-							<div className="row">
-								<div className="col-50 col-l-25">
-									<Field config={fields.onStart} />
-								</div>
-								<div className="col-50 col-l-45">
-									<Field config={fields.onEnd} />
-								</div>
-							</div>
-							<div className="row">
-								<div className="col-50 col-l-25">
-									<Field config={fields.onSuccess} />
-									<Field config={fields.onAction} />
-								</div>
-								<div className="col-50 col-l-45">
-									<Field config={fields.onFail} />
-									<Field config={fields.onNoAction} />
-								</div>
-							</div>
-							<div className="row">
-								<div className="col-50 col-l-25">
-									<Field config={fields.onFullChance} />
-								</div>
-								<div className="col-50 col-l-45">
-								</div>
-							</div>
-							<div className="row">
-								<div className="col-100 col-l-70">
-									<div className="row-buttons">
-										<button type="button" className="error" onClick={this.removeEvent}>Remove event</button>
 									</div>
 								</div>
 							</div>
 						</div>
 					}
 				</form>
-				<Modal show={this.state.iconsModalOpen} pos={this.state.iconsModalPos} locked={false} onClose={this.toggleIconModal}>
-					<h3 data-modal-head>Change event icon</h3>
-					<form onSubmit={this.toggleIconModal}>
-						<input type="submit" className="access" tabindex="-1" />
-						<fieldset className="icon-radios">
-							{icons && icons.map(iconName => (
-								<Tooltip show={this.state[`${iconName}IconTooltip`]}
-									toggleTooltip={isOpen => this.toggleTooltip(`${iconName}Icon`, isOpen)}>
-									<div key={iconName} data-tooltip-trigger>
-										<input type="radio"
-											value={iconName}
-											name="icon-radios"
-											id={`icon-input-${iconName}`}
-											checked={fields.eventIcon.value === iconName}
-											onChange={() => this.iconSelect(iconName)} />
-										<label htmlFor={`icon-input-${iconName}`} className={fields.behaviour.value === 'chance' ? 'rhombus' : ''}>
-											<span style={utils.getIconStyle(iconName)}>{iconName}</span>
-										</label>
-									</div>
-									<p>{iconName}</p>
-								</Tooltip>
-							))}
-						</fieldset>
-					</form>
-				</Modal>
 			</Screen>
 		);
 	}

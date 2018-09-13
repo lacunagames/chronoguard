@@ -33,7 +33,7 @@ const multiAddForm = (renderForm) => {
 					const focusElem = this.props.focusField && document.querySelector(`#${this.props.fields[this.props.focusField].id}`);
 
 					if (focusElem) {
-						this.props.fields[this.props.focusField].type === 'select' ? focusElem.click() : focusElem.focus();
+						['select', 'iconSelect'].includes(this.props.fields[this.props.focusField].type) ? focusElem.click() : focusElem.focus();
 					}
 				});
 			};
@@ -61,6 +61,12 @@ const multiAddForm = (renderForm) => {
 											fields[fieldName].options && fields[fieldName].options.find(option => option.value === fields[fieldName].value) ||
 											fields[fieldName].value,
 			}, {});
+
+			for (let fieldName in newValue) {
+				if (fields[fieldName].type === 'iconSelect') {
+					newValue[fieldName] = {...newValue[fieldName], shape: fields[fieldName].shape.calculated}
+				}
+			}
 
 			newValue._isValid = formMethods.isValidAll(fields);
 			newValue._index = this.props.openIndex;

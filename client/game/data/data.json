@@ -1,4 +1,74 @@
 {
+  "newEventId": 30,
+  "positions": [
+    {
+      "name": "village",
+      "posX": 900,
+      "posY": 280
+    },
+    {
+      "name": "mountain",
+      "posX": 400,
+      "posY": 300
+    }
+  ],
+  "mapImages": [
+    "background",
+    "farm",
+    "forest",
+    "forest2",
+    "island",
+    "mountain",
+    "village",
+    "volcano"
+  ],
+  "mapVideos": [
+    "explode-boom",
+    "explode"
+  ],
+  "soundMusic": [
+    "fables",
+    "town"
+  ],
+  "soundEffects": [
+    "click",
+    "success",
+    "warning"
+  ],
+  "icons": [
+    "air",
+    "avatar",
+    "bonfire",
+    "box",
+    "default",
+    "earth-my",
+    "earth",
+    "farm",
+    "fire",
+    "fireball",
+    "flame-shield",
+    "incantate",
+    "life",
+    "light",
+    "location",
+    "map-remove",
+    "map",
+    "message",
+    "nature",
+    "painting",
+    "phoenix-heart",
+    "player",
+    "queue",
+    "remove",
+    "scorch",
+    "shadow",
+    "snipe",
+    "snowball",
+    "summon-dragon",
+    "video",
+    "volcano",
+    "water"
+  ],
   "events": {
     "fire": {
       "title": "Fire",
@@ -7,7 +77,7 @@
       "posX": "villagePosX",
       "posY": "villagePosY",
       "range": 200,
-      "onAction": [
+      "onPop": [
         {
           "changeBoxAttr": [
             "fireNode",
@@ -28,26 +98,14 @@
       "icon": "fire",
       "onSuccessEditor": [],
       "onFailEditor": [],
-      "onFullChanceEditor": [],
+      "onFullProgressEditor": [],
       "desc": "",
       "onStart": [],
-      "onNoAction": []
+      "onNoPop": []
     },
     "water": {
       "title": "Water",
       "duration": "7-11",
-      "energy": "7",
-      "onAction": [
-        {
-          "changeBoxAttr": [
-            "waterNode",
-            1
-          ]
-        },
-        {
-          "changeMaxEnergy": 1
-        }
-      ],
       "onEnd": [
         {
           "queueItem": {
@@ -59,12 +117,11 @@
       ],
       "behaviour": "pop",
       "icon": "water",
-      "onSuccessEditor": [],
-      "onFailEditor": [],
-      "onFullChanceEditor": [],
       "desc": "",
       "onStart": [],
-      "onNoAction": []
+      "energy": "8",
+      "onPop": [],
+      "onNoPop": []
     },
     "air": {
       "title": "Air",
@@ -73,7 +130,7 @@
       "posX": "villagePosX",
       "posY": "villagePosY",
       "range": 200,
-      "onAction": [
+      "onPop": [
         {
           "changeBoxAttr": [
             "airNode",
@@ -94,16 +151,16 @@
       "icon": "air",
       "onSuccessEditor": [],
       "onFailEditor": [],
-      "onFullChanceEditor": [],
+      "onFullProgressEditor": [],
       "desc": "",
       "onStart": [],
-      "onNoAction": []
+      "onNoPop": []
     },
     "life": {
       "title": "Life",
       "duration": "10-18",
       "energy": 0,
-      "onAction": [
+      "onPop": [
         {
           "changeBoxAttr": [
             "lifeNode",
@@ -125,19 +182,16 @@
       ],
       "behaviour": "pop",
       "icon": "life",
-      "onSuccessEditor": [],
-      "onFailEditor": [],
-      "onFullChanceEditor": [],
-      "desc": "",
+      "desc": "Increases energy by 4",
       "onStart": [],
-      "onNoAction": []
+      "onNoPop": []
     },
     "earth": {
       "title": "Earth",
       "icon": "earth-my",
       "duration": "9-11",
       "energy": "10",
-      "onAction": [
+      "onPop": [
         {
           "changeBoxAttr": [
             "earthNode",
@@ -148,7 +202,7 @@
           "changeEnergyGainRate": 0.1
         }
       ],
-      "onNoAction": [],
+      "onNoPop": [],
       "onEnd": [
         {
           "queueItem": {
@@ -161,7 +215,7 @@
       "behaviour": "pop",
       "onSuccessEditor": [],
       "onFailEditor": [],
-      "onFullChanceEditor": [],
+      "onFullProgressEditor": [],
       "desc": "",
       "onStart": []
     },
@@ -169,13 +223,13 @@
       "title": "Inspire farming",
       "icon": "farm",
       "desc": "The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.\nWhat?",
-      "duration": "40-45",
-      "chance": 15,
+      "duration": "2",
+      "progress": 100,
       "posX": "villagePosX",
       "posY": "villagePosY",
       "offsetX": 50,
       "offsetY": 50,
-      "chanceIncrease": {
+      "progressIncrease": {
         "air": "8-10",
         "fire": "7-11"
       },
@@ -209,7 +263,7 @@
           }
         }
       ],
-      "onFullChance": [
+      "onFullProgress": [
         {
           "removeAllEventsByType": [
             "air",
@@ -237,7 +291,8 @@
             "type": "primary",
             "name": "Farming inspired successfully",
             "descVal": "Some villagers are inspired to become farmers.\n{icon-skill-points} +5",
-            "icon": "farm"
+            "icon": "snipe",
+            "shape": "square"
           }
         },
         {
@@ -248,7 +303,10 @@
         {
           "createMessage": {
             "type": "free",
-            "name": "Inspire Farming Failed"
+            "name": "Inspire Farming Failed",
+            "descVal": "",
+            "icon": false,
+            "shape": false
           }
         }
       ],
@@ -257,7 +315,7 @@
           "queueItem": {
             "type": "createEvent",
             "value": "inspireFarming",
-            "delay": "12-15"
+            "delay": "1200-1500"
           }
         },
         {
@@ -267,108 +325,47 @@
           ]
         }
       ],
-      "behaviour": "chance",
-      "onActionEditor": [],
-      "onNoActionEditor": []
+      "behaviour": "progress"
     },
     "eventType1": {
       "title": "Volcano",
       "icon": "volcano",
       "desc": "A volcano will erupt if enough fire energy is focused at this location.",
       "duration": "50",
-      "chance": 0,
-      "posX": 400,
-      "posY": 300,
-      "chanceIncrease": {
-        "eventType2": "20-30"
-      },
       "onStart": [
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "10-12"
+            "delay": "10-15"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "19-22"
+            "delay": "20-30"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "25-35"
+            "delay": "25-40"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "35-45"
+            "delay": "20-35"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "20-45"
-          }
-        }
-      ],
-      "onFullChance": [
-        {
-          "removeAllEventsByType": [
-            "eventType2"
-          ]
-        }
-      ],
-      "onSuccess": [
-        {
-          "createMapObj": {
-            "name": "explode",
-            "posX": "eventPosX",
-            "posY": "eventPosY"
-          }
-        },
-        {
-          "createMessage": {
-            "type": "primary",
-            "name": "Volcano erupted!",
-            "descVal": "A lot of people died because of you. I hope you are happy.\n{icon-skill-points} +5",
-            "icon": "volcano"
-          }
-        },
-        {
-          "gainSkillPoints": 5
-        },
-        {
-          "createMapObj": {
-            "name": "volcano",
-            "posX": "eventPosX",
-            "posY": "eventPosY"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createMapObj",
-            "delay": "12-14",
-            "value": {
-              "name": "volcano",
-              "posX": "eventPosX",
-              "posY": "eventPosY"
-            }
-          }
-        }
-      ],
-      "onFail": [
-        {
-          "createMessage": {
-            "type": "free",
-            "name": "Volcano eruption failed"
+            "delay": "20-40"
           }
         }
       ],
@@ -386,34 +383,89 @@
           ]
         }
       ],
-      "behaviour": "chance",
-      "onActionEditor": [],
-      "onNoActionEditor": []
-    },
-    "eventType2": {
-      "title": "Focus fire",
-      "duration": "7-9",
-      "energy": "8",
-      "posX": 400,
-      "posY": 300,
-      "range": 250,
-      "onAction": [
+      "behaviour": "progress",
+      "progress": 0,
+      "progressIncrease": {
+        "eventType2": "20-30"
+      },
+      "onSuccess": [
         {
-          "changeBoxAttr": [
-            "fireNode",
-            1
+          "createMessage": {
+            "type": "primary",
+            "name": "Volcano erupted",
+            "descVal": "A lot of people died because of you.. I hope you are happy!\n{icon-skill-points} +3 ",
+            "icon": "volcano",
+            "shape": "rhombus"
+          }
+        },
+        {
+          "gainSkillPoints": 5
+        }
+      ],
+      "onFail": [],
+      "onFullProgress": [
+        {
+          "removeAllEventsByType": [
+            "eventType2"
           ]
         }
       ],
+      "posX": "mountainPosX",
+      "posY": "mountainPosY",
+      "offsetX": 50,
+      "offsetY": 50
+    },
+    "eventType2": {
+      "title": "Focused flame",
+      "duration": "7-9",
+      "posX": "mountainPosX",
+      "posY": "mountainPosY",
+      "range": 250,
       "onEnd": [],
       "behaviour": "pop",
       "icon": "scorch",
-      "onSuccessEditor": [],
-      "onFailEditor": [],
-      "onFullChanceEditor": [],
       "desc": "",
       "onStart": [],
-      "onNoAction": []
+      "energy": "8",
+      "onPop": [],
+      "onNoPop": []
+    },
+    "eventType10": {
+      "title": "Great day to live",
+      "icon": "summon-dragon",
+      "desc": "",
+      "duration": "50",
+      "onStart": [
+        {
+          "createMessage": {
+            "type": "primary",
+            "name": "Mooo",
+            "descVal": "",
+            "icon": "summon-dragon",
+            "shape": "rhombus"
+          }
+        },
+        {
+          "changeEnergy": -2
+        }
+      ],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType10",
+            "delay": "9-13"
+          }
+        }
+      ],
+      "behaviour": "progress",
+      "posX": "mountainPosX",
+      "posY": "mountainPosY",
+      "progress": 0,
+      "progressIncrease": {},
+      "onSuccess": [],
+      "onFail": [],
+      "onFullProgress": []
     }
   }
 }

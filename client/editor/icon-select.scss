@@ -1,0 +1,187 @@
+
+@import '../styles/branding.scss';
+@import '../styles/mixins.scss';
+
+.select-icon {
+	overflow: hidden;
+	border-radius: 50%;
+	transition: filter $animFast;
+	background: $cText;
+	height: 44px;
+
+	&:disabled {
+		filter: grayscale(0.7);
+	}
+
+	&:not(:disabled):hover, &:not(:disabled):focus {
+		filter: brightness(1.2);
+		background: $cText;
+	}
+
+	span {
+		display: inline-block;
+		width: 40px;
+		height: 40px;
+		background-size: cover;
+		background-color: $cSecondary;
+		margin: -8px -2px -10px;
+		border-radius: 50%;
+	}
+
+	.tab-active &:focus {
+		height: 46px;
+	}
+
+	&.square {
+		border-radius: 3px;
+
+		span {
+			border-radius: 3px;
+		}
+	}
+
+	&.rhombus {
+		border-radius: 0;
+		transform: rotate(45deg);
+		padding: 0;
+		margin: 6px 0 0 6px;
+		width: 37px;
+		height: 37px;
+		box-shadow: $shadow1rotate;
+		border: 1px solid $cText;
+
+		&:hover, &:focus {
+			box-shadow: $shadow2rotate;
+		}
+
+		.tab-active &:focus {
+			border: 2px solid $cTab;
+			width: 39px;
+			height: 39px;
+			top: 18px;
+			left: 14px;
+			margin: 5px 0 0 5px;
+		}
+
+		span {
+			transform: rotate(-45deg);
+			border-radius: 0;
+			position: relative;
+			margin: 0;
+			width: 50px;
+			height: 50px;
+			top: -7px;
+			left: -7px;
+		}
+	}
+}
+
+
+.icon-radios {
+	padding: 5px;
+	margin: 0;
+	width: 370px;
+
+	div {
+		float: left;
+		margin: 3px;
+	}
+
+	input[type=radio] + label {
+		padding: 0;
+		border-radius: 50%;
+		line-height: 1px;
+		overflow: hidden;
+		border: 2px solid transparent;
+		transition: all $animFast;
+		position: relative;
+		left: 0;
+		top: 0;
+		transform: scale(1);
+		filter: brightness(1);
+		background-color: $cSecondary;
+
+		&:hover, &:focus {
+			filter: brightness(1.1);
+		}
+
+		&:before, &:after {
+			content: none;
+		}
+
+		span {
+			display: inline-block;
+			width: 50px;
+			height: 50px;
+			background-size: cover;
+			text-indent: 100%;
+			overflow: hidden;
+			white-space: nowrap;
+			border: 3px solid $cText;
+			border-radius: 50%;
+			margin: -2px;
+		}
+
+		&.square {
+			border-radius: 3px;
+
+			span {
+				border-radius: 3px;
+			}
+		}
+
+		&.rhombus {
+			border-radius: 0;
+			transform: rotate(45deg);
+			padding: 0;
+			margin: 6px 4px 4px 6px;
+			width: 40px;
+			height: 40px;
+
+			span {
+				border-radius: 0;
+				transform: rotate(-45deg);
+				position: relative;
+				margin: 0;
+				width: 58px;
+				height: 58px;
+				top: -11px;
+				left: -11px;
+			}
+		}
+	}
+
+	input[type=radio]:checked + label {
+		border-color: darken($cPrimary, 10%);
+		filter: brightness(1.2);
+		transform: scale(1.05);
+		box-shadow: $shadow3;
+		left: -2px;
+		top: -2px;
+
+		&.rhombus {
+			transform: rotate(45deg) scale(1.05);
+			box-shadow: $shadow3rotate;
+		}
+	}
+
+	.tab-active & input[type=radio]:focus + label {
+		border-color: $cTab;
+	}
+}
+
+.icon-select-row {
+	position: relative;
+	padding-right: 70px;
+
+	.icon-select-field {
+		position: absolute;
+		right: 0;
+		top: 19px;
+
+		.rhombus {
+			position: relative;
+			left: -7px;
+		}
+	}
+}

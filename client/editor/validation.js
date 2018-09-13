@@ -21,7 +21,8 @@ const validationRules = {
 	},
 
 	matchOption: (field) => {
-		return !!field.matchingOption;
+		const matchingMulticomplete = field.value instanceof Array && !field.value.some(item => !field.options.find(opt => opt.value === item.value));
+		return !!field.matchingOption || matchingMulticomplete;
 	},
 
 	number: field => {

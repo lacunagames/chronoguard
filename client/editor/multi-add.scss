@@ -24,7 +24,7 @@
 
 		& > span {
 			display: inline-block;
-			padding: 10px 7px;
+			padding: 12px 7px 11px;
 			background: $cSecondary;
 			transition: background $animFast, color $animFast;
 			line-height: 18px;
@@ -84,6 +84,10 @@
 
 		.auto-icon {
 			margin: -5px 4px -9px 0;
+		}
+
+		.icon-no-text {
+			margin-right: 0;
 		}
 
 		.no-text {

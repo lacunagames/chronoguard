@@ -10,6 +10,7 @@ const defaultState = {
 	music: '',
 	musicVolume: 0.15,
 	soundVolume: 0.3,
+	assets: {},
 };
 
 let messageCounter = 0;
@@ -35,7 +36,7 @@ class System extends Agent {
 		}
 	}
 
-	createMessage({type, name, value, descVal, icon}) {
+	createMessage({type, name, value, descVal, icon, shape}) {
 		this.playSound('warning');
 		const {worldTime, duration, text, desc, unique, dismissable, buttons, group,} = messageTypes[type];
 		const calcDuration = duration === 0 ? false : duration || 6;
@@ -48,6 +49,7 @@ class System extends Agent {
 			type,
 			id,
 			icon,
+			shape,
 			dismissable: typeof dismissable === 'undefined' || dismissable,
 			text: typeof text === 'function' ? text(name, value) : text,
 			desc: typeof desc === 'function' ? desc(descVal) : desc || '',

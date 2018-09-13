@@ -31,7 +31,7 @@ const messageTypes = {
 		buttons: [
 			{
 				title: 'Duplicate',
-				onAction: {queueItem: {type: 'createEvent', id: 'water', delay: '2-3'}},
+				onPop: {queueItem: {type: 'createEvent', id: 'water', delay: '2-3'}},
 				primary: true,
 			},
 			{
@@ -46,7 +46,7 @@ const messageTypes = {
 	primary: {
 		text: name => `${name}`,
 		desc: descVal => `${descVal || ''}`,
-		duration: 12,
+		duration: 1200,
 	}
 };
 

@@ -5,10 +5,10 @@ import React from 'react';
 
 import utils from 'utils';
 import config from 'config';
-import allAssets from '../game/data/assets';
+import {mapImages as allImages, mapVideos as allVideos} from '../game/data/data.json';
 
+const assets = [...allImages, ...allVideos].map((name, index) => ({name, isVideo: index >= allImages.length}));
 const animSpeed = 500;
-const assets = {...allAssets.images, ...allAssets.videos};
 
 class MapCanvas extends React.Component {
 
@@ -21,9 +21,7 @@ class MapCanvas extends React.Component {
 	}
 
 	componentDidMount() {
-		const startingAssets = Object.keys(assets).filter(assetName => !assets[assetName].secondary).map(assetName => assetName);
-
-		this.loadAssets(startingAssets).then(() => {
+		this.loadAssets(assets).then(() => {
 			this.assetsLoaded = true;
 			this.windowResize();
 			utils.onEvent(window, 'resize', this.debounceWindowResize);
@@ -48,14 +46,14 @@ class MapCanvas extends React.Component {
 				const updateObj = existingObj ? Object.assign(existingObj, mapObj) : this.mapObjs[this.mapObjs.length - 1];
 
 				if (mapObj.animation && !existingAnim) {
-					const asset = assets[mapObj.name];
-					updateObj.animDuration = asset.isVideo ? asset.element.duration * 1000 : animSpeed;
+					const assetObj = assets.find(assetObj => assetObj.name === mapObj.name);
+					updateObj.animDuration = assetObj.isVideo ? assetObj.element.duration * 1000 : animSpeed;
 					updateObj.animStarted = + new Date();
 
-					if (asset.isVideo) {
+					if (assetObj.isVideo) {
 						updateObj.video = document.createElement('video');
 						updateObj.video.oncanplaythrough = () => updateObj.animLoaded = true;
-						updateObj.video.src = asset.element.src;
+						updateObj.video.src = assetObj.element.src;
 						updateObj.video.load();
 					}
 				}
@@ -93,41 +91,38 @@ class MapCanvas extends React.Component {
 		return new Promise((resolve, reject) => {
 			let loaded = 0;
 
-			assetList.forEach(assetName => {
-				const asset = assets[assetName];
-				const isVideo = asset.url.indexOf('mp4') > -1;
-
-				if (isVideo) {
+			assetList.forEach(assetObj => {
+				if (assetObj.isVideo) {
 					const request = new XMLHttpRequest();
 
-					request.open('GET', `static/${asset.url}`, true);
+					request.open('GET', `static/${config.videosPath + assetObj.name}.mp4`, true);
 					request.responseType = 'blob';
 
 					request.onload = () => {
 						if (request.status === 200) {
-							asset.element = document.createElement('video');
-							asset.element.oncanplaythrough = () => {
-								asset.element.width = asset.element.videoWidth;
-								asset.element.height = asset.element.videoHeight;
-								asset.isVideo = true;
+							assetObj.element = document.createElement('video');
+							assetObj.element.oncanplaythrough = () => {
+								assetObj.element.width = assetObj.element.videoWidth;
+								assetObj.element.height = assetObj.element.videoHeight;
+								assetObj.isVideo = true;
 								loaded++;
 								if (loaded === assetList.length) {
 									resolve();
 								}
 							};
-							asset.element.src = URL.createObjectURL(request.response);
+							assetObj.element.src = URL.createObjectURL(request.response);
 						} else {
-							console.warn(`Error loading ${asset.url} video. Status code: ${request.status}.`);
+							console.warn(`Error loading ${assetObj.name} video. Status code: ${request.status}.`);
 						}
 					};
-					request.onerror = () => console.warn(`Error loading ${asset.url} video.`);
+					request.onerror = () => console.warn(`Error loading ${assetObj.name} video.`);
 					request.send();
 
 				} else {
-					asset.element = new Image();
-					asset.element.onload = () => {
-						if (asset.element.width + asset.element.height === 0) {
-							console.warn(`Error loading ${asset.url} image.`);
+					assetObj.element = new Image();
+					assetObj.element.onload = () => {
+						if (assetObj.element.width + assetObj.element.height === 0) {
+							console.warn(`Error loading ${assetObj.name} image.`);
 							return reject();
 						}
 						loaded++;
@@ -135,30 +130,30 @@ class MapCanvas extends React.Component {
 							resolve();
 						}
 					};
-					asset.element.src = `static/${asset.url}`;
+					assetObj.element.src = `static/${config.imagesPath + assetObj.name}.png`;
 				}
 			});
 		});
 	}
 
 	getScaledAsset(assetName, state) {
-		const asset = assets[assetName];
+		const assetObj = assets.find(assetObj => assetObj.name === assetName);
 
-		if (asset.lastScale !== this.scale || asset.lastState !== state) {
+		if (assetObj.lastScale !== this.scale || assetObj.lastState !== state) {
 			const scaleCanvas = document.createElement('canvas');
 
-			scaleCanvas.width = asset.element.width * this.scale;
-			scaleCanvas.height = asset.element.height * this.scale;
+			scaleCanvas.width = assetObj.element.width * this.scale;
+			scaleCanvas.height = assetObj.element.height * this.scale;
 
 			const ctx = scaleCanvas.getContext('2d');
 
 			ctx.globalAlpha = state === 'hidden' ? 0 : 1;
-			ctx.drawImage(asset.element, 0, 0, scaleCanvas.width, scaleCanvas.height);
-			asset.scaledImg = scaleCanvas;
-			asset.lastScale = this.scale;
-			asset.lastState = state;
+			ctx.drawImage(assetObj.element, 0, 0, scaleCanvas.width, scaleCanvas.height);
+			assetObj.scaledImg = scaleCanvas;
+			assetObj.lastScale = this.scale;
+			assetObj.lastState = state;
 		}
-		return asset.scaledImg;
+		return assetObj.scaledImg;
 	}
 
 	animateImg(mapObj) {
@@ -251,9 +246,9 @@ class MapCanvas extends React.Component {
 		ctx.restore();
 
 		this.mapObjs.forEach(mapObj => {
-			const asset = assets[mapObj.name];
-			const startX = this.offsetX + this.scale * mapObj.posX - asset.element.width * this.scale / 2;
-			const startY = this.offsetY + this.scale * mapObj.posY - asset.element.height * this.scale / 2;
+			const assetObj = assets.find(assetObj => assetObj.name === mapObj.name);
+			const startX = this.offsetX + this.scale * mapObj.posX - assetObj.element.width * this.scale / 2;
+			const startY = this.offsetY + this.scale * mapObj.posY - assetObj.element.height * this.scale / 2;
 			const img = mapObj.animation ? this.animateImg(mapObj) : this.getScaledAsset(mapObj.name, mapObj.state);
 
 			ctx.imageSmoothingEnabled = false;

@@ -2,9 +2,17 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const chokidar = require('chokidar');
 
-const iconsFolder = __dirname + '/static/images';
+const assetPaths = {
+	icons: __dirname + '/static/icons',
+	mapImages: __dirname + '/static/map-images',
+	mapVideos: __dirname + '/static/map-videos',
+	soundMusic: __dirname + '/static/sound-music',
+	soundEffects: __dirname + '/static/sound-effects',
+};
 const dataJsonUrl = __dirname + '/client/game/data/data.json';
+const backupFolder = __dirname + '/client/game/data-backup/';
 
 const app = express();
 
@@ -21,15 +29,28 @@ app.get('/editor', (req, resp) => {
 });
 
 app.get('/get-data', (req, resp) => {
-	resp.send(getData());
+	const dataFile = fs.readFileSync(dataJsonUrl);
+	const data = JSON.parse(dataFile);
+
+	for (let folderType in assetPaths) {
+		data[folderType] = fs.readdirSync(assetPaths[folderType]).map(name => name.slice(0, name.lastIndexOf('.')));
+	}
+
+	resp.send(data);
 });
 
 app.post('/save-event', (req, resp) => {
+	backupData();
 	const eventName = Object.keys(req.body)[0];
 	const event = req.body[eventName];
 	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
+	const isNewEvent = !data.events[eventName];
 
-	data = {...data, events: {...data.events, [eventName]: event}};
+	data = {
+		...data,
+		events: {...data.events, [eventName]: event},
+		newEventId: isNewEvent ? data.newEventId + 1 : data.newEventId,
+	};
 	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
 	resp.send({[eventName]: event});
 });
@@ -43,13 +64,54 @@ app.get('/remove-event', (req, resp) => {
 	resp.send({message: 'Successfully removed event', eventName});
 });
 
-const getData = () => {
-	const dataFile = fs.readFileSync(dataJsonUrl);
-	const data = JSON.parse(dataFile);
 
-	data.icons = fs.readdirSync(iconsFolder).filter(name => name.includes('icon-')).map(name => name.match(/icon\-(.*?)\./)[1]);
-	return data;
-}
+let watcherTimer;
+const updateAssetList = path => {
+	clearTimeout(watcherTimer);
+	watcherTimer = setTimeout(() => {
+		const dataFile = fs.readFileSync(dataJsonUrl);
+		const data = JSON.parse(dataFile);
+
+		for (let folderType in assetPaths) {
+			data[folderType] = fs.readdirSync(assetPaths[folderType]).map(name => name.slice(0, name.lastIndexOf('.')));
+		}
+		fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
+	}, 500);
+};
+
+const assetPathArr = Object.keys(assetPaths).map(name => assetPaths[name].replace(__dirname + '/', ''));
+const watcher = chokidar.watch(assetPathArr, {ignore: /^\./, persistent: true});
+
+watcher.on('add', updateAssetList).on('change', updateAssetList).on('unlink', updateAssetList);
+
+
+const backupData = () => {
+		const twoDigit = val => val < 10 ? '0' + val : val;
+		const now = new Date();
+		const threeDays = 3 * 24 * 60 * 60 * 1000;
+		const targetPath = backupFolder +
+						`data--${now.getFullYear()}-${twoDigit(now.getMonth() + 1)}-${twoDigit(now.getDate())}--` +
+						`${twoDigit(now.getHours())}-${twoDigit(now.getMinutes())}-${twoDigit(now.getSeconds())}.json`;
+
+	const backupFiles = fs.readdirSync(backupFolder)
+													.filter(name => name.includes('.json') && name.split('--').length === 3)
+													.map(name => {
+														const [, date, time] = name.slice(0, name.indexOf('.json')).split('--');
+
+														return {name, day: new Date(`${date}Z`), time: new Date(`${date}T${time.replace(/\-/g, ':')}Z`)};
+													})
+													.sort((a, b) => b.time - a.time);
+
+	backupFiles
+		.filter((fileObj, index) => {
+			const isOldFile = index > 0 && backupFiles[index - 1].day.getTime() === fileObj.day.getTime();
+
+			return fileObj.time < now - threeDays && isOldFile;
+		})
+		.forEach(fileObj => fs.unlinkSync(backupFolder + fileObj.name));
+
+	fs.createReadStream(dataJsonUrl).pipe(fs.createWriteStream(targetPath));
+};
 
 
 const server = app.listen(8081, 'localhost', () => {

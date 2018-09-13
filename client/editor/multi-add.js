@@ -44,19 +44,38 @@ class MultiAdd extends React.Component {
 			for (let fieldName in getOptionsData) {
 				value.forEach((valObj, index) => {
 					const allOptions = getOptionsData[fieldName](data, []);
-					if (utils.isObj(valObj[fieldName])) {
-						const optionValue = allOptions.find(optObj => optObj.value === valObj[fieldName].value);
+					if (typeof valObj[fieldName] === 'object') {
+						const isObj = utils.isObj(valObj[fieldName]);
+						const values = isObj ? [valObj[fieldName]] : valObj[fieldName];
+						const newValArray = [];
+						let isValid = valObj._isValid;
 
-						if (!utils.isEqual(valObj[fieldName], optionValue)) {
+						values.forEach((oldValObj, index) => {
+							const optionValue = allOptions.find(optObj => optObj.value === oldValObj.value);
+
+							if (!utils.isEqual(oldValObj, optionValue)) {
+								newValArray[index] = optionValue || oldValObj.title;
+								isValid = isValid && !!optionValue;
+							} else if (typeof oldValObj === 'string') {
+								const optionValue = utils.pickWild(allOptions, 'title', oldValObj.trim().toLowerCase());
+								newValArray[index] = optionValue;
+								isValid = isValid && !!optionValue;
+							}
+						});
+
+						if (newValArray.filter(val => val).length) {
+							const newVal = isObj ? {...newValArray[0]} : valObj[fieldName].map((val, index) => newValArray[index] || val);
+
 							newValues.push({
 								...valObj,
-								[fieldName]: optionValue || valObj[fieldName].title,
-								_isValid: !!optionValue && valObj._isValid,
+								[fieldName]: newVal,
+								_isValid: isValid,
 							});
-						} else if (typeof valObj[fieldName] === 'string') {
-							const optionValue = utils.pickWild(allOptions, 'title', valObj[fieldName].trim().toLowerCase());
-
-							optionValue && newValues.push({...valObj, [fieldName]: optionValue, _isValid: true});
+						} else if (isValid !== valObj._isValid) {
+							newValues.push({
+								...valObj,
+								_isValid: isValid,
+							});
 						}
 					}
 				});
@@ -121,8 +140,12 @@ class MultiAdd extends React.Component {
 				const hasValue = utils.isObj(valObj[fieldName]) ? valObj[fieldName].value
 																												: valObj[fieldName] instanceof Array 	? valObj[fieldName].length
 																																															: valObj[fieldName];
+				const hiddenType = this.props.config.display[fieldName] && this.props.config.display[fieldName].type === 'hidden';
 
-				return fieldName[0] !== '_' && (!valObj._isValid || hasValue);
+				return fieldName[0] !== '_' && (!valObj._isValid || hasValue) && !hiddenType;
+			}).sort((aName, bName) => {
+				return this.props.config.display.sort ? this.props.config.display.sort.indexOf(aName) - this.props.config.display.sort.indexOf(bName)
+																							: false
 			}).map(fieldName => {
 				const displayConfig = this.props.config.display[fieldName] || {};
 				const displayText = (
@@ -132,16 +155,16 @@ class MultiAdd extends React.Component {
 							return (
 								<span className="multi-val">
 									{item.icon &&
-										<span className={`auto-icon ${item.iconStyle || ''}`}>
+										<span className={`auto-icon ${item.shape || ''}`}>
 											<span style={utils.getIconStyle(item.icon)} />
 										</span>
 									}
-									{item.title || icon.value}
+									{item.title || item.value}
 								</span>
 							);
 						}) || '??')}
-						{typeof valObj[fieldName] === 'string' && (valObj[fieldName] || '??') || ''}
-						{typeof valObj[fieldName] === 'object' && (valObj[fieldName].title || valObj[fieldName].value) || ''}
+						{displayConfig.type !== 'iconText' && typeof valObj[fieldName] === 'string' && (valObj[fieldName] || '??') || ''}
+						{displayConfig.type !== 'iconText' && typeof valObj[fieldName] === 'object' && (valObj[fieldName].title || valObj[fieldName].value) || ''}
 						{displayConfig.post || ''}
 					</span>
 				);
@@ -150,14 +173,14 @@ class MultiAdd extends React.Component {
 					onClick={e => this.toggleModal(e, valObj._index, fieldName)}
 					className={displayConfig.type === 'icon' ? 'no-text' : ''}>
 					{typeof valObj[fieldName] === 'object' && valObj[fieldName].icon && displayConfig.type !== 'icon' &&
-						<span className={`auto-icon ${valObj[fieldName].iconStyle || ''}`}>
+						<span className={`auto-icon ${valObj[fieldName].shape || ''} ${displayConfig.type === 'iconText' && 'icon-no-text'}`}>
 							<span style={utils.getIconStyle(valObj[fieldName].icon)} />
 						</span>
 					}
-					{displayConfig.type === 'icon' &&
+					{displayConfig.type === 'icon' && valObj[fieldName] &&
 						<Tooltip show={this.state[`tooltipIcon${valObj._index}`]}
 							toggleTooltip={isOpen => this.setState({[`tooltipIcon${valObj._index}`]: isOpen})}>
-							<span className={`auto-icon ${valObj[fieldName].iconStyle || ''}`}>
+							<span className={`auto-icon ${valObj[fieldName].shape || ''}`}>
 								<span style={utils.getIconStyle(valObj[fieldName].icon)} />
 							</span>
 							<p>{displayText}</p>

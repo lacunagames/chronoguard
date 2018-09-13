@@ -94,7 +94,7 @@ class SelectDropdown extends React.Component {
 							id={this.props.selectId + '-' + option.value}
 							role="option">
 							{option.icon &&
-								<span className={`auto-icon ${option.iconStyle || ''}`}>
+								<span className={`auto-icon ${option.shape || ''}`}>
 									<span style={utils.getIconStyle(option.icon)} />
 								</span>
 							}

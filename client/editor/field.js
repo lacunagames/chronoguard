@@ -6,6 +6,7 @@ import Select from './select';
 import Autocomplete from './autocomplete';
 import Multicomplete from './multicomplete';
 import MultiAdd from './multi-add';
+import IconSelect from './icon-select';
 
 class Field extends React.Component {
 
@@ -37,6 +38,18 @@ class Field extends React.Component {
 							options={field.options}
 							onChange={field.onChange}
 							disabled={field.disabled}
+							value={field.value} />
+					);
+
+				case 'iconSelect':
+					return (
+						<IconSelect
+							id={field.id}
+							options={field.options}
+							onChange={field.onChange}
+							disabled={field.disabled}
+							shape={field.shape}
+							title={field.label || field.placeholder}
 							value={field.value} />
 					);
 
@@ -183,6 +196,7 @@ class Field extends React.Component {
 				hidden: field.type === 'hidden',
 				'no-label': !field.label,
 				'hide-validation': field.hideValidation,
+				'icon-select-field': field.type === 'iconSelect',
 				})}>
 				{field.label && !['radio', 'toggle', 'checkbox', 'checkboxGroup'].includes(field.type) &&
 					<label htmlFor={field.id} className={!field.value ? 'invisible' : ''}>

@@ -19,7 +19,7 @@ class EventDisc extends React.Component {
 
 	discClick(e, event) {
 		e.preventDefault();
-		event.onAction && this.props.dispatch('eventAction', event.id);
+		event.onPop && this.props.dispatch('eventPop', event.id);
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -37,13 +37,13 @@ class EventDisc extends React.Component {
 
 	render() {
 		const {world, player, event} = this.props;
-		const isChanceEvent = event.chance !== undefined;
+		const isProgressEvent = event.behaviour === 'progress';
 		const mapX = event.posX / config.mapWidth * 100;
 		const mapY = event.posY / config.mapHeight * 100;
 		const zIndex =  Math.floor(99 * (mapY * 1000 + mapX - 1) / 101000 + 1); // Downscale number to 1-100 range
 		const positionStyle = {left: `${mapX}%`, top: `${mapY}%`, zIndex};
 		const remaining = Math.max((event.ends - world.hour - 0.25) / event.duration * 100, 0);
-		const progressStyle = isChanceEvent ? {'stroke-dashoffset': 152 - remaining / 100 * 152}
+		const progressStyle = isProgressEvent ? {'stroke-dashoffset': 152 - remaining / 100 * 152}
 																				: {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
 		const start = event.starts >= world.hour && event.starts <= world.hour + 0.5;
 		const end = event.starts < world.hour && (event.ended || event.ends <= world.hour);
@@ -65,8 +65,8 @@ class EventDisc extends React.Component {
 			<li className={utils.getClassName({
 					'event-disc': true,
 					'no-energy': player.energy < event.energy,
-					'chance-event': isChanceEvent,
-					'chance-done': isChanceEvent && event.chance >= 100,
+					'progress-event': isProgressEvent,
+					'progress-done': isProgressEvent && event.progress >= 100,
 					start,
 					end,
 				})}
@@ -78,10 +78,10 @@ class EventDisc extends React.Component {
 						onClick={e => this.discClick(e, event)}>
 						<span className="crop">
 							<span className="bg" style={utils.getIconStyle(event.icon || event.title)}>
-								{isChanceEvent && event.chance < 100 &&
+								{isProgressEvent && event.progress < 100 &&
 									<span className="bg-empty" style={{
-											height: `${46 - 46 * event.chance / 100}px`,
-											...utils.getIconStyle(event.icon || event.title),
+											height: `${46 - 46 * event.progress / 100}px`,
+											...utils.getIconStyle(event.icon),
 										}} />
 								}
 							</span>
@@ -109,36 +109,36 @@ class EventDisc extends React.Component {
 							{rewards &&
 								<p>Rewards: {rewards}</p>
 							}
-							{event.chanceIncrease &&
+							{event.progressIncrease &&
 								<p>
 									Progressed by:
 									<span className="icon-list">
-										{Object.keys(event.chanceIncrease).map(eventType => {
+										{Object.keys(event.progressIncrease).map(eventType => {
 											const matchEvent = allEvents[eventType];
 											return (
 												<span>
 													<span style={utils.getIconStyle(matchEvent.icon || matchEvent.title)} />
-													{`${matchEvent.title}: ${event.chanceIncrease[eventType]}%`}
+													{`${matchEvent.title}: ${event.progressIncrease[eventType]}%`}
 												</span>
 											);
 										})}
 									</span>
 								</p>
 							}
-							{isChanceEvent &&
-								<p className="large">Progress: {event.chance}%</p>
+							{isProgressEvent &&
+								<p className="large">Progress: {event.progress}%</p>
 							}
 						</div>
 					}
 				</Tooltip>
-				{isChanceEvent &&
+				{isProgressEvent &&
 					<svg width="42" height="42">
 						<path className="thin" d="M4,4 38,4 38,38 4,38 4,4" />
 						<path d="M2,2 40,2 40,40 2,40 2,2" />
 						<path d="M4,2 40,2 40,40 2,40 2,0"  className="progress" style={progressStyle} />
 					</svg>
 				}
-				{!isChanceEvent &&
+				{!isProgressEvent &&
 					<svg width="48" height="48">
 						<circle r="22" cx="24" cy="24" />
 						<circle r="22" cx="24" cy="24" className="progress" style={progressStyle} />

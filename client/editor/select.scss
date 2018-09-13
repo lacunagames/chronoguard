@@ -22,7 +22,7 @@
 		outline: none;
 		width: 100%;
 		margin-bottom: 5px;
-		height: 41px;
+		height: 40px;
 		position: relative;
 		box-shadow: $shadow1In;
 		white-space: nowrap;
@@ -139,7 +139,7 @@
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
 				text-decoration: none;
-				background: $cBg;
+				background: lighten($cSecondary, 17%);
 			}
 
 			.tab-active &:not(.disabled):focus {
@@ -149,10 +149,10 @@
 		}
 
 		.selected {
-			background: lighten($cPrimary, 10%);
+			background: lighten($cSecondary, 0%);
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
-				background: lighten($cPrimary, 15%);
+				background: lighten($cSecondary, 7%);
 			}
 		}
 

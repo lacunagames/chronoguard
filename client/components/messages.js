@@ -59,7 +59,7 @@ class Messages extends React.Component {
 	buttonClick(e, button, message) {
 		e.preventDefault();
 		this.props.dispatch('endMessage', message.id);
-		button.onAction && this.props.dispatch('massDispatch', button.onAction);
+		button.onPop && this.props.dispatch('massDispatch', button.onPop);
 	}
 
 	renderWithIcons(str) {
@@ -93,7 +93,7 @@ class Messages extends React.Component {
 					})}>
 					<a href="#" draggable="false" tabIndex={message.dismissable ? 0 : -1} onClick={e => this.dismissMessage(e, message)}>
 						{message.icon &&
-							<span className="icon">
+							<span className={`icon${message.shape ? ' ' + message.shape : ''}`}>
 								<span style={utils.getIconStyle(message.icon)} />
 							</span>
 						}

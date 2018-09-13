@@ -50,7 +50,7 @@ class Editor extends Agent {
 		const returnObj = {};
 		const getOptionVal = (fieldName, value, data) => {
 			const options = data && actionFieldConfig.getOptionsData[fieldName](data) || actionFieldConfig.fields[fieldName].options;
-			const option = options.find(option => option.value === value);
+			const option = options.find(option => option.value === value) || {value};
 			return {[fieldName]: option};
 		}
 
@@ -118,9 +118,20 @@ class Editor extends Agent {
 						break;
 
 					case 'createMessage':
+						const eventShape = event.behaviour === 'progress' ? 'rhombus' : 'circle';
+						const isMatchEvent = actionValue.icon === event.icon && actionValue.shape === eventShape;
 						obj = {
 							...getOptionVal('selectAction', 'createMessage'),
 							messageTitle: actionValue.name,
+							...getOptionVal('messageIconShape', isMatchEvent 	? 'matchEvent'
+																																: !actionValue.icon ? 'noIcon' : actionValue.shape),
+							...(isMatchEvent 	? {messageIcon: {value: event.icon, icon: event.icon, shape: eventShape}}
+																: !actionValue.icon ? {} : {
+																		messageIcon: {
+																			...getOptionVal('messageIcon', actionValue.icon).messageIcon,
+																			...{shape: actionValue.shape},
+																		}
+																	}),
 							messageDesc: actionValue.descVal,
 						};
 						break;
@@ -138,8 +149,10 @@ class Editor extends Agent {
 
 	_actionToGame(sendEvent) {
 		actionTypes.forEach(actionType => {
-			if (sendEvent.behaviour === 'pop' && ['onSuccess', 'onFail', 'onFullChance'].includes(actionType) ||
-				sendEvent.behaviour === 'chance' && ['onAction', 'onNoAction'].includes(actionType)) {
+			if (sendEvent.behaviour === 'pop' && ['onSuccess', 'onFail', 'onFullProgress'].includes(actionType) ||
+				sendEvent.behaviour === 'progress' && ['onPop', 'onNoPop'].includes(actionType)) {
+				delete sendEvent[`${actionType}Editor`];
+				delete sendEvent[`${actionType}`];
 				return;
 			}
 			sendEvent[actionType] = [];
@@ -171,12 +184,18 @@ class Editor extends Agent {
 						break;
 
 					case 'createMessage':
+						const isMatchEvent = actionObj.messageIconShape.value === 'matchEvent';
+						const eventShape = sendEvent.behaviour === 'progress' ? 'rhombus' : 'circle';
+						const icon = actionObj.messageIconShape.value !== 'noIcon' && (isMatchEvent ? sendEvent.icon : actionObj.messageIcon.value);
+						const shape = icon && isMatchEvent ? eventShape : icon && actionObj.messageIconShape.value;
+
 						obj = {
 							createMessage: {
-								type: actionObj.messageDesc ? 'primary' : 'free',
+								type: actionObj.messageDesc || icon ? 'primary' : 'free',
 								name: actionObj.messageTitle,
 								descVal: actionObj.messageDesc,
-								icon: actionObj.messageDesc ? sendEvent.icon : undefined,
+								icon,
+								shape,
 							}
 						};
 						break;
@@ -201,17 +220,17 @@ class Editor extends Agent {
 		this._ajax({url: '/get-data'}).then(data => {
 			Object.keys(data.events).forEach(eventName => {
 				const event = data.events[eventName];
-				const chanceIncreaseEditor = !event.chanceIncrease ? [] : Object.keys(event.chanceIncrease).map((matchEventName, index) => {
+				const progressIncreaseEditor = !event.progressIncrease ? [] : Object.keys(event.progressIncrease).map((matchEventName, index) => {
 					const matchEvent = data.events[matchEventName];
 
 					return {
-						chanceEvent: matchEvent ? {
+						progressEvent: matchEvent ? {
 							value: matchEventName,
 							title: matchEvent.title,
 							icon: matchEvent.icon,
-							iconStyle: 'circle',
+							shape: 'circle',
 						} : `??${matchEventName}`,
-						increase: event.chanceIncrease[matchEventName] + '',
+						increase: event.progressIncrease[matchEventName] + '',
 						_index: index + 1,
 						_isValid: !!matchEvent,
 					}
@@ -219,9 +238,9 @@ class Editor extends Agent {
 
 				data.events[eventName] = {
 					...event,
-					behaviour: typeof event.chance === 'undefined' ? 'pop' : 'chance',
+					behaviour: typeof event.progress === 'undefined' ? 'pop' : 'progress',
 					icon: event.icon || data.icons.find(icon => icon === event.title.toLowerCase().replace(/ /g, '-')) || 'default',
-					chance: ['number', 'string'].includes(typeof event.chance) ? event.chance + '' : '',
+					progress: ['number', 'string'].includes(typeof event.progress) ? event.progress + '' : '',
 					location: event.posX && isNaN(+event.posX) ? event.posX.split('PosX')[0] : event.posX > 0 ? 'fixed' : 'any',
 					duration: event.duration + '',
 					energy: event.energy ? event.energy + '' : '',
@@ -232,7 +251,7 @@ class Editor extends Agent {
 					offsetX: event.offsetX ? event.offsetX + '' : '',
 					offsetY: event.offsetX ? event.offsetY + '' : '',
 					range: event.range ? event.range + '' :'',
-					chanceIncreaseEditor,
+					progressIncreaseEditor,
 				};
 			});
 
@@ -267,21 +286,21 @@ class Editor extends Agent {
 		const sendEvent = {...eventObj};
 
 		switch (sendEvent.behaviour) {
-			case 'chance':
+			case 'progress':
 				delete sendEvent.energy;
-				sendEvent.chance = sendEvent.chance ? +sendEvent.chance : 0;
-				sendEvent.chanceIncrease = sendEvent.chanceIncreaseEditor.reduce((obj, valObj) => {
-					return obj = {...obj, [valObj.chanceEvent.value]: valObj.increase};
+				sendEvent.progress = sendEvent.progress ? +sendEvent.progress : 0;
+				sendEvent.progressIncrease = sendEvent.progressIncreaseEditor.reduce((obj, valObj) => {
+					return obj = {...obj, [valObj.progressEvent.value]: valObj.increase};
 				}, {});
 				break;
 
 			case 'pop':
-				delete sendEvent.chance;
-				delete sendEvent.chanceIncrease;
+				delete sendEvent.progress;
+				delete sendEvent.progressIncrease;
 				sendEvent.energy = sendEvent.energy ? sendEvent.energy : 0;
 				break;
 		}
-		delete sendEvent.chanceIncreaseEditor;
+		delete sendEvent.progressIncreaseEditor;
 
 		switch (sendEvent.location) {
 			case 'any':

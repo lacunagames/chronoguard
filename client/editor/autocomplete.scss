@@ -35,7 +35,12 @@
 		position: absolute;
 		right: -4px;
 		top: -1px;
-		padding: 10px 4px 9px;
+		padding: 10px 4px 11px;
+		height: 38px;
+
+		.tab-active &:focus {
+			padding-bottom: 13px;
+		}
 	}
 
 	.options {
@@ -97,7 +102,7 @@
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
 				text-decoration: none;
-				background: $cBg;
+				background: lighten($cSecondary, 17%);
 			}
 
 			.tab-active &:not(.disabled):focus {
@@ -106,10 +111,10 @@
 		}
 
 		.selected {
-			background: lighten($cPrimary, 10%);
+			background: lighten($cSecondary, 0%);
 
 			&:not(.disabled):hover, &:not(.disabled):focus {
-				background: lighten($cPrimary, 15%);
+				background: lighten($cSecondary, 7%);
 			}
 		}
 	}

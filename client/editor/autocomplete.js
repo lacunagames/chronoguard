@@ -67,52 +67,19 @@ class Autocomplete extends React.Component {
 			});
 		}
 
-		if (this.props.asyncOptions) {
-			const startCounter = ++this.asyncCounter;
+		const filteredOptions = this.props.options.filter(item => {
+			return item.title.toLowerCase().trim().indexOf(wildValue) > -1 || item.desc && item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
+		});
 
-			if (value.length < this.props.asyncMinLength) {
-				return this.setState({
-					options: [specialOptions.tooShort],
-				}, () => {
-					this.props.onChange({target: {value}, type: 'change'});
-				});
-			}
-			this.setState({
-				options: [specialOptions.loading],
-				isOpen: true,
-			}, () => {
-				this.props.onChange({target: {value}, type: 'change'});
-			});
-			clearTimeout(this.asyncTimer);
-			this.asyncTimer = setTimeout(() => {
-				this.props.asyncOptions(value).then((options) => {
-					if (startCounter === this.asyncCounter) {
-						const matched = utils.pickWild(options, 'title', wildValue);
-
-						this.setState({
-							options: options.length > 0 ? options : [specialOptions.noMatch],
-						}, () => {
-							this.props.onChange({target: {value}, type: 'change', options})
-						});
-					}
-				});
-			}, 300);
-
-		} else {
-			const filteredOptions = this.props.options.filter(item => {
-				return item.title.toLowerCase().trim().indexOf(wildValue) > -1 || item.desc && item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
-			});
-
-			if (filteredOptions.length === 0) {
-				filteredOptions.push(specialOptions.noMatch);
-			}
-			this.setState({
-				options: filteredOptions,
-				isOpen: true,
-			}, () => {
-				this.props.onChange({target: {value}, type: 'change'});
-			});
+		if (filteredOptions.length === 0) {
+			filteredOptions.push(specialOptions.noMatch);
 		}
+		this.setState({
+			options: filteredOptions,
+			isOpen: true,
+		}, () => {
+			this.props.onChange({target: {value}, type: 'change'});
+		});
 	}
 
 	onInputClick(e) {
@@ -197,7 +164,7 @@ class Autocomplete extends React.Component {
 					type="text"
 					ref="input" />
 				{selected && selected.icon &&
-					<span className={`auto-icon ${selected.iconStyle || ''}`}>
+					<span className={`auto-icon ${selected.shape || ''}`}>
 						<span style={utils.getIconStyle(selected.icon)} />
 					</span>
 				}

@@ -1,11 +1,14 @@
 
 import utils from 'utils';
 import config from 'config';
-import {events as allEvents} from './data/data.json';
+import {
+	events as allEvents,
+	mapVideos as allVideos,
+	positions,
+} from './data/data.json';
 import Agent from './agent';
-import allAssets from './data/assets';
 
-const actionTypes = ['onStart', 'onEnd', 'onAction', 'onNoAction', 'onSuccess', 'onFail', 'onFullChance'];
+const actionTypes = ['onStart', 'onEnd', 'onPop', 'onNoPop', 'onSuccess', 'onFail', 'onFullProgress'];
 
 const defaultState = {
 	events: [],
@@ -19,17 +22,14 @@ const defaultState = {
 		{type: 'createEvent', value: 'inspireFarming', activates: 1},
 		{type: 'createEvent', value: 'eventType1', activates: 3},
 		{type: 'createMapObj', value: {name: 'village', posX: 900, posY: 280}, activates: 1},
-		{type: 'createMapObj', value: {name: 'mountain',	posX: 400, posY: 300}, activates: 1},
 	],
 	hour: 0,
 	day: 1,
 	map: [
-		{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: ''},
+		{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: '', priority: 0},
+		{id: 1, name: 'mountain',	posX: 400, posY: 300,	animation: '', state: '', priority: 1},
 	],
-	positions: [
-		{name: 'village', posX: 900, posY: 280},
-		{name: 'mountain', posX: 400, posY: 300},
-	],
+	positions,
 	conditions: [
 		{
 			id: 0,
@@ -54,14 +54,14 @@ const defaultState = {
 };
 
 let eventCounter = 0;
-let mapCounter = 1;
-let conditionCounter = 1;
+let mapCounter = defaultState.map.length;
+let conditionCounter = defaultState.conditions.length;
 
 class World extends Agent {
 
 	constructor(subscribeState) {
 		super(subscribeState);
-		utils.bindThis(this, ['_worldChange', 'eventAction']);
+		utils.bindThis(this, ['_worldChange', 'eventPop']);
 		this.state = {};
 		this.setState(defaultState);
 		this.changeInterval = setInterval(this._worldChange, 250);
@@ -104,10 +104,10 @@ class World extends Agent {
 			}
 			if (event.ends === hour && !event.ended) {
 				this._updateStateObj('events', event.id, {ended: true});
-				this.system.massDispatch(event, 'onNoAction');
+				this.system.massDispatch(event, 'onNoPop');
 				this.system.massDispatch(event, 'onEnd');
-				if (event.hasOwnProperty('chance')) {
-					this.system.massDispatch(event, event.chance >= 100 ? 'onSuccess' : 'onFail');
+				if (event.behaviour === 'progress') {
+					this.system.massDispatch(event, event.progress >= 100 ? 'onSuccess' : 'onFail');
 				}
 			}
 			if (event.removed || event.ends < hour) {
@@ -207,7 +207,7 @@ class World extends Agent {
 			duration,
 			type: eventType,
 			id: eventCounter,
-			chance: utils.getRandom(eventOrig.chance),
+			progress: utils.getRandom(eventOrig.progress),
 			ended: false,
 		}};
 
@@ -236,7 +236,7 @@ class World extends Agent {
 		this.setState({queue, events});
 	}
 
-	eventAction(eventId) {
+	eventPop(eventId) {
 		const event = this.state.events.find(event => event.id === eventId);
 
 		this.system.playSound('click');
@@ -252,13 +252,13 @@ class World extends Agent {
 		this.player.changeEnergy(-event.energy);
 		this._updateStateObj('events', event.id, {ended: true});
 		setTimeout(() => this._updateStateObj('events', event.id, {removed: true}), 1000);
-		this.system.massDispatch(event, 'onAction');
+		this.system.massDispatch(event, 'onPop');
 		this.system.massDispatch(event, 'onEnd');
-		this.increaseChance(event.type);
+		this.increaseProgress(event.type);
 	}
 
 	createMapObj(mapObj) {
-		const priority = allAssets.videos[mapObj.name] ? mapCounter * 1000 : mapCounter;
+		const priority = allVideos.indexOf(mapObj.name) > -1 ? mapCounter * 1000 : mapCounter;
 		const newObj = {id: mapCounter, animation: 'create', state: '', priority, ...mapObj};
 
 		newObj.posX = this._getPosValue(newObj.posX) + (newObj.offsetX || 0);
@@ -330,23 +330,23 @@ class World extends Agent {
 		}
 	}
 
-	increaseChance(type) {
+	increaseProgress(type) {
 		const reachedFull = [];
 		const events = this.state.events.map(event => {
-			if (event.hasOwnProperty('chance') && event.chanceIncrease && event.chanceIncrease[type] && !event.ended) {
-				const newChance = Math.min(event.chance + utils.getRandom(event.chanceIncrease[type]), 100);
+			if (event.hasOwnProperty('progress') && event.progressIncrease && event.progressIncrease[type] && !event.ended) {
+				const newProgress = Math.min(event.progress + utils.getRandom(event.progressIncrease[type]), 100);
 
-				if (event.chance < 100 && newChance === 100) {
+				if (event.progress < 100 && newProgress === 100) {
 					reachedFull.push(event.id);
 				}
-				return {...event, chance: newChance};
+				return {...event, progress: newProgress};
 			} else {
 				return event;
 			}
 		});
 
 		this.setState({events});
-		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id), 'onFullChance'));
+		reachedFull.forEach(id => this.system.massDispatch(events.find(event => event.id === id), 'onFullProgress'));
 	}
 };
 

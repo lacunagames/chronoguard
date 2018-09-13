@@ -1,0 +1,619 @@
+
+import React from 'react';
+
+import {Field} from './form';
+import config from '../config';
+import {mapImages as allImages, mapVideos as allVideos, positions, icons as allIcons} from '../game/data/data.json';
+import {actionTypes} from '../game/world';
+
+const positionOptions = positions.map(posObj => ({
+	value: posObj.name,
+	title: posObj.name.charAt(0).toUpperCase() + posObj.name.slice(1),
+}));
+
+const actionFieldConfig = {
+	fields: {
+		selectAction: {
+			id: 'select-action',
+			type: 'select',
+			value: '',
+			label: 'Select action',
+			options: [
+				{value: '', title: 'Select action', icon: 'default', disabled: true},
+				{value: 'queueEvent', title: 'Queue event', icon: 'queue'},
+				{value: 'removeEvents', title: 'Remove events', icon: 'remove'},
+				{value: 'createMapObj', title: 'Create map item', icon: 'map'},
+				{value: 'removeMapObj', title: 'Remove map item', icon: 'map-remove'},
+				{value: 'createMessage', title: 'Create message', icon: 'message'},
+				{value: 'playerAttrs', title: 'Player attributes', icon: 'player'},
+				{value: 'boxAttrs', title: 'Box values', icon: 'box'},
+			],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		queueEvent: {
+			id: 'queue-event',
+			type: 'autocomplete',
+			value: '',
+			label: 'Select event',
+			options: [],
+			hidden: {field: 'selectAction', fieldValueNot: 'queueEvent'},
+			rules: [
+				{type: 'required'},
+				{type: 'matchOption'},
+			],
+		},
+		removeEvents: {
+			id: 'remove-events',
+			type: 'multicomplete',
+			value: [],
+			label: 'Select events',
+			options: [],
+			hidden: {field: 'selectAction', fieldValueNot: 'removeEvents'},
+			rules: [
+				{type: 'required'},
+				{type: 'matchOption'},
+			],
+		},
+		delayEvent: {
+			id: 'delayEvent',
+			type: 'text',
+			value: '',
+			label: 'Delay',
+			hidden: {field: 'selectAction', fieldValueNot: 'queueEvent'},
+			rules: [
+				{type: 'required'},
+				{type: 'range'},
+				{type: 'rangeMin', value: 1},
+			],
+		},
+		selectMapObj: {
+			id: 'select-mapobj',
+			type: 'select',
+			value: '',
+			label: 'Map item',
+			hidden: {field: 'selectAction', fieldValueNot: ['createMapObj', 'removeMapObj']},
+			options: ['', ...allImages, ...allVideos].map((name, index) => {
+				const isVideo = index > allImages.length;
+
+				return {
+					value: name,
+					title: name ? name[0].toUpperCase() + name.slice(1) : 'Select map item',
+					icon: isVideo ? 'video'
+												: name ? 'painting' : 'default',
+					disabled: !name,
+				};
+			}),
+			rules: [
+				{type: 'required'},
+			],
+		},
+		mapObjLocation: {
+			id: 'location-mapobj',
+			type: 'select',
+			label: 'Location',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			options: [
+				{value: 'event', title: 'This event'},
+				...positionOptions,
+			],
+			value: 'event',
+			rules: [{type: 'required'}],
+		},
+		delayMapObj: {
+			id: 'delayMapObj',
+			type: 'text',
+			value: '',
+			label: 'Delay',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			rules: [
+				{type: 'range'},
+			],
+		},
+		messageTitle: {
+			id: 'message-title',
+			type: 'text',
+			value: '',
+			label: 'Title',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMessage'},
+			rules: [
+				{type: 'required'},
+				{type: 'minLength', value: 3},
+			],
+		},
+		messageIconShape: {
+			id: 'message-shape',
+			type: 'select',
+			label: 'Message icon',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMessage'},
+			options: [
+				{value: 'noIcon', title: '- No icon'},
+				{value: 'matchEvent', title: '- Match event'},
+				{value: 'rhombus', title: 'Rhombus shape'},
+				{value: 'circle', title: 'Circle shape'},
+				{value: 'square', title: 'Square shape'},
+			],
+			value: 'noIcon',
+			rules: [],
+		},
+		messageIcon: {
+			id: 'message-icon',
+			type: 'iconSelect',
+			value: 'default',
+			placeholder: 'Select message icon',
+			options: allIcons.map(name => ({value: name, title: name, icon: name})),
+			hidden: [
+				{field: 'selectAction', fieldValueNot: 'createMessage'},
+				{field: 'messageIconShape', fieldValue: ['noIcon', 'matchEvent']},
+			],
+			rules: [],
+			shape: {
+				valueOf: 'messageIconShape',
+				valueFn: value => ['circle', 'rhombus', 'square'].includes(value) ? value : 'circle',
+			},
+			propOrig: 'icon',
+			hideValidation: true,
+			updateWhenChanged: 'messageIconShape',
+		},
+		messageDesc: {
+			id: 'message-desc',
+			type: 'textarea',
+			value: '',
+			label: 'Description',
+			hidden: {field: 'selectAction', fieldValueNot: 'createMessage'},
+			rules: [
+				{type: 'minLength', value: 3},
+			],
+		},
+		playerAttrs: {
+			id: 'player-attrs',
+			type: 'select',
+			value: '',
+			label: 'Player attributes',
+			hidden: {field: 'selectAction', fieldValueNot: 'playerAttrs'},
+			options: [
+				{value: '', title: 'Select attribute action', disabled: true},
+				{value: 'gainSkillPoints', title: 'Gain skill points'},
+				{value: 'changeEnergy', title: 'Change energy by'},
+				{value: 'changeMaxEnergy', title: 'Change maximum energy by'},
+				{value: 'changeEnergyGainRate', title: 'Change energy gain rate by'},
+			],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		playerAttrValue: {
+			id: 'player-attr-val',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: [
+				{field: 'selectAction', fieldValueNot: 'playerAttrs'},
+				{field: 'playerAttrs', fieldValue: 'gainSkillPoints'},
+			],
+			rules: [
+				{type: 'required'},
+				{type: 'number'},
+			],
+		},
+		playerAttrWhole: {
+			id: 'player-attr-whole',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: [
+				{field: 'selectAction', fieldValueNot: 'playerAttrs'},
+				{field: 'playerAttrs', fieldValueNot: 'gainSkillPoints'},
+			],
+			rules: [
+				{type: 'required'},
+				{type: 'wholeNumber'},
+				{type: 'min', value: 1},
+			],
+		},
+		boxName: {
+			id: 'box-name',
+			type: 'autocomplete',
+			value: '',
+			label: 'Name',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			options: [],
+			rules: [
+				{type: 'required'},
+			],
+		},
+		boxActionType: {
+			id: 'box-action-type',
+			type: 'toggle',
+			label: 'Type',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			options: [
+				{value: 'change', title: 'Change by'},
+				{value: 'set', title: 'Set to'},
+			],
+			value: 'change',
+			rules: [],
+		},
+		boxValue: {
+			id: 'box-value',
+			type: 'text',
+			value: '',
+			label: 'Value',
+			hidden: {field: 'selectAction', fieldValueNot: 'boxAttrs'},
+			rules: [
+				{type: 'required'},
+				{type: 'number'},
+			],
+		},
+	},
+	data: {},
+	getOptionsData: {
+		queueEvent: data => Object.keys(data.events || {})
+														.map(eventName => ({
+															value: eventName,
+															title: data.events[eventName].title,
+															icon: data.events[eventName].icon,
+															shape: data.events[eventName].behaviour === 'progress' ? 'rhombus' : 'circle',
+														})),
+		removeEvents: data => Object.keys(data.events || {})
+														.map(eventName => ({
+															value: eventName,
+															title: data.events[eventName].title,
+															icon: data.events[eventName].icon,
+															shape: data.events[eventName].behaviour === 'progress' ? 'rhombus' : 'circle',
+														})),
+		boxName: data => {
+			const uniqueNames = [];
+
+			for (let eventName in data.events) {
+				actionTypes.forEach(actionType => {
+					data.events[eventName][`${actionType}Editor`] && data.events[eventName][`${actionType}Editor`].forEach(action => {
+						if (action.boxName && uniqueNames.indexOf(action.boxName) === -1) {
+							uniqueNames.push(action.boxName);
+						}
+					});
+				});
+			}
+			return uniqueNames.map(name => ({value: name, title: name}));
+		}
+	},
+	display: {
+		selectAction: {type: 'icon'},
+		delayEvent: {pre: 'Delay: '},
+		messageIconShape: {type: 'hidden'},
+		messageIcon: {type: 'iconText'},
+		delayMapObj: {pre: 'Delay: '},
+		mapObjLocation: {pre: 'Location: '},
+	},
+	renderForm: fields => (
+		<React.Fragment>
+			<div className="row">
+				<div className="col-100">
+					<Field config={fields.selectAction} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.queueEvent} />
+					<Field config={fields.removeEvents} />
+					<Field config={fields.selectMapObj} />
+					<Field config={fields.messageTitle} />
+					<Field config={fields.playerAttrs} />
+					<Field config={fields.boxName} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.delayEvent} />
+					<Field config={fields.mapObjLocation} />
+					<div className="icon-select-row">
+						<Field config={fields.messageIconShape} />
+						<Field config={fields.messageIcon} />
+					</div>
+					<Field config={fields.playerAttrValue} />
+					<Field config={fields.playerAttrWhole} />
+					<Field config={fields.boxActionType} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.messageDesc} />
+					<Field config={fields.delayMapObj} />
+					<Field config={fields.boxValue} />
+				</div>
+			</div>
+		</React.Fragment>
+	),
+};
+
+const fields = {
+	selectEvent: {
+		id: 'select-event',
+		name: 'select-event',
+		type: 'autocomplete',
+		value: '',
+		placeholder: 'Select event',
+		options: [],
+		rules: [],
+		hideValidation: true,
+	},
+	eventIcon: {
+		id: 'event-icon',
+		type: 'iconSelect',
+		value: 'default',
+		placeholder: 'Change event icon',
+		options: allIcons.map(name => ({value: name, title: name})),
+		rules: [],
+		shape: {
+			valueOf: 'behaviour',
+			valueFn: value => value === 'progress' ? 'rhombus' : 'circle',
+		},
+		propOrig: 'icon',
+		hideValidation: true,
+	},
+	eventTitle: {
+		id: 'event-title',
+		type: 'text',
+		value: '',
+		label: 'Event title',
+		rules: [
+			{type: 'required'},
+			{type: 'minLength', value: 3},
+			{type: 'unique', others: [], errorText: 'This value already exists, title has to be unique'},
+		],
+		propOrig: 'title',
+	},
+	eventDuration: {
+		id: 'event-duration',
+		type: 'text',
+		value: '',
+		label: 'Event duration',
+		rules: [
+			{type: 'required'},
+			{type: 'range'},
+		],
+		propOrig: 'duration',
+	},
+	behaviour: {
+		id: 'behaviour',
+		type: 'toggle',
+		label: 'Event behaviour',
+		options: [
+			{value: 'pop', title: 'Pop'},
+			{value: 'progress', title: 'Progress'},
+		],
+		value: 'pop',
+		rules: [],
+	},
+	location: {
+		id: 'location',
+		type: 'select',
+		label: 'Location',
+		options: [
+			{value: 'any', title: '- Anywhere'},
+			{value: 'fixed', title: '- Fixed location'},
+			...positionOptions,
+		],
+		value: 'any',
+		rules: [],
+	},
+	posX: {
+		id: 'posx',
+		type: 'text',
+		value: '100',
+		label: 'X position',
+		rules: [
+			{type: 'required'},
+			{type: 'wholeNumber'},
+			{type: 'min', value: 100},
+			{type: 'max', value: config.mapWidth - 100},
+		],
+		hidden: {field: 'location', fieldValueNot: 'fixed',},
+		propOrig: 'fixedPosX',
+	},
+	posY: {
+		id: 'posy',
+		type: 'text',
+		value: '100',
+		label: 'Y position',
+		rules: [
+			{type: 'required'},
+			{type: 'wholeNumber'},
+			{type: 'min', value: 100},
+			{type: 'max', value: config.mapHeight - 100},
+		],
+		hidden: {field: 'location', fieldValueNot: 'fixed',},
+		propOrig: 'fixedPosY',
+	},
+	offsetX: {
+		id: 'offsetx',
+		type: 'text',
+		value: '',
+		label: 'X offset',
+		rules: [
+			{type: 'wholeNumber'},
+		],
+		hidden: {field: 'location', fieldValue: ['fixed', 'any']},
+	},
+	offsetY: {
+		id: 'offsety',
+		type: 'text',
+		value: '',
+		label: 'Y offset',
+		rules: [
+			{type: 'wholeNumber'},
+		],
+		hidden: {field: 'location', fieldValue: ['fixed', 'any']},
+	},
+	range: {
+		id: 'range',
+		type: 'text',
+		value: '',
+		label: 'Range',
+		rules: [
+			{type: 'wholeNumber'},
+			{type: 'min', value: 20},
+		],
+		hidden: {field: 'location', fieldValue: 'any',},
+	},
+	energyCost: {
+		id: 'energy-cost',
+		type: 'text',
+		value: '',
+		label: 'Energy cost',
+		rules: [
+			{type: 'wholeNumber'},
+			{type: 'min', value: 0},
+		],
+		hidden: {field: 'behaviour', fieldValue: 'progress',},
+		propOrig: 'energy',
+	},
+	eventDesc: {
+		id: 'event-desc',
+		type: 'textarea',
+		value: '',
+		label: 'Event description',
+		rules: [
+			{type: 'minLength', value: 3},
+		],
+		propOrig: 'desc',
+	},
+	progress: {
+		id: 'progress',
+		type: 'text',
+		value: '',
+		label: 'Base progress (%)',
+		rules: [
+			{type: 'range'},
+		],
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	},
+	progressIncrease: {
+		id: 'progress-increase',
+		type: 'multiAdd',
+		value: [],
+		label: 'Progress increase',
+		rules: [{type: 'allValidValues'}],
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+		propOrig: 'progressIncreaseEditor',
+		config: {
+			fields: {
+				progressEvent: {
+					id: 'progress-event',
+					type: 'autocomplete',
+					value: '',
+					label: 'Select pop event',
+					options: [],
+					rules: [
+						{type: 'required'},
+						{type: 'matchOption'},
+					],
+				},
+				increase: {
+					id: 'increase',
+					type: 'text',
+					value: '',
+					label: 'Progress increase (%)',
+					rules: [
+						{type: 'required'},
+						{type: 'range'},
+					],
+				},
+			},
+			display: {increase: {post: '%'}},
+			uniqueOptionField: 'progressEvent',
+			getOptionsData: {
+				progressEvent: (data, values) => Object.keys(data.events || {})
+																				.filter(name => data.events[name].behaviour === 'pop' && !values.includes(name))
+																				.map(eventName => ({
+																					value: eventName,
+																					title: data.events[eventName].title,
+																					icon: data.events[eventName].icon,
+																					shape: 'circle',
+																				}))},
+			data: {},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.progressEvent} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.increase} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	},
+	onStart: {
+		id: 'on-start',
+		type: 'multiAdd',
+		value: [],
+		label: 'onStart',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onStartEditor',
+		config: actionFieldConfig,
+	},
+	onEnd: {
+		id: 'on-end',
+		type: 'multiAdd',
+		value: [],
+		label: 'onEnd',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onEndEditor',
+		config: actionFieldConfig,
+	},
+	onPop: {
+		id: 'on-action',
+		type: 'multiAdd',
+		value: [],
+		label: 'onPop',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onPopEditor',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'progress',},
+	},
+	onNoPop: {
+		id: 'on-no-action',
+		type: 'multiAdd',
+		value: [],
+		label: 'onNoPop',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onNoPopEditor',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'progress',},
+	},
+	onSuccess: {
+		id: 'on-success',
+		type: 'multiAdd',
+		value: [],
+		label: 'onSuccess',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onSuccessEditor',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	},
+	onFail: {
+		id: 'on-fail',
+		type: 'multiAdd',
+		value: [],
+		label: 'onFail',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onFailEditor',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	},
+	onFullProgress: {
+		id: 'on-full-progress',
+		type: 'multiAdd',
+		value: [],
+		label: 'onFullProgress',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'onFullProgressEditor',
+		config: actionFieldConfig,
+		hidden: {field: 'behaviour', fieldValue: 'pop',},
+	}
+};
+
+export {
+	actionFieldConfig,
+	fields,
+};

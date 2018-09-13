@@ -23,7 +23,6 @@
 			padding: 8px;
 			margin: 0 5px 5px 0;
 			box-shadow: $shadow1;
-			overflow: hidden;
 		}
 
 		.text {
@@ -32,7 +31,7 @@
 
 		button {
 			padding: 8px 6px 11px;
-			margin: -8px -8px -9px 3px;
+			margin: -8px -9px -9px 3px;
 
 			&:hover, &:focus {
 				background: lighten($cError, 10%);
@@ -41,6 +40,7 @@
 
 			.tab-active &:focus {
 				padding: 6px 4px 9px;
+				height: 40px;
 			}
 		}
 

@@ -62,6 +62,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					});
 				}
 				field.isHidden = this.isHiddenField(field);
+				field.disabled = this.isDisabledField(field);
 
 				// Add asterisk to mark required for select
 				if ((field.type === 'select' || field.type === 'autocomplete') && field.rules.find(rule => rule.type === 'required')) {
@@ -74,6 +75,9 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					if (field.dynamicHelpText) {
 						field.helpText = field.matchingOption ? field.dynamicHelpText(field) : '';
 					}
+				}
+				if (typeof field.shape === 'object') {
+					field.shape.origin = this;
 				}
 				// Add change handler
 				field.onChange = (e) => {
@@ -107,6 +111,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 
 				case 'autocomplete':
 				case 'select':
+				case 'iconSelect':
 					cloneField.value = e.target.value;
 					cloneField.options = e.options || cloneField.options;
 					cloneField.matchingOption = e.matchingOption ||
@@ -120,6 +125,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 					cloneField.value = e.target.value;
 			}
 			cloneField.isHidden = this.isHiddenField(cloneField);
+			cloneField.disabled = this.isDisabledField(cloneField);
 			if (!skipValidate) {
 				cloneField.invalid = this.checkValidity(cloneField);
 			}
@@ -142,9 +148,12 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				}
 				const fieldsToUpdate = Object.keys(this.state).filter(matchName => {
 					const hidden = this.state[matchName].hidden;
-					const hiddenMatch = hidden instanceof Array && hidden.find(item => item.field === fieldName);
+					const update = this.state[matchName].updateWhenChanged;
+					const hiddenMatch = hidden instanceof Array ? hidden.find(item => item.field === fieldName)
+																											: (hidden || {}).field === fieldName;
+					const updateMatch = update instanceof Array ? update.find(item => item === fieldName) : update === fieldName;
 
-					return hidden && (hidden.field === fieldName || hiddenMatch);
+					return hiddenMatch || updateMatch;
 				}).reduce((obj, name) => obj = {...obj, [name]: this.state[name].value}, {});
 				const hasFieldsToUpdate = Object.keys(fieldsToUpdate).length > 0;
 
@@ -185,6 +194,29 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				return isHidden;
 			});
 			return isHidden;
+		}
+
+		isDisabledField(field) {
+			if (!field.isDisabled) {
+				return field.disabled || false;
+			}
+
+			let isDisabled = false;
+			const items = field.isDisabled instanceof Array ? field.isDisabled : [field.isDisabled];
+
+			items.some(item => {
+				const matchValue = this.state[item.field].value;
+				const {fieldValue, fieldValueNot} = item;
+
+				if (fieldValue !== undefined) {
+					isDisabled = typeof fieldValue === 'object' ? fieldValue.indexOf(matchValue) > -1 : fieldValue === matchValue;
+				}
+				if (fieldValueNot !== undefined && !isDisabled) {
+					isDisabled = typeof fieldValueNot === 'object' ? fieldValueNot.indexOf(matchValue) === -1 : fieldValueNot !== matchValue;
+				}
+				return isDisabled;
+			});
+			return isDisabled;
 		}
 
 		checkValidity(field) {
@@ -268,8 +300,13 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			let updatedCount = 0;
 			const updateAll = (type, callbackFn) => {
 				fieldNames.forEach((fieldName) => {
-					const value = type === 'value' ? fields[fieldName] : this.isHiddenField(this.state[fieldName]);
-					const updatedField = {...this.state[fieldName], [type]: value};
+					let setTo;
+					switch (type) {
+						case 'value': setTo = fields[fieldName]; break;
+						case 'isHidden': setTo = this.isHiddenField(this.state[fieldName]); break;
+						case 'disabled': setTo = this.isDisabledField(this.state[fieldName]); break;
+					}
+					const updatedField = {...this.state[fieldName], [type]: setTo};
 
 					if (type === 'value' && ['autocomplete', 'select'].includes(updatedField.type)) {
 						updatedField.matchingOption = utils.pickWild(updatedField.options, updatedField.type === 'autocomplete' ? 'title' : 'value', updatedField.value);
@@ -290,7 +327,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 			if (fieldNames.length === 0) {
 				return callback && callback();
 			}
-			updateAll('value', () => updateAll('isHidden', callback));
+			updateAll('value', () => updateAll('isHidden', () => updateAll('disabled', callback)));
 		}
 
 		updateOptions(fieldName, newOptions, callback) {
