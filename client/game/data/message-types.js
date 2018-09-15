@@ -46,7 +46,7 @@ const messageTypes = {
 	primary: {
 		text: name => `${name}`,
 		desc: descVal => `${descVal || ''}`,
-		duration: 1200,
+		duration: 12,
 	}
 };
 

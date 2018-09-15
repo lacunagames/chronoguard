@@ -4,7 +4,7 @@ import config from 'config';
 import {
 	events as allEvents,
 	mapVideos as allVideos,
-	positions,
+	positions as allPositions,
 } from './data/data.json';
 import Agent from './agent';
 
@@ -29,7 +29,7 @@ const defaultState = {
 		{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: '', priority: 0},
 		{id: 1, name: 'mountain',	posX: 400, posY: 300,	animation: '', state: '', priority: 1},
 	],
-	positions,
+	positions: allPositions,
 	conditions: [
 		{
 			id: 0,
@@ -125,6 +125,10 @@ class World extends Agent {
 					case 'createMapObj':
 						this.createMapObj(item.value);
 						break;
+
+					case 'destroyMapObj':
+						this.destroyMapObj(item.value);
+						break;
 				}
 				return false;
 			}
@@ -150,6 +154,10 @@ class World extends Agent {
 
 			case 'eventPosY':
 				return refs && refs.event.posY;
+
+			case 'anyPosX':
+			case 'anyPosY':
+				return false;
 
 			default:
 				const [posObjName, type] = value.split('Pos');
@@ -222,6 +230,10 @@ class World extends Agent {
 				}
 				action[actionName].posX = this._getPosValue(action[actionName].posX, {event});
 				action[actionName].posY = this._getPosValue(action[actionName].posY, {event});
+				if (actionName === 'queueItem' && action[actionName].value.posX) {
+					action[actionName].value.posX = this._getPosValue(action[actionName].value.posX, {event});
+					action[actionName].value.posY = this._getPosValue(action[actionName].value.posY, {event});
+				}
 			});
 		});
 
@@ -265,6 +277,16 @@ class World extends Agent {
 		newObj.posY = this._getPosValue(newObj.posY) + (newObj.offsetY || 0);
 		mapCounter++;
 		this.setState({map: [...this.state.map, newObj]});
+	}
+
+	destroyMapObj(obj) {
+		const mapItem = this.state.map.find(mapObj => {
+			return mapObj.name === obj.name && (!obj.posX || obj.posX === mapObj.posX && obj.posY === mapObj.posY);
+		});
+
+		if (mapItem) {
+			obj.noAnimation ? this.removeMapObj(mapItem.id) : this.updateMapObj(mapItem.id, {animation: 'destroy'});
+		}
 	}
 
 	updateMapObj(id, update) {

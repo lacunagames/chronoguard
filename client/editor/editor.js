@@ -80,12 +80,13 @@ class Editor extends Agent {
 								...getOptionVal('queueEvent', actionValue.value, data),
 								delayEvent: actionValue.delay + '',
 							};
-						} else if (actionValue.type === 'createMapObj') {
+						} else if (['createMapObj', 'destroyMapObj'].includes(actionValue.type)) {
 							obj = {
-								...getOptionVal('selectAction', 'createMapObj'),
+								...getOptionVal('selectAction', actionValue.type),
 								...getOptionVal('selectMapObj', actionValue.value.name),
-								...getOptionVal('mapObjLocation', actionValue.value.posX.split('PosX')[0]),
+								...getOptionVal(`${actionValue.type}Location`, actionValue.value.posX.split('PosX')[0]),
 								delayMapObj: actionValue.delay + '',
+								noAnimation: actionValue.noAnimation,
 							};
 						}
 						break;
@@ -102,11 +103,13 @@ class Editor extends Agent {
 						break;
 
 					case 'createMapObj':
+					case 'destroyMapObj':
 						obj = {
-							...getOptionVal('selectAction', 'createMapObj'),
+							...getOptionVal('selectAction', actionName),
 							...getOptionVal('selectMapObj', actionValue.name),
-							...getOptionVal('mapObjLocation', actionValue.posX.split('PosX')[0]),
+							...getOptionVal(`${actionName}Location`, actionValue.posX.split('PosX')[0]),
 							delayMapObj: '',
+							noDestroyMapObjAnimation: actionValue.noAnimation ? actionFieldConfig.fields.noDestroyMapObjAnimation.checkedValue : '',
 						};
 						break;
 
@@ -174,13 +177,16 @@ class Editor extends Agent {
 						break;
 
 					case 'createMapObj':
+					case 'destroyMapObj':
+						const actionName = actionObj.selectAction.value;
 						const mapObj = {
 							name: actionObj.selectMapObj.value,
-							posX: actionObj.mapObjLocation.value + 'PosX',
-							posY: actionObj.mapObjLocation.value + 'PosY',
+							posX: actionObj[`${actionName}Location`].value + 'PosX',
+							posY: actionObj[`${actionName}Location`].value + 'PosY',
+							noAnimation: actionName === 'destroyMapObj' && !!actionObj.noDestroyMapObjAnimation,
 						};
-						obj = actionObj.delayMapObj ? {queueItem: {type: 'createMapObj', delay: actionObj.delayMapObj, value: mapObj}}
-																				: {createMapObj: mapObj};
+						obj = actionObj.delayMapObj ? {queueItem: {type: actionName, delay: actionObj.delayMapObj, value: mapObj}}
+																				: {[actionName]: mapObj};
 						break;
 
 					case 'createMessage':

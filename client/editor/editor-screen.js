@@ -210,11 +210,13 @@ class EditorScreen extends React.Component {
 			title: `New event ${this.data.newEventId}`,
 		}};
 		localStorage.currentEvent = newEventType;
-		this.dataChange({events: {...this.data.events, [newEventType]: newEvent}}, () => {
-			this.setState({saving: true});
-			this.editor.saveEvent(newEventType, this.state.events[newEventType]).then(() => {
-				this.setState({saving: false});
-				this.data.newEventId++;
+		this.props.formMethods.updateFields({selectEvent: ''}, () => {
+			this.dataChange({events: {...this.data.events, [newEventType]: newEvent}}, () => {
+				this.setState({saving: true});
+				this.editor.saveEvent(newEventType, this.state.events[newEventType]).then(() => {
+					this.setState({saving: false});
+					this.data.newEventId++;
+				});
 			});
 		});
 	}
@@ -274,7 +276,8 @@ class EditorScreen extends React.Component {
 										</button>
 										<p>
 											{!isValidAll && 'Some fields are invalid. Changes cannot be saved.'}
-											{saving === false && isValidAll && ' All changes saved.'}
+											{saving && isValidAll && 'Saving.'}
+											{saving === false && isValidAll && 'All changes saved.'}
 										</p>
 									</Tooltip>
 								}

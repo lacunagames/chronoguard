@@ -23,7 +23,7 @@ const actionFieldConfig = {
 				{value: 'queueEvent', title: 'Queue event', icon: 'queue'},
 				{value: 'removeEvents', title: 'Remove events', icon: 'remove'},
 				{value: 'createMapObj', title: 'Create map item', icon: 'map'},
-				{value: 'removeMapObj', title: 'Remove map item', icon: 'map-remove'},
+				{value: 'destroyMapObj', title: 'Destroy map item', icon: 'map-remove'},
 				{value: 'createMessage', title: 'Create message', icon: 'message'},
 				{value: 'playerAttrs', title: 'Player attributes', icon: 'player'},
 				{value: 'boxAttrs', title: 'Box values', icon: 'box'},
@@ -73,7 +73,7 @@ const actionFieldConfig = {
 			type: 'select',
 			value: '',
 			label: 'Map item',
-			hidden: {field: 'selectAction', fieldValueNot: ['createMapObj', 'removeMapObj']},
+			hidden: {field: 'selectAction', fieldValueNot: ['createMapObj', 'destroyMapObj']},
 			options: ['', ...allImages, ...allVideos].map((name, index) => {
 				const isVideo = index > allImages.length;
 
@@ -89,8 +89,8 @@ const actionFieldConfig = {
 				{type: 'required'},
 			],
 		},
-		mapObjLocation: {
-			id: 'location-mapobj',
+		createMapObjLocation: {
+			id: 'location-mapobj-create',
 			type: 'select',
 			label: 'Location',
 			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
@@ -101,15 +101,36 @@ const actionFieldConfig = {
 			value: 'event',
 			rules: [{type: 'required'}],
 		},
+		destroyMapObjLocation: {
+			id: 'location-mapobj-remove',
+			type: 'select',
+			label: 'Location',
+			hidden: {field: 'selectAction', fieldValueNot: 'destroyMapObj'},
+			options: [
+				{value: 'any', title: 'Anywhere'},
+				{value: 'event', title: 'This event'},
+				...positionOptions,
+			],
+			value: 'any',
+			rules: [],
+		},
 		delayMapObj: {
 			id: 'delayMapObj',
 			type: 'text',
 			value: '',
 			label: 'Delay',
-			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+			hidden: {field: 'selectAction', fieldValueNot: ['createMapObj', 'destroyMapObj']},
 			rules: [
 				{type: 'range'},
 			],
+		},
+		noDestroyMapObjAnimation: {
+			id: 'no-destroy-mapobj-animation',
+			type: 'checkbox',
+			value: '',
+			label: 'Skip fade out animation',
+			checkedValue: 'No animation',
+			rules: [],
 		},
 		messageTitle: {
 			id: 'message-title',
@@ -284,7 +305,8 @@ const actionFieldConfig = {
 		messageIconShape: {type: 'hidden'},
 		messageIcon: {type: 'iconText'},
 		delayMapObj: {pre: 'Delay: '},
-		mapObjLocation: {pre: 'Location: '},
+		createMapObjLocation: {pre: 'Location: '},
+		destroyMapObjLocation: {pre: 'Location: '},
 	},
 	renderForm: fields => (
 		<React.Fragment>
@@ -302,7 +324,8 @@ const actionFieldConfig = {
 				</div>
 				<div className="col-100">
 					<Field config={fields.delayEvent} />
-					<Field config={fields.mapObjLocation} />
+					<Field config={fields.createMapObjLocation} />
+					<Field config={fields.destroyMapObjLocation} />
 					<div className="icon-select-row">
 						<Field config={fields.messageIconShape} />
 						<Field config={fields.messageIcon} />
@@ -315,6 +338,9 @@ const actionFieldConfig = {
 					<Field config={fields.messageDesc} />
 					<Field config={fields.delayMapObj} />
 					<Field config={fields.boxValue} />
+				</div>
+				<div className="col-100">
+					<Field config={fields.noDestroyMapObjAnimation} />
 				</div>
 			</div>
 		</React.Fragment>

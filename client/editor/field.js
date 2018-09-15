@@ -194,7 +194,7 @@ class Field extends React.Component {
 				invalid: field.invalid,
 				valid: !field.invalid,
 				hidden: field.type === 'hidden',
-				'no-label': !field.label,
+				'no-label': !field.label || field.type === 'checkbox',
 				'hide-validation': field.hideValidation,
 				'icon-select-field': field.type === 'iconSelect',
 				})}>

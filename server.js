@@ -102,15 +102,17 @@ const backupData = () => {
 													})
 													.sort((a, b) => b.time - a.time);
 
-	backupFiles
-		.filter((fileObj, index) => {
-			const isOldFile = index > 0 && backupFiles[index - 1].day.getTime() === fileObj.day.getTime();
+	const deleteFiles = backupFiles.filter((fileObj, index) => {
+		const isOldFile = index > 0 && backupFiles[index - 1].day.getTime() === fileObj.day.getTime();
 
-			return fileObj.time < now - threeDays && isOldFile;
-		})
-		.forEach(fileObj => fs.unlinkSync(backupFolder + fileObj.name));
+		return fileObj.time < now - threeDays && isOldFile;
+	});
+	deleteFiles.forEach(fileObj => fs.unlinkSync(backupFolder + fileObj.name));
+	deleteFiles.length && console.log(`${deleteFiles.length} backup files have been deleted.`);
 
-	fs.createReadStream(dataJsonUrl).pipe(fs.createWriteStream(targetPath));
+	if (fs.readFileSync(dataJsonUrl).toString() !== fs.readFileSync(backupFolder + backupFiles[0].name).toString()) {
+		fs.createReadStream(dataJsonUrl).pipe(fs.createWriteStream(targetPath));
+	}
 };
 
 
