@@ -20,13 +20,16 @@ app.use('/static', express.static(path.resolve(__dirname, 'static')));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+
 app.get('/', (req, resp) => {
 	resp.sendFile(__dirname + '/static/index.html');
 });
 
-app.get('/editor', (req, resp) => {
+
+app.get('/*editor', (req, resp) => {
 	resp.sendFile(__dirname + '/static/editor.html');
 });
+
 
 app.get('/get-data', (req, resp) => {
 	const dataFile = fs.readFileSync(dataJsonUrl);
@@ -38,6 +41,7 @@ app.get('/get-data', (req, resp) => {
 
 	resp.send(data);
 });
+
 
 app.post('/save-event', (req, resp) => {
 	backupData();
@@ -54,6 +58,24 @@ app.post('/save-event', (req, resp) => {
 	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
 	resp.send({[eventName]: event});
 });
+
+
+app.post('/save-state', (req, resp) => {
+	backupData();
+	const newState = {...req.body};
+	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
+	const positionIds = (newState.positions || []).map(posObj => +posObj.id.substr(3) + 1);
+	const newPositionId = Math.max(...positionIds, data.newPositionId);
+
+	data = {
+		...data,
+		...newState,
+		newPositionId,
+	};
+	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
+	resp.send(data);
+});
+
 
 app.get('/remove-event', (req, resp) => {
 	const eventName = req.query.type;

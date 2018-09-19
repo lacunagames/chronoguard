@@ -12,10 +12,10 @@ class SelectDropdown extends React.Component {
 	}
 
 	componentDidMount() {
-		const selectedIndex = this.props.options.findIndex(option => option.value === this.props.selected.value);
+		const selectedIndex = this.props.options.findIndex(option => this.props.selected && option.value === this.props.selected.value);
 
 		window.addEventListener('focusout', this.focusout);
-		this.setFocus(selectedIndex || 0);
+		this.setFocus(selectedIndex > -1 ? selectedIndex : 0);
 	}
 
 	componentWillUnmount() {

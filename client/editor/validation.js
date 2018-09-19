@@ -21,7 +21,9 @@ const validationRules = {
 	},
 
 	matchOption: (field) => {
-		const matchingMulticomplete = field.value instanceof Array && !field.value.some(item => !field.options.find(opt => opt.value === item.value));
+		const matchingMulticomplete = field.value instanceof Array &&
+																		!field.value.some(item => !field.options.find(opt => opt.value === item.value));
+
 		return !!field.matchingOption || matchingMulticomplete;
 	},
 
@@ -42,7 +44,7 @@ const validationRules = {
 	},
 
 	unique: (field, rule) => {
-		return !field.value || !rule.others.includes(field.value);
+		return !field.value || !rule.others.includes(field.value.toLowerCase().trim());
 	},
 
 	range: field => {
@@ -65,7 +67,7 @@ const defaultErrorTexts = {
 	required: `This field is required`,
 	minLength: `This field has to be at least {value} characters long`,
 	maxLength: `This field can't be more than {value} characters long`,
-	matchOption: `Please enter a matching value`,
+	matchOption: `Please select a matching value`,
 	number: `Please enter a number, for example 3.23`,
 	wholeNumber: `Please enter a whole number, for example 3`,
 	range: `Please enter a positive whole number or range, for example: 4 or 3-12`,

@@ -18,7 +18,8 @@ const multiAddForm = (renderForm) => {
 			const {optionsData, formMethods, openIndex, fields} = this.props;
 			const updateValues = () => {
 				const valObj = this.props.values.find(valObj => valObj._index === openIndex);
-				const fieldValues = valObj && Object.keys(valObj).filter(name => name[0] !== '_').reduce((obj, fieldName) => {
+
+				let fieldValues = valObj && Object.keys(valObj).filter(name => name[0] !== '_').reduce((obj, fieldName) => {
 					const isAutoComplete = fields[fieldName].type === 'autocomplete';
 
 					return obj = {
@@ -29,6 +30,10 @@ const multiAddForm = (renderForm) => {
 					};
 				}, {});
 
+				for (let fieldName in this.props.generatedValues) {
+					fieldValues = fieldValues || {};
+					fieldValues[fieldName] = this.props.generatedValues[fieldName];
+				}
 				fieldValues && formMethods.updateFields(fieldValues, () => {
 					const focusElem = this.props.focusField && document.querySelector(`#${this.props.fields[this.props.focusField].id}`);
 
@@ -37,6 +42,7 @@ const multiAddForm = (renderForm) => {
 					}
 				});
 			};
+
 			let updateLength = Object.keys(optionsData).length;
 
 			if (updateLength === 0) {

@@ -5,6 +5,8 @@ import {
 	events as allEvents,
 	mapVideos as allVideos,
 	positions as allPositions,
+	startingMapItems,
+	startingQueueItems,
 } from './data/data.json';
 import Agent from './agent';
 
@@ -12,23 +14,10 @@ const actionTypes = ['onStart', 'onEnd', 'onPop', 'onNoPop', 'onSuccess', 'onFai
 
 const defaultState = {
 	events: [],
-	queue: [
-		{type: 'createEvent', value: 'water', activates: 3,},
-		{type: 'createEvent', value: 'life', activates: 8,},
-		{type: 'createEvent', value: 'earth', activates: 11,},
-		{type: 'createEvent', value: 'water', activates: 2,},
-		{type: 'createEvent', value: 'life', activates: 7,},
-		{type: 'createEvent', value: 'earth', activates: 2,},
-		{type: 'createEvent', value: 'inspireFarming', activates: 1},
-		{type: 'createEvent', value: 'eventType1', activates: 3},
-		{type: 'createMapObj', value: {name: 'village', posX: 900, posY: 280}, activates: 1},
-	],
+	queue: startingQueueItems,
 	hour: 0,
 	day: 1,
-	map: [
-		{id: 0, name: 'island',	posX: 600, posY: 450,	animation: '', state: '', priority: 0},
-		{id: 1, name: 'mountain',	posX: 400, posY: 300,	animation: '', state: '', priority: 1},
-	],
+	map: startingMapItems,
 	positions: allPositions,
 	conditions: [
 		{
@@ -62,6 +51,22 @@ class World extends Agent {
 	constructor(subscribeState) {
 		super(subscribeState);
 		utils.bindThis(this, ['_worldChange', 'eventPop']);
+
+		defaultState.map = defaultState.map.map((mapObj, index) => ({
+			state: '',
+			animation: '',
+			priority: index,
+			id: index,
+			...mapObj,
+			posX: this._getPosValue(mapObj.posX, {positions: allPositions}),
+			posY: this._getPosValue(mapObj.posY, {positions: allPositions}),
+		}));
+		defaultState.queue.forEach(queueObj => {
+			if (['createMapObj', 'destroyMapObj'].includes(queueObj.type)) {
+				queueObj.value.posX = this._getPosValue(queueObj.value.posX, {positions: allPositions});
+				queueObj.value.posY = this._getPosValue(queueObj.value.posY, {positions: allPositions});
+			}
+		});
 		this.state = {};
 		this.setState(defaultState);
 		this.changeInterval = setInterval(this._worldChange, 250);
@@ -160,10 +165,11 @@ class World extends Agent {
 				return false;
 
 			default:
-				const [posObjName, type] = value.split('Pos');
-				const findFn = posObj => posObj.name === posObjName;
+				const [posObjId, type] = value.split('Pos');
+				const findFn = posObj => posObj.id === posObjId;
 				// Find object
-				const posObj = this.state.positions.find(findFn) || this.state.map.find(findFn);
+				const posObj = refs && refs.positions ? refs.positions.find(findFn)
+																							: this.state.positions.find(findFn) || this.state.map.find(findFn);
 
 				if (!posObj) {
 					console.warn(`Error: no position object found for ${value}.`);

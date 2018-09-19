@@ -332,10 +332,9 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 
 		updateOptions(fieldName, newOptions, callback) {
 			const field = {...this.state[fieldName]};
-			const isMulticomplete = field.type === 'multicomplete';
-			const matchingOption = !isMulticomplete &&
-							utils.pickWild(newOptions, 'value', field.matchingOption ? field.matchingOption.value : field.value);
-			const value = isMulticomplete ? field.value : matchingOption && matchingOption.title || '';
+			const isAutocomplete = field.type === 'autocomplete';
+			const matchingOption = isAutocomplete && utils.pickWild(newOptions, 'value', (field.matchingOption || field).value);
+			const value = isAutocomplete ? matchingOption && matchingOption.title || '' : field.value;
 
 			this.setState({[fieldName]: {
 				...field,

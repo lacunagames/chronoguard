@@ -14,13 +14,15 @@ class Select extends React.Component {
 		utils.bindThis(this, ['keydown', 'clickSelect', 'clickOption']);
 		this.state = {
 			isOpen: false,
-			selected: this.props.options.find(option => option.value === this.props.value) || this.props.options[0]
+			selected: this.props.options.find(option => option.value === this.props.value) || !this.props.value && this.props.options[0]
 		};
 	}
 
 	componentWillReceiveProps(nextProps) {
 		if (this.props.options !== nextProps.options || this.props.value !== nextProps.value) {
-			this.setState({selected: nextProps.options.find(option => option.value === nextProps.value) || nextProps.options[0]});
+			this.setState({
+				selected: nextProps.options.find(option => option.value === nextProps.value) || !nextProps.value && nextProps.options[0]
+			});
 		}
 	}
 
@@ -33,7 +35,7 @@ class Select extends React.Component {
 				this.clickSelect();
 			} else {
 				const {options} = this.props;
-				const index = options.findIndex(option => option.value === this.state.selected.value);
+				const index = options.findIndex(option => this.state.selected && option.value === this.state.selected.value);
 				let newIndex = index;
 				do {
 					newIndex += e.keyCode === 38 ? -1 : 1;
@@ -60,17 +62,17 @@ class Select extends React.Component {
 	}
 
 	render() {
-		const {options, selectId, disabled} = this.props;
+		const {options, selectId, disabled, value} = this.props;
 		const {selected, isOpen} = this.state;
 
 		return (
-			<div className="select-box" role="listbox" aria-activedescendant={selectId + '-' + selected.value}>
-				<input value={selected.value} id={selectId} onClick={this.clickSelect} tabIndex="-1" />
+			<div className="select-box" role="listbox" aria-activedescendant={selectId + '-' + value}>
+				<input value={value} id={selectId} onClick={this.clickSelect} tabIndex="-1" />
 				<div className={utils.getClassName({
 						select: true,
 						open: isOpen,
-						placeholder: !selected.value,
-						'has-icon': selected.icon,
+						placeholder: !value,
+						'has-icon': selected && selected.icon,
 						disabled,
 					})}
 					onClick={this.clickSelect}
@@ -82,7 +84,7 @@ class Select extends React.Component {
 							<span style={utils.getIconStyle(selected.icon)} />
 						</span>
 					}
-					{selected.title || selected.value}
+					{selected && selected.title || value}
 					<i>expand_more</i>
 				</div>
 				{isOpen &&

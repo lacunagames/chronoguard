@@ -1,15 +1,103 @@
 {
-  "newEventId": 35,
-  "positions": [
+  "newEventId": 47,
+  "newPositionId": 9,
+  "startingMapItems": [
     {
-      "name": "village",
-      "posX": 900,
-      "posY": 280
+      "name": "island",
+      "posX": "pos7PosX",
+      "posY": "pos7PosY"
     },
     {
       "name": "mountain",
-      "posX": 400,
-      "posY": 300
+      "posX": "pos2PosX",
+      "posY": "pos2PosY"
+    }
+  ],
+  "startingQueueItems": [
+    {
+      "type": "createEvent",
+      "value": "water",
+      "activates": 3
+    },
+    {
+      "type": "createEvent",
+      "value": "life",
+      "activates": 8
+    },
+    {
+      "type": "createEvent",
+      "value": "earth",
+      "activates": 11
+    },
+    {
+      "type": "createEvent",
+      "value": "water",
+      "activates": 2
+    },
+    {
+      "type": "createEvent",
+      "value": "life",
+      "activates": 7
+    },
+    {
+      "type": "createEvent",
+      "value": "earth",
+      "activates": 2
+    },
+    {
+      "type": "createEvent",
+      "value": "inspireFarming",
+      "activates": 1
+    },
+    {
+      "type": "createEvent",
+      "value": "eventType1",
+      "activates": 3
+    },
+    {
+      "type": "createMapObj",
+      "value": {
+        "name": "village",
+        "posX": "pos1PosX",
+        "posY": "pos1PosY"
+      },
+      "activates": 1
+    },
+    {
+      "type": "destroyMapObj",
+      "value": {
+        "name": "island",
+        "posX": "anyPosX",
+        "posY": "anyPosY",
+        "noAnimation": false
+      },
+      "activates": 3
+    }
+  ],
+  "positions": [
+    {
+      "id": "pos1",
+      "name": "Village",
+      "posX": 450,
+      "posY": 280
+    },
+    {
+      "id": "pos2",
+      "name": "Mountain",
+      "posX": 950,
+      "posY": 600
+    },
+    {
+      "id": "pos7",
+      "name": "Center",
+      "posX": 600,
+      "posY": 450
+    },
+    {
+      "id": "pos8",
+      "name": "Lake",
+      "posX": 300,
+      "posY": 250
     }
   ],
   "mapImages": [
@@ -47,6 +135,8 @@
     "fire",
     "fireball",
     "flame-shield",
+    "flowers",
+    "ice-rune",
     "incantate",
     "life",
     "light",
@@ -74,9 +164,9 @@
       "title": "Fire",
       "duration": "7-9",
       "energy": "5",
-      "posX": "villagePosX",
-      "posY": "villagePosY",
-      "range": 200,
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "range": 100,
       "onPop": [
         {
           "changeBoxAttr": [
@@ -96,9 +186,6 @@
       ],
       "behaviour": "pop",
       "icon": "fire",
-      "onSuccessEditor": [],
-      "onFailEditor": [],
-      "onFullProgressEditor": [],
       "desc": "",
       "onStart": [],
       "onNoPop": []
@@ -135,11 +222,11 @@
     },
     "air": {
       "title": "Air",
-      "duration": "7-9",
-      "energy": "5",
-      "posX": "villagePosX",
-      "posY": "villagePosY",
-      "range": 200,
+      "duration": "5-7",
+      "energy": "4",
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "range": 150,
       "onPop": [
         {
           "changeBoxAttr": [
@@ -153,15 +240,12 @@
           "queueItem": {
             "type": "createEvent",
             "value": "air",
-            "delay": "5-8"
+            "delay": "3-5"
           }
         }
       ],
       "behaviour": "pop",
       "icon": "air",
-      "onSuccessEditor": [],
-      "onFailEditor": [],
-      "onFullProgressEditor": [],
       "desc": "",
       "onStart": [],
       "onNoPop": []
@@ -231,89 +315,26 @@
       "icon": "farm",
       "desc": "The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.\nWhat?",
       "duration": "40",
-      "progress": 15,
-      "posX": "villagePosX",
-      "posY": "villagePosY",
-      "offsetX": 50,
-      "offsetY": 50,
-      "progressIncrease": {
-        "air": "8-10",
-        "fire": "7-11"
-      },
       "onStart": [
         {
           "queueItem": {
             "type": "createEvent",
             "value": "air",
-            "delay": "1-3"
+            "delay": "2-4"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "air",
-            "delay": "3-5"
+            "delay": "5-7"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
-            "value": "fire",
-            "delay": "1-3"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "fire",
-            "delay": "4-6"
-          }
-        }
-      ],
-      "onFullProgress": [
-        {
-          "removeAllEventsByType": [
-            "air",
-            "fire"
-          ]
-        }
-      ],
-      "onSuccess": [
-        {
-          "createMapObj": {
-            "name": "farm",
-            "posX": "villagePosX",
-            "posY": "villagePosY"
-          }
-        },
-        {
-          "createMapObj": {
-            "name": "explode",
-            "posX": "villagePosX",
-            "posY": "villagePosY"
-          }
-        },
-        {
-          "createMessage": {
-            "type": "primary",
-            "name": "Farming inspired successfully",
-            "descVal": "Some villagers are inspired to become farmers.\n{icon-skill-points} +5",
-            "icon": "farm",
-            "shape": "rhombus"
-          }
-        },
-        {
-          "gainSkillPoints": 5
-        }
-      ],
-      "onFail": [
-        {
-          "createMessage": {
-            "type": "free",
-            "name": "Inspire Farming Failed",
-            "descVal": "",
-            "icon": false,
-            "shape": false
+            "value": "air",
+            "delay": "20-25"
           }
         }
       ],
@@ -327,12 +348,28 @@
         },
         {
           "removeAllEventsByType": [
-            "air",
-            "fire"
+            "air"
           ]
         }
       ],
-      "behaviour": "progress"
+      "behaviour": "progress",
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "offsetX": 50,
+      "offsetY": 50,
+      "progress": 0,
+      "progressIncrease": {
+        "air": "8-11"
+      },
+      "onSuccess": [],
+      "onFail": [],
+      "onFullProgress": [
+        {
+          "removeAllEventsByType": [
+            "air"
+          ]
+        }
+      ]
     },
     "eventType1": {
       "title": "Volcano",
@@ -393,7 +430,7 @@
           "createMessage": {
             "type": "primary",
             "name": "Volcano erupted",
-            "descVal": "A lot of people died because of you.. I hope you are happy!\n{icon-skill-points} +3 ",
+            "descVal": "A lot of people died because of you.. I hope you are happy!\n{icon-skill-points} +5",
             "icon": "volcano",
             "shape": "rhombus"
           }
@@ -404,8 +441,8 @@
         {
           "createMapObj": {
             "name": "volcano",
-            "posX": "mountainPosX",
-            "posY": "mountainPosY",
+            "posX": "pos2PosX",
+            "posY": "pos2PosY",
             "noAnimation": false
           }
         },
@@ -415,24 +452,20 @@
             "delay": "7-10",
             "value": {
               "name": "volcano",
-              "posX": "mountainPosX",
-              "posY": "mountainPosY",
+              "posX": "pos2PosX",
+              "posY": "pos2PosY",
               "noAnimation": false
             }
           }
-        }
-      ],
-      "onFail": [
+        },
         {
-          "createMessage": {
-            "type": "free",
-            "name": "Volcano eruption failed",
-            "descVal": "",
-            "icon": false,
-            "shape": false
-          }
+          "changeBoxAttr": [
+            "volcanoErupted",
+            1
+          ]
         }
       ],
+      "onFail": [],
       "onFullProgress": [
         {
           "removeAllEventsByType": [
@@ -440,16 +473,17 @@
           ]
         }
       ],
-      "posX": "mountainPosX",
-      "posY": "mountainPosY",
+      "posX": "pos2PosX",
+      "posY": "pos2PosY",
       "offsetX": 50,
-      "offsetY": 50
+      "offsetY": 50,
+      "selectScreen": "event"
     },
     "eventType2": {
       "title": "Focused flame",
       "duration": "6-8",
-      "posX": "mountainPosX",
-      "posY": "mountainPosY",
+      "posX": "pos2PosX",
+      "posY": "pos2PosY",
       "range": 250,
       "onEnd": [],
       "behaviour": "pop",
@@ -462,7 +496,7 @@
     },
     "eventType10": {
       "title": "Great day to live",
-      "icon": "summon-dragon",
+      "icon": "flowers",
       "desc": "",
       "duration": "50",
       "onStart": [
@@ -471,7 +505,7 @@
             "type": "primary",
             "name": "Mooo",
             "descVal": "",
-            "icon": "summon-dragon",
+            "icon": "flowers",
             "shape": "rhombus"
           }
         },
@@ -479,10 +513,11 @@
           "changeEnergy": -2
         },
         {
-          "createMapObj": {
+          "destroyMapObj": {
             "name": "farm",
-            "posX": "eventPosX",
-            "posY": "eventPosY"
+            "posX": "pos2PosX",
+            "posY": "pos2PosY",
+            "noAnimation": false
           }
         }
       ],
@@ -496,13 +531,80 @@
         }
       ],
       "behaviour": "progress",
-      "posX": "mountainPosX",
-      "posY": "mountainPosY",
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
       "progress": 0,
-      "progressIncrease": {},
+      "progressIncrease": {
+        "eventType2": "8",
+        "life": "8",
+        "eventType46": "8-11"
+      },
       "onSuccess": [],
-      "onFail": [],
-      "onFullProgress": []
+      "onFail": [
+        {
+          "createMessage": {
+            "type": "primary",
+            "name": "Volcano eruption failed",
+            "descVal": "",
+            "icon": "farm",
+            "shape": "square"
+          }
+        }
+      ],
+      "onFullProgress": [],
+      "range": 100
+    },
+    "eventType46": {
+      "title": "Icy eye",
+      "icon": "ice-rune",
+      "desc": "",
+      "duration": "51",
+      "onStart": [
+        {
+          "createMapObj": {
+            "name": "explode",
+            "posX": "pos2PosX",
+            "posY": "pos2PosY",
+            "noAnimation": false
+          }
+        }
+      ],
+      "onEnd": [],
+      "behaviour": "pop",
+      "energy": 0,
+      "onPop": [],
+      "onNoPop": [],
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "range": 100
     }
+  },
+  "sendState": {
+    "positionsEditor": [
+      {
+        "id": "pos1",
+        "positionName": "Village",
+        "posX": "900",
+        "posY": "280",
+        "_index": 1,
+        "_isValid": true
+      },
+      {
+        "id": "pos2",
+        "positionName": "Mountain",
+        "posX": "400",
+        "posY": "300",
+        "_index": 2,
+        "_isValid": true
+      },
+      {
+        "id": "",
+        "positionName": "Ice cap",
+        "posX": "400",
+        "posY": "799",
+        "_isValid": true,
+        "_index": 3
+      }
+    ]
   }
 }

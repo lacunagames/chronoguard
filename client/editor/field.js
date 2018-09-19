@@ -38,7 +38,8 @@ class Field extends React.Component {
 							options={field.options}
 							onChange={field.onChange}
 							disabled={field.disabled}
-							value={field.value} />
+							value={field.value}
+							classNames={field.classNames} />
 					);
 
 				case 'iconSelect':

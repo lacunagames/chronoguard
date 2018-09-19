@@ -1,7 +1,7 @@
 
 import Agent from '../game/agent';
 import {actionTypes} from '../game/world';
-import {actionFieldConfig} from './editor-screen-fields';
+import {actionFieldConfig, stateFields} from './editor-screen-fields';
 
 import utils from 'utils';
 
@@ -10,13 +10,14 @@ class Editor extends Agent {
 
 	constructor(subscribeState) {
 		super(subscribeState);
-		utils.bindThis(this, ['_saveEvent']);
+		utils.bindThis(this, ['_saveEvent', '_saveState']);
 
 		this.state = {};
 		this.subscribeSave = {};
 		this.saving = false;
 		this.saveQueue = {};
-		this.debounceSave = utils.debounce(this._saveEvent, 500);
+		this.debounceSaveEvent = utils.debounce(this._saveEvent, 500);
+		this.debounceSaveState = utils.debounce(this._saveState, 500);
 
 		this._loadData();
 	}
@@ -46,16 +47,18 @@ class Editor extends Agent {
 		});
 	}
 
+	_getOptionVal(fieldName, value, data, config) {
+		config = config || actionFieldConfig;
+		const options = data && config.getOptionsData[fieldName](data) || config.fields[fieldName].options;
+		const option = options.find(option => option.value === value) || {value};
+		return {[fieldName]: option};
+	}
+
 	_actionToEditor(event, data) {
 		const returnObj = {};
-		const getOptionVal = (fieldName, value, data) => {
-			const options = data && actionFieldConfig.getOptionsData[fieldName](data) || actionFieldConfig.fields[fieldName].options;
-			const option = options.find(option => option.value === value) || {value};
-			return {[fieldName]: option};
-		}
 
 		actionTypes.forEach(actionType => {
-			const arr = returnObj[`${actionType}Editor`] = [];
+			returnObj[`${actionType}Editor`] = [];
 
 			event[actionType] && event[actionType].forEach((action, index) => {
 				const actionName = Object.keys(action)[0];
@@ -66,9 +69,9 @@ class Editor extends Agent {
 					case 'changeBoxAttr':
 					case 'setBoxAttr':
 						obj = {
-							...getOptionVal('selectAction', 'boxAttrs'),
+							...this._getOptionVal('selectAction', 'boxAttrs'),
 							boxName: actionValue[0],
-							...getOptionVal('boxActionType', actionName === 'changeBoxAttr' ? 'change' : 'set'),
+							...this._getOptionVal('boxActionType', actionName === 'changeBoxAttr' ? 'change' : 'set'),
 							boxValue: actionValue[1] + '',
 						};
 						break;
@@ -76,15 +79,15 @@ class Editor extends Agent {
 					case 'queueItem':
 						if (actionValue.type === 'createEvent') {
 							obj = {
-								...getOptionVal('selectAction', 'queueEvent'),
-								...getOptionVal('queueEvent', actionValue.value, data),
+								...this._getOptionVal('selectAction', 'queueEvent'),
+								...this._getOptionVal('queueEvent', actionValue.value, data),
 								delayEvent: actionValue.delay + '',
 							};
 						} else if (['createMapObj', 'destroyMapObj'].includes(actionValue.type)) {
 							obj = {
-								...getOptionVal('selectAction', actionValue.type),
-								...getOptionVal('selectMapObj', actionValue.value.name),
-								...getOptionVal(`${actionValue.type}Location`, actionValue.value.posX.split('PosX')[0]),
+								...this._getOptionVal('selectAction', actionValue.type),
+								...this._getOptionVal('selectMapObj', actionValue.value.name),
+								...this._getOptionVal(`${actionValue.type}Location`, actionValue.value.posX.split('PosX')[0]),
 								delayMapObj: actionValue.delay + '',
 								noAnimation: actionValue.noAnimation,
 							};
@@ -96,8 +99,8 @@ class Editor extends Agent {
 					case 'changeEnergyGainRate':
 					case 'gainSkillPoints':
 						obj = {
-							...getOptionVal('selectAction', 'playerAttrs'),
-							...getOptionVal('playerAttrs', actionName),
+							...this._getOptionVal('selectAction', 'playerAttrs'),
+							...this._getOptionVal('playerAttrs', actionName),
 							[actionName === 'gainSkillPoints' ? 'playerAttrWhole' : 'playerAttrValue']: actionValue + '',
 						};
 						break;
@@ -105,9 +108,9 @@ class Editor extends Agent {
 					case 'createMapObj':
 					case 'destroyMapObj':
 						obj = {
-							...getOptionVal('selectAction', actionName),
-							...getOptionVal('selectMapObj', actionValue.name),
-							...getOptionVal(`${actionName}Location`, actionValue.posX.split('PosX')[0]),
+							...this._getOptionVal('selectAction', actionName),
+							...this._getOptionVal('selectMapObj', actionValue.name),
+							...this._getOptionVal(`${actionName}Location`, actionValue.posX.split('PosX')[0]),
 							delayMapObj: '',
 							noDestroyMapObjAnimation: actionValue.noAnimation ? actionFieldConfig.fields.noDestroyMapObjAnimation.checkedValue : '',
 						};
@@ -115,8 +118,8 @@ class Editor extends Agent {
 
 					case 'removeAllEventsByType':
 						obj = {
-							...getOptionVal('selectAction', 'removeEvents'),
-							removeEvents: actionValue.map(eventName => getOptionVal('removeEvents', eventName, data).removeEvents),
+							...this._getOptionVal('selectAction', 'removeEvents'),
+							removeEvents: actionValue.map(eventName => this._getOptionVal('removeEvents', eventName, data).removeEvents),
 						};
 						break;
 
@@ -124,14 +127,14 @@ class Editor extends Agent {
 						const eventShape = event.behaviour === 'progress' ? 'rhombus' : 'circle';
 						const isMatchEvent = actionValue.icon === event.icon && actionValue.shape === eventShape;
 						obj = {
-							...getOptionVal('selectAction', 'createMessage'),
+							...this._getOptionVal('selectAction', 'createMessage'),
 							messageTitle: actionValue.name,
-							...getOptionVal('messageIconShape', isMatchEvent 	? 'matchEvent'
+							...this._getOptionVal('messageIconShape', isMatchEvent 	? 'matchEvent'
 																																: !actionValue.icon ? 'noIcon' : actionValue.shape),
 							...(isMatchEvent 	? {messageIcon: {value: event.icon, icon: event.icon, shape: eventShape}}
 																: !actionValue.icon ? {} : {
 																		messageIcon: {
-																			...getOptionVal('messageIcon', actionValue.icon).messageIcon,
+																			...this._getOptionVal('messageIcon', actionValue.icon).messageIcon,
 																			...{shape: actionValue.shape},
 																		}
 																	}),
@@ -143,7 +146,7 @@ class Editor extends Agent {
 				if (obj) {
 					obj._index = index + 1;
 					obj._isValid = true;
-					arr.push(obj);
+					returnObj[`${actionType}Editor`].push(obj);
 				}
 			});
 		});
@@ -247,7 +250,8 @@ class Editor extends Agent {
 					behaviour: typeof event.progress === 'undefined' ? 'pop' : 'progress',
 					icon: event.icon || data.icons.find(icon => icon === event.title.toLowerCase().replace(/ /g, '-')) || 'default',
 					progress: ['number', 'string'].includes(typeof event.progress) ? event.progress + '' : '',
-					location: event.posX && isNaN(+event.posX) ? event.posX.split('PosX')[0] : event.posX > 0 ? 'fixed' : 'any',
+					location: event.posX && isNaN(+event.posX) 	? event.posX.split('PosX')[0]
+																											: event.posX > 0 ? 'fixed' : 'any',
 					duration: event.duration + '',
 					energy: event.energy ? event.energy + '' : '',
 					posX: typeof event.posX === 'string' ? event.posX : '',
@@ -269,6 +273,47 @@ class Editor extends Agent {
 				};
 			}
 
+			// State
+			data.positionsEditor = data.positions.map((posObj, index) => ({
+				id: posObj.id,
+				positionName: posObj.name,
+				posX: posObj.posX + '',
+				posY: posObj.posY + '',
+				_index: index + 1,
+				_isValid: true,
+			}));
+
+			data.startingMapItemsEditor = data.startingMapItems.map((mapObj, index) => {
+				const location = typeof mapObj.posX === 'number' ? 'fixed' : mapObj.posX.split('PosX')[0];
+				return {
+					...this._getOptionVal('selectMapObj', mapObj.name, null, stateFields.startingMapItems.config),
+					...this._getOptionVal('mapItemLocation', location, data, stateFields.startingMapItems.config),
+					posX: typeof mapObj.posX === 'number' ? mapObj.posX + '' : '',
+					posY: typeof mapObj.posY === 'number' ? mapObj.posY + '' : '',
+					_index: index + 1,
+					_isValid: true,
+				};
+			});
+
+			data.startingQueueItemsEditor = data.startingQueueItems.map((queueObj, index) => {
+				const createEventFn = () => this._getOptionVal('createEvent', queueObj.value, data, stateFields.startingQueueItems.config);
+				const selectMapObjFn = () => this._getOptionVal('selectMapObj', queueObj.value.name, null, stateFields.startingQueueItems.config);
+				const createMapObjLocationFn = () => this._getOptionVal('createMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
+				const destroyMapObjLocationFn = () => this._getOptionVal('destroyMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
+
+				return {
+					...this._getOptionVal('selectAction', queueObj.type, null, stateFields.startingQueueItems.config),
+					activates: queueObj.activates + '',
+					...(queueObj.type === 'createEvent' ? createEventFn() : {}),
+					...(['createMapObj', 'destroyMapObj'].includes(queueObj.type) ? selectMapObjFn() : {}),
+					...(queueObj.type === 'createMapObj' ? createMapObjLocationFn() : {}),
+					...(queueObj.type === 'destroyMapObj' ? destroyMapObjLocationFn() : {}),
+					...(queueObj.type === 'destroyMapObj' ? {noDestroyMapObjAnimation: queueObj.value.noAnimation} : {}),
+					_index: index + 1,
+					_isValid: true,
+				};
+			});
+
 			this.setState({
 				...data,
 			});
@@ -283,7 +328,7 @@ class Editor extends Agent {
 				this.saveQueue[type] = eventObj;
 			} else {
 				this.saving = type;
-				this.debounceSave(type, eventObj);
+				this.debounceSaveEvent(type, eventObj);
 			}
 		});
 	}
@@ -338,7 +383,7 @@ class Editor extends Agent {
 
 		this._actionToGame(sendEvent);
 
-		this.saving = '!inProgress';
+		this.saving = '!!inProgress';
 		this._ajax({url: '/save-event', type: 'post', data: {[type]: sendEvent}}).then(eventObj => {
 			const nextSave = Object.keys(this.saveQueue)[0];
 
@@ -348,7 +393,8 @@ class Editor extends Agent {
 			}
 			if (nextSave) {
 				this.saving = nextSave;
-				this.debounceSave(nextSave, this.saveQueue[nextSave]);
+				nextSave === '!!state' 	? this.debounceSaveState(this.saveQueue[nextSave])
+																: this.debounceSaveEvent(nextSave, this.saveQueue[nextSave]);
 				delete this.saveQueue[nextSave];
 			} else {
 				this.saving = false;
@@ -360,6 +406,79 @@ class Editor extends Agent {
 		return new Promise(resolve => {
 			this._ajax({url: '/remove-event', params: {type}}).then(resolve);
 		});
+	}
+
+	saveState(newStateObj) {
+		const type = '!!state';
+		return new Promise((resolve, reject) => {
+			this.subscribeSave[type] = this.subscribeSave[type] || [];
+			this.subscribeSave[type].push(event => resolve(event));
+			if (this.saving && this.saving !== type) {
+				this.saveQueue[type] = newStateObj;
+			} else {
+				this.saving = type;
+				this.debounceSaveState(newStateObj);
+			}
+		});
+	}
+
+	_saveState(newStateObj) {
+		const type = '!!state';
+		const sendState = {...newStateObj};
+
+		if (newStateObj.positionsEditor) {
+			sendState.positions = sendState.positionsEditor.map(posObj => ({
+				id: posObj.id,
+				name: posObj.positionName,
+				posX: +posObj.posX,
+				posY: +posObj.posY,
+			}));
+			delete sendState.positionsEditor;
+		}
+
+		if (newStateObj.startingMapItemsEditor) {
+			sendState.startingMapItems = sendState.startingMapItemsEditor.map(mapObj => ({
+				name: mapObj.selectMapObj.value,
+				posX: mapObj.mapItemLocation.value === 'fixed' ? +mapObj.posX : mapObj.mapItemLocation.value + 'PosX',
+				posY: mapObj.mapItemLocation.value === 'fixed' ? +mapObj.posY : mapObj.mapItemLocation.value + 'PosY',
+			}));
+			delete sendState.startingMapItemsEditor;
+		}
+
+		if (newStateObj.startingQueueItemsEditor) {
+			sendState.startingQueueItems = sendState.startingQueueItemsEditor.map(queueObj => {
+				const selectAction = queueObj.selectAction.value;
+				const locationField = selectAction === 'createMapObj' ? 'createMapObjLocation' : 'destroyMapObjLocation';
+				let value = selectAction === 'createEvent' ? queueObj.createEvent.value : {
+					name: queueObj.selectMapObj.value,
+					posX: queueObj[locationField].value + 'PosX',
+					posY: queueObj[locationField].value + 'PosY',
+					...(selectAction === 'destroyMapObj' && queueObj.noDestroyMapObjAnimation ? {noAnimation: true} : {})
+				};
+
+				return {type: queueObj.selectAction.value, value, activates: +queueObj.activates};
+			});
+			delete sendState.startingQueueItemsEditor;
+		}
+
+		this.saving = '!!inProgress';
+		this._ajax({url: '/save-state', type: 'post', data: sendState}).then(stateObj => {
+			const nextSave = Object.keys(this.saveQueue)[0];
+
+			if (!this.saveQueue[type]) {
+				this.subscribeSave[type].forEach(fn => fn(stateObj));
+				this.subscribeSave[type] = [];
+			}
+			if (nextSave) {
+				this.saving = nextSave;
+				nextSave === type ? this.debounceSaveState(this.saveQueue[nextSave])
+													: this.debounceSaveEvent(nextSave, this.saveQueue[nextSave]);
+				delete this.saveQueue[nextSave];
+			} else {
+				this.saving = false;
+			}
+		});
+
 	}
 }
 

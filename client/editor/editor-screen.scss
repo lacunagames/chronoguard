@@ -18,6 +18,12 @@
 }
 
 .editor-screen {
+	opacity: 1;
+	transition: opacity $animFast;
+
+	.screen:not(.ready) & {
+		opacity: 0;
+	}
 
 	form, & {
 		overflow: hidden;
@@ -34,8 +40,14 @@
 		padding: 14px 15px 0;
 		background: lighten($cSecondary, 20%);
 		box-shadow: $shadow1;
+		height: 71px;
 
-		h3 {
+		.inner {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.h3 {
 			font-size: 24px;
 			padding: 10px 40px 0 0;
 			margin-bottom: 0;

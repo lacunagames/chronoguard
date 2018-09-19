@@ -85,7 +85,7 @@ class MultiAdd extends React.Component {
 	}
 
 	toggleModal(e, index, focusField) {
-		const {getOptionsData, data} = this.props.config;
+		const {getOptionsData, data, fields} = this.props.config;
 		const openIndex = index || Math.max(...this.props.value.map(valObj => valObj._index), 0) + 1;
 
 		e && e.stopPropagation();
@@ -96,11 +96,35 @@ class MultiAdd extends React.Component {
 		} else {
 			const {top, bottom, left, right} = e.currentTarget.getBoundingClientRect();
 
+			// Update unique rule others array
+			for (let fieldName in fields) {
+				const uniqueRule = fields[fieldName].rules.find(rule => rule.type === 'unique');
+
+				if (uniqueRule) {
+					const value = this.props.value;
+
+					uniqueRule.others = value.filter(valObj => value.indexOf(valObj) + 1 !== openIndex)
+																		.map(valObj => valObj[fieldName].toLowerCase().trim());
+				}
+			}
+
+
+			// Generate value on new item
+			const generatedValues = {};
+			if (openIndex > this.props.value.length) {
+				for (let fieldName in fields) {
+					if (fields[fieldName].generateValue) {
+						generatedValues[fieldName] = fields[fieldName].generateValue(this.props.config);
+					}
+				}
+			}
+
 			this.setState({
 				isModalOpen: true,
 				modalPos: typeof top !== 'undefined' && {top, bottom, left, right},
 				openIndex,
 				focusField,
+				generatedValues,
 				optionsData: Object.keys(getOptionsData || {}).reduce((obj, fieldName) => {
 					const values = this.props.value.filter(valObj => valObj._index !== openIndex).map(valObj => {
 						return typeof valObj[fieldName] === 'object' ? valObj[fieldName].value : valObj[fieldName];
@@ -120,9 +144,9 @@ class MultiAdd extends React.Component {
 			const index = newValues.findIndex(valObj => valObj._index === newValue._index);
 			const isRemove = newValue._remove || !Object.keys(newValue).filter(name => name[0] !== '_').some(name => newValue[name]);
 
-				newValues = isRemove ? newValues.filter(valObj => valObj._index !== newValue._index)
-														 : index === -1 ? [...newValues, newValue].sort((valObjA, valObjB) => valObjA._index - valObjB._index)
-																						: [...newValues.slice(0, index), newValue, ...newValues.slice(index + 1)];
+			newValues = isRemove ? newValues.filter(valObj => valObj._index !== newValue._index)
+													 : index === -1 ? [...newValues, newValue].sort((valObjA, valObjB) => valObjA._index - valObjB._index)
+																					: [...newValues.slice(0, index), newValue, ...newValues.slice(index + 1)];
 
 		});
 
@@ -219,7 +243,6 @@ class MultiAdd extends React.Component {
 					<button type="button" className="icon-raised add-new" onClick={this.toggleModal}><i>add</i></button>
 				}
 				<Modal show={this.state.isModalOpen}
-					// pos={this.state.modalPos}
 					locked={false}
 					className="multi-add-modal"
 					onClose={this.toggleModal}>
@@ -231,7 +254,8 @@ class MultiAdd extends React.Component {
 						optionsData={this.state.optionsData}
 						changeValue={this.changeValue}
 						focusField={this.state.focusField}
-						toggleModal={this.toggleModal} />
+						toggleModal={this.toggleModal}
+						generatedValues={this.state.generatedValues} />
 				</Modal>
 			</div>
 		);

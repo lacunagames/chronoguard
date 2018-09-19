@@ -96,16 +96,15 @@ class System extends Agent {
 	}
 
 	massDispatch(actionArr, actionType) {
-		if (actionType) {
-			this.world.state.conditions.forEach(condition => this.world.checkCondition(condition, actionArr, actionType));
-			actionArr = actionArr[actionType];
-		}
-		actionArr && actionArr.forEach(action => {
+		const actions = actionType ? actionArr[actionType] : actionArr;
+
+		actions && actions.forEach(action => {
 			const actionName = Object.keys(action)[0];
 			const args = action[actionName] instanceof Array ? action[actionName] : [action[actionName]];
 
 			this.dispatch(actionName, ...args);
 		});
+		this.world.state.conditions.forEach(condition => this.world.checkCondition(condition, actionArr, actionType));
 	}
 
 	playMusic(musicName) {

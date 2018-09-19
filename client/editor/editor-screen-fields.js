@@ -3,13 +3,8 @@ import React from 'react';
 
 import {Field} from './form';
 import config from '../config';
-import {mapImages as allImages, mapVideos as allVideos, positions, icons as allIcons} from '../game/data/data.json';
+import {mapImages as allImages, mapVideos as allVideos, positions as allPositions, icons as allIcons} from '../game/data/data.json';
 import {actionTypes} from '../game/world';
-
-const positionOptions = positions.map(posObj => ({
-	value: posObj.name,
-	title: posObj.name.charAt(0).toUpperCase() + posObj.name.slice(1),
-}));
 
 const actionFieldConfig = {
 	fields: {
@@ -94,10 +89,7 @@ const actionFieldConfig = {
 			type: 'select',
 			label: 'Location',
 			hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
-			options: [
-				{value: 'event', title: 'This event'},
-				...positionOptions,
-			],
+			options: [],
 			value: 'event',
 			rules: [{type: 'required'}],
 		},
@@ -106,11 +98,7 @@ const actionFieldConfig = {
 			type: 'select',
 			label: 'Location',
 			hidden: {field: 'selectAction', fieldValueNot: 'destroyMapObj'},
-			options: [
-				{value: 'any', title: 'Anywhere'},
-				{value: 'event', title: 'This event'},
-				...positionOptions,
-			],
+			options: [],
 			value: 'any',
 			rules: [],
 		},
@@ -130,6 +118,7 @@ const actionFieldConfig = {
 			value: '',
 			label: 'Skip fade out animation',
 			checkedValue: 'No animation',
+			hidden: {field: 'selectAction', fieldValueNot: 'destroyMapObj'},
 			rules: [],
 		},
 		messageTitle: {
@@ -284,6 +273,16 @@ const actionFieldConfig = {
 															icon: data.events[eventName].icon,
 															shape: data.events[eventName].behaviour === 'progress' ? 'rhombus' : 'circle',
 														})),
+		createMapObjLocation: data => {
+			const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+			return [{value: 'event', title: 'This event'}, ...fixedPositions];
+		},
+		destroyMapObjLocation: data => {
+			const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+			return [{value: 'any', title: 'Anywhere'}, {value: 'event', title: 'This event'}, ...fixedPositions];
+		},
 		boxName: data => {
 			const uniqueNames = [];
 
@@ -347,7 +346,7 @@ const actionFieldConfig = {
 	),
 };
 
-const fields = {
+const eventFields = {
 	selectEvent: {
 		id: 'select-event',
 		name: 'select-event',
@@ -413,10 +412,10 @@ const fields = {
 		options: [
 			{value: 'any', title: '- Anywhere'},
 			{value: 'fixed', title: '- Fixed location'},
-			...positionOptions,
+			...allPositions.map(posObj => ({value: posObj.id, title: posObj.name})),
 		],
 		value: 'any',
-		rules: [],
+		rules: [{type: 'matchOption'}],
 	},
 	posX: {
 		id: 'posx',
@@ -639,7 +638,353 @@ const fields = {
 	}
 };
 
+const stateFields = {
+	positions: {
+		id: 'positions',
+		type: 'multiAdd',
+		value: [],
+		label: 'Locations',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'positionsEditor',
+		config: {
+			fields: {
+				id: {
+					type: 'hidden',
+					rules: [],
+					value: '',
+					generateValue: config => {
+						const val = `pos${config.newId}`;
+						config.newId++;
+						return val;
+					},
+				},
+				positionName: {
+					id: 'position-name',
+					type: 'text',
+					value: '',
+					label: 'Name',
+					rules: [
+						{type: 'required'},
+						{type: 'minLength', value: 3},
+						{type: 'unique', others: [], errorText: 'Title has to be unique'},
+					],
+				},
+				posX: {
+					id: 'posx',
+					type: 'text',
+					value: '',
+					label: 'X position',
+					rules: [
+						{type: 'required'},
+						{type: 'wholeNumber'},
+						{type: 'min', value: 100},
+						{type: 'max', value: config.mapWidth - 100},
+					],
+				},
+				posY: {
+					id: 'posy',
+					type: 'text',
+					value: '',
+					label: 'Y position',
+					rules: [
+						{type: 'required'},
+						{type: 'wholeNumber'},
+						{type: 'min', value: 100},
+						{type: 'max', value: config.mapHeight - 100},
+					],
+				},
+			},
+			data: {},
+			newId: 0,
+			display: {
+				id: {type: 'hidden'},
+				posX: {pre: 'X: '},
+				posY: {pre: 'Y: '},
+			},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.positionName} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.posX} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.posY} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	},
+	startingMapItems: {
+		id: 'map-items',
+		type: 'multiAdd',
+		value: [],
+		label: 'Starting map items',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'startingMapItemsEditor',
+		config: {
+			fields: {
+				selectMapObj: {
+					id: 'select-mapobj',
+					type: 'select',
+					value: '',
+					label: 'Map item',
+					options: ['', ...allImages, ...allVideos].map((name, index) => {
+						const isVideo = index > allImages.length;
+
+						return {
+							value: name,
+							title: name ? name[0].toUpperCase() + name.slice(1) : 'Select map item',
+							icon: isVideo ? 'video'
+														: name ? 'painting' : 'default',
+							disabled: !name,
+						};
+					}),
+					rules: [
+						{type: 'required'},
+					],
+				},
+				mapItemLocation: {
+					id: 'location-mapitem',
+					type: 'select',
+					label: 'Location',
+					options: [],
+					value: 'pos7',
+					rules: [{type: 'required'}],
+				},
+				posX: {
+					id: 'posx',
+					type: 'text',
+					value: '',
+					label: 'X position',
+					hidden: {field: 'mapItemLocation', fieldValueNot: 'fixed'},
+					rules: [
+						{type: 'required'},
+						{type: 'wholeNumber'},
+						{type: 'min', value: 100},
+						{type: 'max', value: config.mapWidth - 100},
+					],
+				},
+				posY: {
+					id: 'posy',
+					type: 'text',
+					value: '',
+					label: 'Y position',
+					hidden: {field: 'mapItemLocation', fieldValueNot: 'fixed'},
+					rules: [
+						{type: 'required'},
+						{type: 'wholeNumber'},
+						{type: 'min', value: 100},
+						{type: 'max', value: config.mapHeight - 100},
+					],
+				},
+			},
+			getOptionsData: {
+				mapItemLocation: data => {
+					const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+					return [{value: 'fixed', title: 'Fixed location'}, ...fixedPositions];
+				},
+			},
+			data: {},
+			display: {
+				mapItemLocation: {pre: 'Location: '},
+				posX: {pre: 'X: '},
+				posY: {pre: 'Y: '},
+			},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.selectMapObj} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.mapItemLocation} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.posX} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.posY} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	},
+	startingQueueItems: {
+		id: 'queue-items',
+		type: 'multiAdd',
+		value: [],
+		label: 'Starting queue items',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'startingMapItemsEditor',
+		config: {
+			fields: {
+				selectAction: {
+					id: 'select-action',
+					type: 'select',
+					value: '',
+					label: 'Select action',
+					options: [
+						{value: '', title: 'Select action', icon: 'default', disabled: true},
+						{value: 'createEvent', title: 'Create event', icon: 'queue'},
+						{value: 'createMapObj', title: 'Create map item', icon: 'map'},
+						{value: 'destroyMapObj', title: 'Destroy map item', icon: 'map-remove'},
+					],
+					rules: [
+						{type: 'required'},
+					],
+				},
+				activates: {
+					id: 'activates',
+					type: 'text',
+					value: '',
+					label: 'Activates at (turn)',
+					hidden: {field: 'selectAction', fieldValue: ''},
+					rules: [
+						{type: 'required'},
+						{type: 'wholeNumber'},
+						{type: 'min', value: 1},
+					],
+				},
+				createEvent: {
+					id: 'create-event',
+					type: 'autocomplete',
+					value: '',
+					label: 'Select event',
+					options: [],
+					hidden: {field: 'selectAction', fieldValueNot: 'createEvent'},
+					rules: [
+						{type: 'required'},
+						{type: 'matchOption'},
+					],
+				},
+				selectMapObj: {
+					id: 'select-mapobj',
+					type: 'select',
+					value: '',
+					label: 'Map item',
+					hidden: {field: 'selectAction', fieldValueNot: ['createMapObj', 'destroyMapObj']},
+					options: ['', ...allImages, ...allVideos].map((name, index) => {
+						const isVideo = index > allImages.length;
+
+						return {
+							value: name,
+							title: name ? name[0].toUpperCase() + name.slice(1) : 'Select map item',
+							icon: isVideo ? 'video'
+														: name ? 'painting' : 'default',
+							disabled: !name,
+						};
+					}),
+					rules: [
+						{type: 'required'},
+					],
+				},
+				createMapObjLocation: {
+					id: 'location-mapobj-create',
+					type: 'select',
+					label: 'Location',
+					hidden: {field: 'selectAction', fieldValueNot: 'createMapObj'},
+					options: [],
+					value: '',
+					rules: [{type: 'required'}, {type: 'matchOption'}],
+				},
+				destroyMapObjLocation: {
+					id: 'location-mapobj-remove',
+					type: 'select',
+					label: 'Location',
+					hidden: {field: 'selectAction', fieldValueNot: 'destroyMapObj'},
+					options: [],
+					value: 'any',
+					rules: [{type: 'required'}, {type: 'matchOption'}],
+				},
+				noDestroyMapObjAnimation: {
+					id: 'no-destroy-mapobj-animation',
+					type: 'checkbox',
+					value: '',
+					label: 'Skip fade out animation',
+					checkedValue: 'No animation',
+					hidden: {field: 'selectAction', fieldValueNot: 'destroyMapObj'},
+					rules: [],
+				},
+			},
+			getOptionsData: {
+				createEvent: data => Object.keys(data.events || {})
+																.map(eventName => ({
+																	value: eventName,
+																	title: data.events[eventName].title,
+																	icon: data.events[eventName].icon,
+																	shape: data.events[eventName].behaviour === 'progress' ? 'rhombus' : 'circle',
+																})),
+				createMapObjLocation: data => {
+					const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+					return [{value: '', title: 'Select location', disabled: true}, ...fixedPositions];
+				},
+				destroyMapObjLocation: data => {
+					const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+					return [{value: 'any', title: 'Anywhere'}, ...fixedPositions];
+				},
+			},
+			data: {},
+			display: {
+				selectAction: {type: 'icon'},
+				activates: {pre: 'Turn '},
+				createMapObjLocation: {pre: 'Location: '},
+				destroyMapObjLocation: {pre: 'Location: '},
+			},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.selectAction} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.activates} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.createEvent} />
+							<Field config={fields.selectMapObj} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.createMapObjLocation} />
+							<Field config={fields.destroyMapObjLocation} />
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.noDestroyMapObjAnimation} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	},
+};
+
 export {
 	actionFieldConfig,
-	fields,
+	eventFields,
+	stateFields,
 };

@@ -8,8 +8,12 @@ class Screen extends React.Component {
 	constructor(props) {
 		super(props);
 		utils.bindThis(this, ['screenKeydown', 'screenMousedown']);
-		this.state = {tabKey: false};
+		this.state = {
+			tabKey: false,
+			ready: false,
+		};
 		document.title = this.props.pageTitle || document.title;
+		window.onload = () => this.setState({ready: true});
 	}
 
 	componentDidMount() {
@@ -37,6 +41,7 @@ class Screen extends React.Component {
 			<div className={utils.getClassName({
 					'tab-active': this.state.tabKey,
 					screen: true,
+					ready: this.state.ready,
 				})}>
 				<div className={this.props.className}>
 					{this.props.children}
