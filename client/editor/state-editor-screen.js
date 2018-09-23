@@ -52,8 +52,10 @@ class StateEditorScreen extends React.Component {
 			}
 
 			this.setState({saving: true});
-			this.editor.saveState(newState).then(() => {
-				this.setState({saving: false});
+			this.editor.saveState(newState).then(newData => {
+				this.dataChange(newData, () => {
+					this.setState({saving: false});
+				});
 			});
 		}
 	}
@@ -75,8 +77,7 @@ class StateEditorScreen extends React.Component {
 				this.loadCallbacks = [];
 			});
 		};
-
-		this.data = {...this.data, ...newData};
+		this.data = newData;
 		for (let fieldName in this.props.fields) {
 			if (this.props.fields[fieldName].type === 'multiAdd') {
 				this.props.fields[fieldName].config.data = this.data;

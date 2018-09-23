@@ -40,6 +40,9 @@ const multiAddForm = (renderForm) => {
 					if (focusElem) {
 						['select', 'iconSelect'].includes(this.props.fields[this.props.focusField].type) ? focusElem.click() : focusElem.focus();
 					}
+					if (valObj) {
+						this.props.formMethods.validateAll(this.props.fields);
+					}
 				});
 			};
 

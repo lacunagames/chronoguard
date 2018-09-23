@@ -225,6 +225,49 @@ class Editor extends Agent {
 		});
 	}
 
+	_loadEditorState(data) {
+		// State
+		data.positionsEditor = data.positions.map((posObj, index) => ({
+			id: posObj.id,
+			positionName: posObj.name,
+			posX: posObj.posX + '',
+			posY: posObj.posY + '',
+			_index: index + 1,
+			_isValid: true,
+		}));
+
+		data.startingMapItemsEditor = data.startingMapItems.map((mapObj, index) => {
+			const location = typeof mapObj.posX === 'number' ? 'fixed' : mapObj.posX.split('PosX')[0];
+			return {
+				...this._getOptionVal('selectMapObj', mapObj.name, null, stateFields.startingMapItems.config),
+				...this._getOptionVal('mapItemLocation', location, data, stateFields.startingMapItems.config),
+				posX: typeof mapObj.posX === 'number' ? mapObj.posX + '' : '',
+				posY: typeof mapObj.posY === 'number' ? mapObj.posY + '' : '',
+				_index: index + 1,
+				_isValid: true,
+			};
+		});
+
+		data.startingQueueItemsEditor = data.startingQueueItems.map((queueObj, index) => {
+			const createEventFn = () => this._getOptionVal('createEvent', queueObj.value, data, stateFields.startingQueueItems.config);
+			const selectMapObjFn = () => this._getOptionVal('selectMapObj', queueObj.value.name, null, stateFields.startingQueueItems.config);
+			const createMapObjLocationFn = () => this._getOptionVal('createMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
+			const destroyMapObjLocationFn = () => this._getOptionVal('destroyMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
+
+			return {
+				...this._getOptionVal('selectAction', queueObj.type, null, stateFields.startingQueueItems.config),
+				activates: queueObj.activates + '',
+				...(queueObj.type === 'createEvent' ? createEventFn() : {}),
+				...(['createMapObj', 'destroyMapObj'].includes(queueObj.type) ? selectMapObjFn() : {}),
+				...(queueObj.type === 'createMapObj' ? createMapObjLocationFn() : {}),
+				...(queueObj.type === 'destroyMapObj' ? destroyMapObjLocationFn() : {}),
+				...(queueObj.type === 'destroyMapObj' ? {noDestroyMapObjAnimation: queueObj.value.noAnimation} : {}),
+				_index: index + 1,
+				_isValid: true,
+			};
+		});
+	}
+
 	_loadData() {
 		this._ajax({url: '/get-data'}).then(data => {
 			Object.keys(data.events).forEach(eventName => {
@@ -273,46 +316,7 @@ class Editor extends Agent {
 				};
 			}
 
-			// State
-			data.positionsEditor = data.positions.map((posObj, index) => ({
-				id: posObj.id,
-				positionName: posObj.name,
-				posX: posObj.posX + '',
-				posY: posObj.posY + '',
-				_index: index + 1,
-				_isValid: true,
-			}));
-
-			data.startingMapItemsEditor = data.startingMapItems.map((mapObj, index) => {
-				const location = typeof mapObj.posX === 'number' ? 'fixed' : mapObj.posX.split('PosX')[0];
-				return {
-					...this._getOptionVal('selectMapObj', mapObj.name, null, stateFields.startingMapItems.config),
-					...this._getOptionVal('mapItemLocation', location, data, stateFields.startingMapItems.config),
-					posX: typeof mapObj.posX === 'number' ? mapObj.posX + '' : '',
-					posY: typeof mapObj.posY === 'number' ? mapObj.posY + '' : '',
-					_index: index + 1,
-					_isValid: true,
-				};
-			});
-
-			data.startingQueueItemsEditor = data.startingQueueItems.map((queueObj, index) => {
-				const createEventFn = () => this._getOptionVal('createEvent', queueObj.value, data, stateFields.startingQueueItems.config);
-				const selectMapObjFn = () => this._getOptionVal('selectMapObj', queueObj.value.name, null, stateFields.startingQueueItems.config);
-				const createMapObjLocationFn = () => this._getOptionVal('createMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
-				const destroyMapObjLocationFn = () => this._getOptionVal('destroyMapObjLocation', queueObj.value.posX.split('PosX')[0], data, stateFields.startingQueueItems.config);
-
-				return {
-					...this._getOptionVal('selectAction', queueObj.type, null, stateFields.startingQueueItems.config),
-					activates: queueObj.activates + '',
-					...(queueObj.type === 'createEvent' ? createEventFn() : {}),
-					...(['createMapObj', 'destroyMapObj'].includes(queueObj.type) ? selectMapObjFn() : {}),
-					...(queueObj.type === 'createMapObj' ? createMapObjLocationFn() : {}),
-					...(queueObj.type === 'destroyMapObj' ? destroyMapObjLocationFn() : {}),
-					...(queueObj.type === 'destroyMapObj' ? {noDestroyMapObjAnimation: queueObj.value.noAnimation} : {}),
-					_index: index + 1,
-					_isValid: true,
-				};
-			});
+			this._loadEditorState(data);
 
 			this.setState({
 				...data,
@@ -412,7 +416,7 @@ class Editor extends Agent {
 		const type = '!!state';
 		return new Promise((resolve, reject) => {
 			this.subscribeSave[type] = this.subscribeSave[type] || [];
-			this.subscribeSave[type].push(event => resolve(event));
+			this.subscribeSave[type].push(data => resolve(data));
 			if (this.saving && this.saving !== type) {
 				this.saveQueue[type] = newStateObj;
 			} else {
@@ -465,7 +469,8 @@ class Editor extends Agent {
 		this._ajax({url: '/save-state', type: 'post', data: sendState}).then(stateObj => {
 			const nextSave = Object.keys(this.saveQueue)[0];
 
-			if (!this.saveQueue[type]) {
+			if (!this.saveQueue[type] && this.subscribeSave[type].length) {
+				this._loadEditorState(stateObj);
 				this.subscribeSave[type].forEach(fn => fn(stateObj));
 				this.subscribeSave[type] = [];
 			}

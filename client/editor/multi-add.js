@@ -14,13 +14,17 @@ class MultiAdd extends React.Component {
 
 	constructor(props) {
 		super(props);
-		utils.bindThis(this, ['toggleModal', 'changeValue', 'clickRemove']);
+		utils.bindThis(this, ['toggleModal', 'changeValue', 'clickRemove', 'dragStartMultiButton']);
 		this.state = {
 			isModalOpen: false,
 			openIndex: false,
 			modalPos: '',
 			optionsData: {},
+			draggedIndex: -1,
+			moveDragBefore: -1,
+			moveDragAfter: -1,
 		};
+		this.dragButtons = [];
 		// Create form in constructor to avoid circular dependency errors
 		this.Form = formWithValidation(multiAddForm(this.props.config.renderForm), this.props.config.fields);
 	}
@@ -34,6 +38,10 @@ class MultiAdd extends React.Component {
 			this.validateOptionFields(nextProps.value);
 			typeof this.state.modalPos === 'object' && this.setState({modalPos: {...this.state.modalPos}});
 		}
+	}
+
+	componentWillUnmount() {
+		clearTimeout(this.dragTimer);
 	}
 
 	validateOptionFields(value) {
@@ -158,8 +166,75 @@ class MultiAdd extends React.Component {
 		this.changeValue({_remove: true, _index: index});
 	}
 
+	dragStartMultiButton(e, index) {
+		const dragClone = this.dragButtons[index].cloneNode(true);
+		const buttonBox = this.dragButtons[index].getBoundingClientRect();
+		const offsetX = buttonBox.left - (e.touches ? e.touches[0].clientX : e.clientX);
+		const offsetY = buttonBox.top - (e.touches ? e.touches[0].clientY : e.clientY);
+		let dragging = false;
+		const hasMoved = e => {
+			const xMove = buttonBox.left - (e.touches ? e.touches[0].clientX : e.clientX) - offsetX;
+			const yMove = buttonBox.top - (e.touches ? e.touches[0].clientY : e.clientY) - offsetY;
+
+			return Math.abs(xMove) + Math.abs(yMove) > 10;
+		}
+
+		const dragUpdate = e => {
+			if (['mouseup', 'touchend', 'click'].includes(e.type)) {
+				dragClone.remove();
+				utils.offEvent(window, 'mousemove mouseup touchmove touchend click', dragUpdate);
+
+				const moveToIndex = this.state.moveDragBefore > index ? this.state.moveDragBefore - 1 : this.state.moveDragBefore;
+				this.setState({draggedIndex: -1, moveDragBefore: -1, moveDragAfter: -1}, () => {
+					if (moveToIndex >= 0 && moveToIndex !== index) {
+						const newValues = [...this.props.value];
+						newValues.splice(index, 1);
+						newValues.splice(moveToIndex, 0, this.props.value[index]);
+						this.props.onChange({target: {value: newValues}});
+					}
+				});
+
+			} else if (!dragging && ['mousemove', 'touchmove'].includes(e.type) && hasMoved(e)) {
+				dragClone.className += ' clone';
+				document.body.querySelector('.screen').appendChild(dragClone);
+				this.setState({draggedIndex: index});
+				dragging = true;
+			}
+			if (dragging && ['mousemove', 'touchmove'].includes(e.type)) {
+				const x = (e.touches ? e.touches[0].clientX : e.clientX);
+				const y = (e.touches ? e.touches[0].clientY : e.clientY);
+				const getSide = box => {
+					const inside = box.left <= x && box.right >= x && box.top <= y && box.bottom >= y;
+					return inside ? x <= box.left + box.width / 2 ? 'left' : 'right'
+												: false;
+				};
+
+				this.dragButtons.some((button, matchIndex) => {
+					const side = getSide(button.getBoundingClientRect());
+
+					if (side) {
+						let moveDragAfter, moveDragBefore;
+
+						moveDragAfter = side === 'left' ? matchIndex - 1 : matchIndex;
+						moveDragAfter = moveDragAfter === index ? index - 1 : moveDragAfter;
+						moveDragBefore = side === 'left' ? matchIndex : matchIndex + 1;
+						moveDragBefore = moveDragBefore === index ? index + 1 : moveDragBefore;
+
+						this.setState({moveDragAfter, moveDragBefore});
+						return true;
+					}
+				});
+
+				dragClone.style.left = `${x + offsetX}px`;
+				dragClone.style.top = `${y + offsetY}px`;
+			}
+		};
+
+		utils.onEvent(window, 'mousemove mouseup touchmove touchend click', dragUpdate);
+	}
+
 	render() {
-		const valueButtons = this.props.value.map(valObj => {
+		const valueButtons = this.props.value.map((valObj, index) => {
 			const valueText = Object.keys(valObj).filter(fieldName => {
 				const hasValue = utils.isObj(valObj[fieldName]) ? valObj[fieldName].value
 																												: valObj[fieldName] instanceof Array 	? valObj[fieldName].length
@@ -220,11 +295,22 @@ class MultiAdd extends React.Component {
 
 			valueText.push(<span className="remove" onClick={e => this.clickRemove(e, valObj._index)}><i>close</i></span>);
 
-			return <button type="button"
-				className={`multi-button ${!valObj._isValid && 'invalid'}`}
-				onClick={e => this.toggleModal(e, valObj._index)}>
-				{valueText}
-			</button>
+			return (
+				<button type="button"
+					className={utils.getClassName({
+						'multi-button' : true,
+						invalid: !valObj._isValid,
+						dragged: index === this.state.draggedIndex,
+						'drag-before': index === this.state.moveDragBefore,
+						'drag-after': index === this.state.moveDragAfter,
+					})}
+					ref={el => this.dragButtons[index] = el}
+					onMouseDown={e => this.dragStartMultiButton(e, index)}
+					onTouchStart={e => this.dragStartMultiButton(e, index)}
+					onClick={e => this.toggleModal(e, valObj._index)}>
+					{valueText}
+				</button>
+			);
 		});
 		const {maxLength, value, label} = this.props;
 		const {getOptionsData, uniqueOptionField, data} = this.props.config;
@@ -240,7 +326,11 @@ class MultiAdd extends React.Component {
 			<div className="multi-add">
 				{valueButtons}
 				{(remaining && (!maxLength || maxLength > value.length)) &&
-					<button type="button" className="icon-raised add-new" onClick={this.toggleModal}><i>add</i></button>
+					<button type="button"
+						className={`icon-raised add-new${this.state.moveDragBefore === value.length ? ' drag-before' : ''}`}
+						onClick={this.toggleModal}>
+						<i>add</i>
+					</button>
 				}
 				<Modal show={this.state.isModalOpen}
 					locked={false}

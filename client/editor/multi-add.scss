@@ -6,114 +6,154 @@
 	margin: -1px 0 5px;
 	padding-right: 45px;
 	overflow: hidden;
-	// @include clearfix;
-
-	.multi-button {
-		position: relative;
-		padding: 0 27px 0 0;
-		font-size: 16px;
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		max-width: 100%;
-		float: left;
-
-		.tab-active &:focus > span {
-			background: lighten($cSecondary, 10%);
-		}
-
-		& > span {
-			display: inline-block;
-			padding: 12px 7px 11px;
-			background: $cSecondary;
-			transition: background $animFast, color $animFast;
-			line-height: 18px;
-
-			&:hover {
-				background: lighten($cSecondary, 10%);
-			}
-
-			&:not(:first-child) {
-				border-left: 1px solid darken($cSecondary, 10%);
-			}
-		}
-
-		&.invalid {
-
-			& > span {
-			background: #eaa0a0;
-
-				&:hover {
-					background: #ffc9c9;
-				}
-
-				&:not(:first-child) {
-					border-left-color: #f0bfbf;
-				}
-			}
-
-			.tab-active &:focus > span {
-				background: #eaa0a0;
-			}
-		}
-
-		& > span.remove {
-			position: absolute;
-			right: -1px;
-			top: -1px;
-			bottom: -1px;
-			padding: 12px 2px 10px 4px;
-
-			&:hover {
-				background: lighten($cError, 10%);
-				color: #fff;
-			}
-
-
-			i {
-				font-size: 18px;
-			}
-		}
-
-		.tab-active &:focus > span.remove {
-			right: -2px;
-			top: -2px;
-			bottom: -2px;
-			padding: 13px 3px 11px 4px;
-		}
-
-		.auto-icon {
-			margin: -5px 4px -9px 0;
-		}
-
-		.icon-no-text {
-			margin-right: 0;
-		}
-
-		.no-text {
-			padding: 0;
-			vertical-align: bottom;
-
-			.auto-icon {
-				margin: 0;
-				padding: 5px;
-				width: 38px;
-				height: 40px;
-				pointer-events: auto;
-				overflow: hidden;
-				vertical-align: bottom;
-			}
-		}
-
-		.multi-val:not(:last-child) {
-			padding-right: 6px;
-			margin-right: 6px;
-			border-right: 1px solid darken($cSecondary, 10%);
-		}
-	}
 
 	.add-new {
 		float: left;
+		position: relative;
+		overflow: hidden;
+	}
+}
+
+.multi-button {
+	position: relative;
+	padding: 0 27px 0 0;
+	font-size: 16px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	float: left;
+
+	.tab-active &:focus > span {
+		background: lighten($cSecondary, 10%);
+	}
+
+	& > span {
+		display: inline-block;
+		padding: 12px 7px 11px;
+		background: $cSecondary;
+		transition: background $animFast, color $animFast;
+		line-height: 18px;
+
+		&:hover {
+			background: lighten($cSecondary, 10%);
+		}
+
+		&:not(:first-child) {
+			border-left: 1px solid darken($cSecondary, 10%);
+		}
+	}
+
+	&.invalid {
+
+		& > span {
+		background: #eaa0a0;
+
+			&:hover {
+				background: #ffc9c9;
+			}
+
+			&:not(:first-child) {
+				border-left-color: #f0bfbf;
+			}
+		}
+
+		.tab-active &:focus > span {
+			background: #eaa0a0;
+		}
+	}
+
+	& > span.remove {
+		position: absolute;
+		right: -1px;
+		top: -1px;
+		bottom: -1px;
+		padding: 12px 2px 10px 4px;
+
+		&:hover {
+			background: lighten($cError, 10%);
+			color: #fff;
+		}
+
+
+		i {
+			font-size: 18px;
+		}
+	}
+
+	.tab-active &:focus > span.remove {
+		right: -2px;
+		top: -2px;
+		bottom: -2px;
+		padding: 13px 3px 11px 4px;
+	}
+
+	.auto-icon {
+		margin: -5px 4px -9px 0;
+	}
+
+	.icon-no-text {
+		margin-right: 0;
+	}
+
+	.no-text {
+		padding: 0;
+		vertical-align: bottom;
+
+		.auto-icon {
+			margin: 0;
+			padding: 5px;
+			width: 38px;
+			height: 40px;
+			pointer-events: auto;
+			overflow: hidden;
+			vertical-align: bottom;
+		}
+	}
+
+	.multi-val:not(:last-child) {
+		padding-right: 6px;
+		margin-right: 6px;
+		border-right: 1px solid darken($cSecondary, 10%);
+	}
+
+	&.dragged {
+		opacity: 0;
+	}
+
+	@at-root {
+		.multi-button.drag-before:before,
+		.multi-button.drag-after:before,
+		.multi-add .add-new.drag-before:before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			display: block;
+			width: 5px;
+			height: 100%;
+			background: $cPrimary;
+			z-index: 3;
+		}
+	}
+
+	&.drag-after:before {
+		left: auto;
+		right: 0;
+	}
+
+	&.clone {
+		position: absolute;
+		opacity: 0.7;
+		color: lighten($cText, 15%);
+		z-index: 3;
+		transition: transform $animFast;
+		transform: rotate(5deg);
+
+		& > span {
+			background: lighten($cSecondary, 15%);
+		}
 	}
 }
 

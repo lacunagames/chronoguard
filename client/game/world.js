@@ -7,6 +7,7 @@ import {
 	positions as allPositions,
 	startingMapItems,
 	startingQueueItems,
+	conditions as allConditions,
 } from './data/data.json';
 import Agent from './agent';
 
@@ -19,27 +20,7 @@ const defaultState = {
 	day: 1,
 	map: startingMapItems,
 	positions: allPositions,
-	conditions: [
-		{
-			id: 0,
-			requires: 'box.lifeNode >= 3',
-			actions: [
-				{createMapObj: {name: 'forest', posX: 685, posY: 440,}},
-				{createMessage: {type: 'free', name: 'A forest evolved from high natural activity.'}},
-				{removeCondition: 0},
-			],
-		},
-		{
-			id: 1,
-			requires: 'box.lifeNode >= 6',
-			requiredEvent: {type: 'life', action: 'onEnd'},
-			actions: [
-				{createMapObj: {name: 'forest2', posX: 680, posY: 428,}},
-				{createMessage: {type: 'free', name: 'Double forest!'}},
-				{removeCondition: 1},
-			],
-		}
-	],
+	conditions: allConditions,
 };
 
 let eventCounter = 0;
@@ -85,18 +66,6 @@ class World extends Agent {
 
 		if (hour % 1 !== 0) {
 			return;
-		}
-
-		const forest = this.state.map.find(obj => obj.name === 'forest2');
-
-		if (forest) {
-
-			if (hour % 3 === 1) {
-				this._updateStateObj('map', forest.id, {animation: 'hide'});
-			}
-			if (hour % 3 === 0) {
-				this._updateStateObj('map', forest.id, {animation: 'show', state: ''});
-			}
 		}
 
 		this.state.conditions.forEach(condition => this.checkCondition(condition));
