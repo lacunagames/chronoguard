@@ -2,17 +2,6 @@
 @import '../styles/branding.scss';
 @import '../styles/mixins.scss';
 
-.multi-add {
-	margin: -1px 0 5px;
-	padding-right: 45px;
-	overflow: hidden;
-
-	.add-new {
-		float: left;
-		position: relative;
-		overflow: hidden;
-	}
-}
 
 .multi-button {
 	position: relative;
@@ -157,6 +146,177 @@
 	}
 }
 
+.multi-add {
+	margin: -1px 0 5px;
+	padding-right: 45px;
+	overflow: hidden;
+
+	.add-new {
+		float: left;
+		position: relative;
+		overflow: hidden;
+	}
+
+	&.extended {
+		margin-left: -10px;
+
+		.value-wrap {
+			display:inline-block;
+			padding: 5px;
+			border-radius: 3px;
+			margin: 0 0 5px 10px;
+			background: lighten($cSecondary, 15%);
+			position: relative;
+
+			&:nth-child(n + 1) {
+				margin-top: 5px;
+			}
+		}
+
+		& > div {
+			float: left;
+			width: calc(100% - 10px);
+
+			&:nth-child(n + 1) {
+				clear: left;
+			}
+
+			@include media(m) {
+				width: calc(50% - 10px);
+
+				&:nth-child(2) {
+					margin-top: 0;
+				}
+
+				&:nth-child(n + 1) {
+					clear: none;
+				}
+
+				&:nth-child(2n + 1) {
+					clear: left;
+				}
+			}
+
+			@include media(l) {
+				width: calc(33.33% - 10px);
+
+				&:nth-child(3) {
+					margin-top: 0;
+				}
+
+				&:nth-child(2n + 1) {
+					clear: none;
+				}
+
+				&:nth-child(3n + 1) {
+					clear: left;
+				}
+			}
+		}
+
+		.multi-button-extended {
+			padding-right: 0;
+			margin-right: 44px;
+			max-width: calc(100% - 44px);
+
+			.tab-active &:focus {
+				margin-right: 42px;
+			}
+		}
+
+		.add-new {
+			margin-top: 6px;
+			position: relative;
+			left: 10px;
+
+			.tab-active &:focus {
+				margin-top: 4px;
+			}
+		}
+
+		.remove-extended, form .add-new {
+			width: 36px;
+			float: left;
+			background: none;
+			box-shadow: none;
+			margin-top: 2px;
+			position: static;
+
+			&:hover, &:focus {
+				background: lighten($cSecondary, 20%);
+				box-shadow: none;
+			}
+
+			i {
+				font-size: 22px;
+			}
+
+			.tab-active &:focus {
+				width: 40px;
+				margin-top: 0;
+			}
+		}
+
+
+		.sub-multi-val {
+			background: $cSecondary;
+			float: left;
+
+			&:hover, &:focus {
+				background: lighten($cSecondary, 10%);
+			}
+
+			.auto-icon {
+				position: relative;
+				top: -4px;
+			}
+
+
+			&.invalid {
+				background: #eaa0a0;
+
+				&:hover, &:focus {
+					background: #ffc9c9;
+				}
+
+				.tab-active &:focus {
+					background: #ffc9c9;
+				}
+			}
+		}
+
+		.remove-extended {
+			position: absolute;
+			right: 0;
+
+			&:hover, &:focus {
+				background: lighten($cError, 10%);
+				color: #fff;
+			}
+		}
+
+		form {
+			clear: both;
+
+			label {
+				padding: 5px 5px 0;
+				font-size: 12px;
+			}
+
+			.row:not(.multi-add-row),
+			.row-buttons,
+			.valid-signs,
+			.help.error {
+				display: none;
+			}
+
+			.row-field, .multi-add {
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
 .multi-add-modal .modal-box {
 	width: 400px;
 
@@ -167,4 +327,8 @@
 	.row-buttons {
 		padding-bottom: 0;
 	}
+}
+
+.extended-modal .multi-add-row {
+	display: none;
 }

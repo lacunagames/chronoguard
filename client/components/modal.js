@@ -97,11 +97,11 @@ class Modal extends React.Component {
 				input:not(:disabled), select:not(:disabled),
 				textarea:not(:disabled), [tabindex]
 			`;
-		const allFocusables = Array.from(document.body.querySelectorAll(focusableQuery));
+		this.allFocusables = this.allFocusables || Array.from(document.body.querySelectorAll(focusableQuery));
 		const modalFocusables = Array.from(this.modalRef.current.querySelectorAll(focusableQuery));
 		const focusElem = isDisable ? modalFocusables[0] : this.lastActiveElem;
 
-		allFocusables.forEach(elem => {
+		this.allFocusables.forEach(elem => {
 			if (modalFocusables.indexOf(elem) > -1) {
 				return;
 			}
@@ -119,6 +119,7 @@ class Modal extends React.Component {
 				}
 			}
 		});
+		this.allFocusables = isDisable && this.allFocusables;
 		focusElem && focusElem.focus();
 	}
 

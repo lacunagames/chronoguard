@@ -79,6 +79,8 @@ const multiAddForm = (renderForm) => {
 
 			newValue._isValid = formMethods.isValidAll(fields);
 			newValue._index = this.props.openIndex;
+			newValue._invalids = formMethods.getInvalids(fields);
+			newValue.boxName && console.log(newValue.boxName);
 			changeValue(newValue);
 		}
 
@@ -101,7 +103,7 @@ const multiAddForm = (renderForm) => {
 
 			return (
 				<form onSubmit={this.formAction}>
-					<input type="submit" className="access" tabindex="-1" />
+					<input type="submit" className="access" tabIndex="-1" />
 					{renderForm(this.props.fields)}
 					<div className="row-buttons">
 						{hasValue &&

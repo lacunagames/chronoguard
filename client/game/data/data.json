@@ -1,6 +1,7 @@
 {
   "newEventId": 48,
-  "newPositionId": 19,
+  "newPositionId": 20,
+  "newConditionId": 3,
   "startingMapItems": [
     {
       "name": "island",
@@ -24,22 +25,17 @@
     },
     {
       "name": "forest",
-      "posX": "pos8PosX",
-      "posY": "pos8PosY"
-    },
-    {
-      "name": "forest",
       "posX": 250,
       "posY": 600
     },
     {
       "name": "farm",
-      "posX": 300,
+      "posX": 900,
       "posY": 300
     },
     {
       "name": "farm",
-      "posX": 900,
+      "posX": 300,
       "posY": 300
     }
   ],
@@ -75,15 +71,6 @@
       "activates": 8
     },
     {
-      "type": "destroyMapObj",
-      "value": {
-        "name": "farm",
-        "posX": "anyPosX",
-        "posY": "anyPosY"
-      },
-      "activates": 9
-    },
-    {
       "type": "createMapObj",
       "value": {
         "name": "forest",
@@ -117,16 +104,16 @@
       "posY": 600
     },
     {
-      "id": "pos8",
-      "name": "Lake",
-      "posX": 700,
-      "posY": 450
-    },
-    {
       "id": "pos1",
       "name": "Village",
       "posX": 450,
       "posY": 280
+    },
+    {
+      "id": "pos8",
+      "name": "Lake",
+      "posX": 700,
+      "posY": 450
     },
     {
       "id": "pos18",
@@ -137,7 +124,7 @@
   ],
   "conditions": [
     {
-      "id": 0,
+      "id": 1,
       "requires": "box.lifeNode >= 3",
       "actions": [
         {
@@ -154,12 +141,12 @@
           }
         },
         {
-          "removeCondition": 0
+          "removeCondition": 1
         }
       ]
     },
     {
-      "id": 1,
+      "id": 2,
       "requires": "box.lifeNode >= 6",
       "requiredEvent": {
         "type": "life",
@@ -180,7 +167,7 @@
           }
         },
         {
-          "removeCondition": 1
+          "removeCondition": 2
         }
       ]
     }
@@ -645,12 +632,12 @@
       "behaviour": "progress",
       "progress": 0,
       "progressIncrease": {
-        "eventType47": "23-33"
+        "eventType47": "34"
       },
       "onSuccess": [
         {
           "createMapObj": {
-            "name": "forest",
+            "name": "forest2",
             "posX": "pos18PosX",
             "posY": "pos18PosY",
             "noAnimation": false
@@ -664,7 +651,9 @@
             "eventType47"
           ]
         }
-      ]
+      ],
+      "posX": "pos18PosX",
+      "posY": "pos18PosY"
     },
     "eventType47": {
       "title": "Snow ball",

@@ -288,6 +288,14 @@ const actionFieldConfig = {
 
 			for (let eventName in data.events) {
 				actionTypes.forEach(actionType => {
+					data.events[eventName][actionType] && data.events[eventName][actionType].forEach(action => {
+						const actionName = Object.keys(action)[0];
+
+						if (['changeBoxAttr', 'setBoxAttr'].includes(actionName) && uniqueNames.indexOf(action[actionName][0]) === -1) {
+							uniqueNames.push(action[actionName][0]);
+						}
+					});
+
 					data.events[eventName][`${actionType}Editor`] && data.events[eventName][`${actionType}Editor`].forEach(action => {
 						if (action.boxName && uniqueNames.indexOf(action.boxName) === -1) {
 							uniqueNames.push(action.boxName);
@@ -344,6 +352,34 @@ const actionFieldConfig = {
 			</div>
 		</React.Fragment>
 	),
+};
+
+const actionFieldConfigCondition = {
+	...actionFieldConfig,
+	fields: {
+		...actionFieldConfig.fields,
+		messageIconShape: {
+			...actionFieldConfig.fields.messageIconShape,
+			options: actionFieldConfig.fields.messageIconShape.options.filter(opt => opt.value !== 'matchEvent'),
+		},
+		createMapObjLocation: {
+			...actionFieldConfig.fields.createMapObjLocation,
+			value: '',
+		}
+	},
+	getOptionsData: {
+		...actionFieldConfig.getOptionsData,
+		createMapObjLocation: data => {
+			const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+			return [{value: '', title: 'Select location', disabled: true}, ...fixedPositions];
+		},
+		destroyMapObjLocation: data => {
+			const fixedPositions  = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
+
+			return [{value: 'any', title: 'Anywhere'}, ...fixedPositions];
+		},
+	},
 };
 
 const eventFields = {
@@ -411,7 +447,7 @@ const eventFields = {
 		label: 'Location',
 		options: [
 			{value: 'any', title: '- Anywhere'},
-			{value: 'fixed', title: '- Fixed location'},
+			{value: 'fixed', title: '- Fixed'},
 			...allPositions.map(posObj => ({value: posObj.id, title: posObj.name})),
 		],
 		value: 'any',
@@ -790,7 +826,7 @@ const stateFields = {
 				mapItemLocation: data => {
 					const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
 
-					return [{value: 'fixed', title: 'Fixed location'}, ...fixedPositions];
+					return [{value: 'fixed', title: '- Fixed'}, ...fixedPositions];
 				},
 			},
 			data: {},
@@ -981,10 +1017,73 @@ const stateFields = {
 			),
 		},
 	},
+	conditions: {
+		id: 'conditions',
+		type: 'multiAdd',
+		value: [],
+		label: 'Conditions',
+		rules: [{type: 'allValidValues'}],
+		propOrig: 'conditionsEditor',
+		config: {
+			fields: {
+				id: {
+					type: 'hidden',
+					rules: [],
+					value: '',
+					generateValue: config => {
+						const val = config.newId + '';
+
+						config.newId++;
+						return val;
+					},
+				},
+				condition: {
+					id: 'condition',
+					type: 'text',
+					value: '',
+					label: 'Condition',
+					rules: [
+						{type: 'required'},
+					],
+				},
+				actions: {
+					id: 'actions',
+					type: 'multiAdd',
+					value: [],
+					label: 'Actions',
+					rules: [{type: 'allValidValues'}],
+					config: actionFieldConfigCondition,
+				},
+			},
+			getOptionsData: {
+			},
+			newId: 0,
+			data: {},
+			display: {
+				id: {type: 'hidden'},
+				actions: {iconField: 'selectAction'},
+			},
+			renderForm: fields => (
+				<React.Fragment>
+					<div className="row">
+						<div className="col-100">
+							<Field config={fields.condition} />
+						</div>
+					</div>
+					<div className="row multi-add-row">
+						<div className="col-100">
+							<Field config={fields.actions} />
+						</div>
+					</div>
+				</React.Fragment>
+			),
+		},
+	}
 };
 
 export {
 	actionFieldConfig,
+	actionFieldConfigCondition,
 	eventFields,
 	stateFields,
 };

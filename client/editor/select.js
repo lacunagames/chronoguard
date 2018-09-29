@@ -11,11 +11,12 @@ class Select extends React.Component {
 
 	constructor(props) {
 		super(props);
-		utils.bindThis(this, ['keydown', 'clickSelect', 'clickOption']);
+		utils.bindThis(this, ['keydown', 'clickSelect', 'clickOption', 'searchOption']);
 		this.state = {
 			isOpen: false,
 			selected: this.props.options.find(option => option.value === this.props.value) || !this.props.value && this.props.options[0]
 		};
+		this.searchStr = '';
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -24,6 +25,10 @@ class Select extends React.Component {
 				selected: nextProps.options.find(option => option.value === nextProps.value) || !nextProps.value && nextProps.options[0]
 			});
 		}
+	}
+
+	componentWillUnmount() {
+		clearTimeout(this.searchTimer);
 	}
 
 	keydown(e) {
@@ -43,7 +48,23 @@ class Select extends React.Component {
 				options[newIndex] && this.clickOption(options[newIndex]);
 			}
 		}
+
+		this.searchOption(e);
 	}
+
+	searchOption(e) {
+		const char = String.fromCharCode((96 <= e.keyCode && e.keyCode <= 105)? e.keyCode - 48 : e.keyCode);
+
+		if (/^[a-z0-9\s\-\:]+$/i.test(char)) {
+			this.searchStr += char.toLowerCase();
+			this.searchTimer = setTimeout(() => this.searchStr = '', 2000);
+
+			const matchedOption = this.props.options.find(opt => (opt.title || opt.value).toLowerCase().indexOf(this.searchStr) === 0);
+
+			matchedOption && this.clickOption(matchedOption, true);
+		}
+	}
+
 
 	clickSelect(e) {
 		if (!this.props.disabled) {
@@ -51,14 +72,14 @@ class Select extends React.Component {
 		}
 	}
 
-	clickOption(selected) {
+	clickOption(selected, keepOpen) {
 		if (typeof selected === 'object') {
 			this.setState({selected}, () => {
 				this.props.onChange({target: {value: selected.value}, matchingOption: selected});
 			});
 			this.refs.select.focus();
 		}
-		this.state.isOpen && this.clickSelect();
+		this.state.isOpen && !keepOpen && this.clickSelect();
 	}
 
 	render() {
@@ -93,7 +114,8 @@ class Select extends React.Component {
 						selectId={selectId}
 						selectRef={this.refs.select}
 						selected={selected}
-						onClick={this.clickOption} />
+						onClick={this.clickOption}
+						searchOption={this.searchOption} />
 				}
 			</div>
 		);

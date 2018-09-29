@@ -285,7 +285,7 @@ class World extends Agent {
 		const parts = condition.requires.replace(/(\[\')/g, '').replace(/(\'\])/g, '.').split(/(\s|>=|==|===|<=|<|>|\.)/g);
 		const compare = {sides: [], operator: ''};
 		const agents = [this, this.player, this.system];
-		const matchSides = () => {
+		const compareSides = () => {
 			switch (compare.operator) {
 				case '<': return compare.sides[0] < compare.sides[1];
 				case '<=': return compare.sides[0] <= compare.sides[1];
@@ -322,7 +322,7 @@ class World extends Agent {
 				}
 			}
 		});
-		if (matchSides()) {
+		if (compareSides()) {
 			this.system.massDispatch(condition.actions);
 		}
 	}

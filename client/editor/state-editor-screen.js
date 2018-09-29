@@ -9,7 +9,7 @@ import Editor from './editor';
 import {formWithValidation, Field} from './form';
 import Tooltip from '../components/tooltip';
 import Modal from '../components/modal';
-import {actionFieldConfig, stateFields} from './editor-screen-fields';
+import {actionFieldConfigCondition, stateFields} from './editor-screen-fields';
 import TitleMenu from './title-menu';
 
 
@@ -63,9 +63,13 @@ class StateEditorScreen extends React.Component {
 	dataChange(newData, callback) {
 		const loadToState = () => {
 			const posConfig = this.props.fields.positions.config;
+			const conConfig = this.props.fields.conditions.config;
 
 			if (posConfig.newId < this.data.newPositionId) {
 				posConfig.newId = this.data.newPositionId;
+			}
+			if (conConfig.newId < this.data.newConditionId) {
+				conConfig.newId = this.data.newConditionId;
 			}
 			this.props.formMethods.updateFields({
 				positions: this.data.positionsEditor,
@@ -83,7 +87,7 @@ class StateEditorScreen extends React.Component {
 				this.props.fields[fieldName].config.data = this.data;
 			}
 		}
-		actionFieldConfig.data = this.data;
+		actionFieldConfigCondition.data = this.data;
 		if (callback) {
 			this.loadCallbacks.push(callback);
 		}
@@ -141,13 +145,20 @@ class StateEditorScreen extends React.Component {
 						<div className="inner">
 							<div className="row">
 								<div className="col-100">
-									<Field config={fields.positions} />
+									<Field config={fields.conditions} />
 								</div>
-								<div className="col-100">
+							</div>
+							<div className="row">
+								<div className="col-100 col-l-50">
+									<Field config={fields.startingQueueItems} />
+								</div>
+								<div className="col-100 col-l-50">
 									<Field config={fields.startingMapItems} />
 								</div>
+							</div>
+							<div className="row">
 								<div className="col-100">
-									<Field config={fields.startingQueueItems} />
+									<Field config={fields.positions} />
 								</div>
 							</div>
 						</div>

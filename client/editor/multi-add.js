@@ -25,6 +25,7 @@ class MultiAdd extends React.Component {
 			moveDragAfter: -1,
 		};
 		this.dragButtons = [];
+		this.extended = Object.keys(this.props.config.fields).find(name => this.props.config.fields[name].type === 'multiAdd');
 		// Create form in constructor to avoid circular dependency errors
 		this.Form = formWithValidation(multiAddForm(this.props.config.renderForm), this.props.config.fields);
 	}
@@ -157,7 +158,6 @@ class MultiAdd extends React.Component {
 																					: [...newValues.slice(0, index), newValue, ...newValues.slice(index + 1)];
 
 		});
-
 		this.props.onChange({target: {value: newValues}});
 	}
 
@@ -167,6 +167,9 @@ class MultiAdd extends React.Component {
 	}
 
 	dragStartMultiButton(e, index) {
+		if (this.extended) {
+			return;
+		}
 		const dragClone = this.dragButtons[index].cloneNode(true);
 		const buttonBox = this.dragButtons[index].getBoundingClientRect();
 		const offsetX = buttonBox.left - (e.touches ? e.touches[0].clientX : e.clientX);
@@ -239,9 +242,10 @@ class MultiAdd extends React.Component {
 				const hasValue = utils.isObj(valObj[fieldName]) ? valObj[fieldName].value
 																												: valObj[fieldName] instanceof Array 	? valObj[fieldName].length
 																																															: valObj[fieldName];
-				const hiddenType = this.props.config.display[fieldName] && this.props.config.display[fieldName].type === 'hidden';
+				const hiddenType = (this.props.config.display[fieldName] || {}).type === 'hidden';
+				const multiAdd = (this.props.config.fields[fieldName] || {}).type === 'multiAdd';
 
-				return fieldName[0] !== '_' && (!valObj._isValid || hasValue) && !hiddenType;
+				return fieldName[0] !== '_' && (!valObj._isValid || hasValue) && !hiddenType && !multiAdd;
 			}).sort((aName, bName) => {
 				return this.props.config.display.sort ? this.props.config.display.sort.indexOf(aName) - this.props.config.display.sort.indexOf(bName)
 																							: false
@@ -293,23 +297,42 @@ class MultiAdd extends React.Component {
 				</span>
 			});
 
-			valueText.push(<span className="remove" onClick={e => this.clickRemove(e, valObj._index)}><i>close</i></span>);
+			const invalidNormalPart = valObj._invalids && valObj._invalids.filter(name => name !== this.extended).length > 0;
+
+			!this.extended && valueText.push(
+				<span className="remove" onClick={e => this.clickRemove(e, valObj._index)}><i>close</i></span>
+			);
 
 			return (
-				<button type="button"
-					className={utils.getClassName({
-						'multi-button' : true,
-						invalid: !valObj._isValid,
-						dragged: index === this.state.draggedIndex,
-						'drag-before': index === this.state.moveDragBefore,
-						'drag-after': index === this.state.moveDragAfter,
-					})}
-					ref={el => this.dragButtons[index] = el}
-					onMouseDown={e => this.dragStartMultiButton(e, index)}
-					onTouchStart={e => this.dragStartMultiButton(e, index)}
-					onClick={e => this.toggleModal(e, valObj._index)}>
-					{valueText}
-				</button>
+				<div className={utils.getClassName({'value-wrap': this.extended})}>
+					<button type="button"
+						className={utils.getClassName({
+							'multi-button' : true,
+							'multi-button-extended' : this.extended,
+							invalid: this.extended ? invalidNormalPart : !valObj._isValid,
+							dragged: index === this.state.draggedIndex,
+							'drag-before': index === this.state.moveDragBefore,
+							'drag-after': index === this.state.moveDragAfter,
+						})}
+						ref={el => this.dragButtons[index] = el}
+						onMouseDown={e => this.dragStartMultiButton(e, index)}
+						onTouchStart={e => this.dragStartMultiButton(e, index)}
+						onClick={e => this.toggleModal(e, valObj._index)}>
+						{valueText}
+					</button>
+					{this.extended &&
+						<button className="remove-extended icon" onClick={e => this.clickRemove(e, valObj._index)}><i>close</i></button>
+					}
+					{this.extended &&
+						<this.Form
+							values={this.props.value}
+							openIndex={this.state.openIndex}
+							optionsData={this.state.optionsData}
+							changeValue={this.changeValue}
+							focusField={this.state.focusField}
+							generatedValues={this.state.generatedValues} />
+					}
+				</div>
 			);
 		});
 		const {maxLength, value, label} = this.props;
@@ -323,18 +346,20 @@ class MultiAdd extends React.Component {
 		}
 
 		return (
-			<div className="multi-add">
+			<div className={utils.getClassName({'multi-add': true, extended: this.extended})}>
 				{valueButtons}
 				{(remaining && (!maxLength || maxLength > value.length)) &&
-					<button type="button"
-						className={`icon-raised add-new${this.state.moveDragBefore === value.length ? ' drag-before' : ''}`}
-						onClick={this.toggleModal}>
-						<i>add</i>
-					</button>
+					<div>
+						<button type="button"
+							className={`icon-raised add-new${this.state.moveDragBefore === value.length ? ' drag-before' : ''}`}
+							onClick={this.toggleModal}>
+							<i>add</i>
+						</button>
+					</div>
 				}
 				<Modal show={this.state.isModalOpen}
 					locked={false}
-					className="multi-add-modal"
+					className={utils.getClassName({'multi-add-modal': true, 'extended-modal': this.extended})}
 					onClose={this.toggleModal}>
 					<h3 data-modal-head>{label}</h3>
 					<this.Form

@@ -25,6 +25,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				'updateFields',
 				'updateOptions',
 				'subscribeFieldChange',
+				'getInvalids',
 			]);
 			this.state = fieldsConfig;
 			this.fillState();
@@ -37,6 +38,7 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				checkValidity: this.checkValidity,
 				isValidAll: this.isValidAll,
 				validateAll: this.validateAll,
+				getInvalids: this.getInvalids,
 				clearValidity: this.clearValidity,
 				onValidityChange: this.subscribeValidityChange,
 				onFieldChange: this.subscribeFieldChange,
@@ -240,6 +242,17 @@ const formWithValidation = (FormComponent, fieldsConfig) => {
 				}
 			}
 			return true;
+		}
+
+		getInvalids(fields) {
+			const invalids = [];
+
+			for (let fieldName in fields) {
+				if (this.checkValidity(fields[fieldName])) {
+					invalids.push(fieldName);
+				}
+			}
+			return invalids;
 		}
 
 		validateAll(fields) {

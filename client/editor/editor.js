@@ -215,8 +215,9 @@ class Editor extends Agent {
 						break;
 
 					case 'boxAttrs':
+					const boxName = typeof actionObj.boxName === 'object' ? actionObj.boxName.value : actionObj.boxName;
 						obj = {
-							[actionObj.boxActionType.value === 'set' ? 'setBoxAttr' : 'changeBoxAttr']: [actionObj.boxName, +actionObj.boxValue]
+							[actionObj.boxActionType.value === 'set' ? 'setBoxAttr' : 'changeBoxAttr']: [boxName, +actionObj.boxValue]
 						};
 				}
 				obj && sendEvent[actionType].push(obj);

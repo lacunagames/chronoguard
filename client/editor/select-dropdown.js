@@ -58,9 +58,8 @@ class SelectDropdown extends React.Component {
 		// Escape and Tab
 		} else if (e.keyCode === 27 || e.keyCode === 9) {
 			this.click(e, this.props.selected);
-
-
 		}
+		this.props.searchOption(e);
 	}
 
 	click(e, option) {
