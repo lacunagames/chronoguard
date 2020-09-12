@@ -1,6 +1,13 @@
 
 
 import utils from 'utils';
+import {defaultState as worldState} from '../game/world';
+import {defaultState as playerState} from '../game/player';
+
+const validConditionNames = Object.keys({...worldState, ...playerState}).map(name => ({
+	name,
+	hasSubFields: typeof (worldState.hasOwnProperty(name) ? worldState[name] : playerState[name]) === 'object',
+}));
 
 const validationRules = {
 
@@ -61,6 +68,26 @@ const validationRules = {
 
 		return !val || +s0 >= rule.value;
 	},
+
+	conditionText: field => {
+		const [leftSide, separator, rightSide] = field.value.replace(/(\[|\]\.)/g, '.')
+																						.replace(/(\s|\'|\")/g, '')
+																						.split(/(>=|>|===|==|<=|<|includes)/);
+		const validSide = side => {
+			const dotSplit = (side || '').split('.');
+			const validNameObj = validConditionNames.find(obj => obj.name === dotSplit[0]);
+			const hasSubFields = dotSplit.length > 1;
+
+			return side && !isNaN(+side) || validNameObj && dotSplit[dotSplit.length - 1] && validNameObj.hasSubFields === hasSubFields;
+		};
+		const validIncludes = () => {
+			const leftObj = validConditionNames.find(obj => obj.name === leftSide);
+
+			return separator === 'includes' && leftObj && leftObj.hasSubFields && isNaN(+rightSide) && !rightSide.includes('.');
+		}
+
+		 return !field.value || validSide(rightSide) && validSide(leftSide) || validIncludes();
+	},
 };
 
 const defaultErrorTexts = {
@@ -76,9 +103,11 @@ const defaultErrorTexts = {
 	min: `This field value has to be at least {value}`,
 	max: `This field value can't be larger than {value}`,
 	allValidValues: 'Invalid values',
+	conditionText: 'Please enter a valid condition, for example maxEnergy >= 34'
 };
 
 export {
 	validationRules,
+	validConditionNames,
 	defaultErrorTexts,
 };

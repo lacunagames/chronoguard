@@ -179,7 +179,7 @@ class EventEditorScreen extends React.Component {
 					this.props.formMethods.updateOptions('selectEvent', selectOptions, () => {
 						this.loadCallbacks.forEach(fn => fn());
 						this.loadCallbacks = [];
-						if (!this.props.fields.selectEvent.value) {
+						if (!this.props.fields.selectEvent.value && selectOptions.length) {
 							const eventTitle = (selectOptions.find(opt => opt.value === localStorage.currentEvent) || selectOptions[selectOptions.length -1]).title;
 							this.props.formMethods.updateFields({selectEvent: eventTitle}, null, true);
 						}

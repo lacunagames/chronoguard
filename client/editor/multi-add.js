@@ -24,6 +24,7 @@ class MultiAdd extends React.Component {
 			moveDragBefore: -1,
 			moveDragAfter: -1,
 		};
+		this.newIndex = this.props.value.length ? this.props.value.length + 1 : 1;
 		this.dragButtons = [];
 		this.extended = Object.keys(this.props.config.fields).find(name => this.props.config.fields[name].type === 'multiAdd');
 		// Create form in constructor to avoid circular dependency errors
@@ -37,6 +38,9 @@ class MultiAdd extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.value !== this.props.value) {
 			this.validateOptionFields(nextProps.value);
+			if (nextProps.value.length + 1 > this.newIndex) {
+				this.newIndex = nextProps.value.length + 1;
+			}
 			typeof this.state.modalPos === 'object' && this.setState({modalPos: {...this.state.modalPos}});
 		}
 	}
@@ -93,9 +97,21 @@ class MultiAdd extends React.Component {
 		}, 0);
 	}
 
+	generateOptionsData(openIndex) {
+		const {getOptionsData, data, fields} = this.props.config;
+
+		return Object.keys(getOptionsData || {}).reduce((obj, fieldName) => {
+			const values = this.props.value.filter(valObj => valObj._index !== openIndex).map(valObj => {
+				return typeof valObj[fieldName] === 'object' ? valObj[fieldName].value : valObj[fieldName];
+			});
+
+			return obj = {...obj, [fieldName]: getOptionsData[fieldName](data, values)};
+		}, {});
+	}
+
 	toggleModal(e, index, focusField) {
 		const {getOptionsData, data, fields} = this.props.config;
-		const openIndex = index || Math.max(...this.props.value.map(valObj => valObj._index), 0) + 1;
+		const openIndex = index || this.newIndex;
 
 		e && e.stopPropagation();
 
@@ -120,27 +136,20 @@ class MultiAdd extends React.Component {
 
 			// Generate value on new item
 			const generatedValues = {};
-			if (openIndex > this.props.value.length) {
+			if (openIndex > Math.max(...this.props.value.map(val => val._index))) {
 				for (let fieldName in fields) {
 					if (fields[fieldName].generateValue) {
 						generatedValues[fieldName] = fields[fieldName].generateValue(this.props.config);
 					}
 				}
 			}
-
 			this.setState({
 				isModalOpen: true,
 				modalPos: typeof top !== 'undefined' && {top, bottom, left, right},
 				openIndex,
 				focusField,
 				generatedValues,
-				optionsData: Object.keys(getOptionsData || {}).reduce((obj, fieldName) => {
-					const values = this.props.value.filter(valObj => valObj._index !== openIndex).map(valObj => {
-						return typeof valObj[fieldName] === 'object' ? valObj[fieldName].value : valObj[fieldName];
-					});
-
-					return obj = {...obj, [fieldName]: getOptionsData[fieldName](data, values)};
-				}, {}),
+				optionsData: this.generateOptionsData(openIndex),
 			});
 		}
 	}
@@ -152,6 +161,10 @@ class MultiAdd extends React.Component {
 		newValueMultiple.forEach(newValue => {
 			const index = newValues.findIndex(valObj => valObj._index === newValue._index);
 			const isRemove = newValue._remove || !Object.keys(newValue).filter(name => name[0] !== '_').some(name => newValue[name]);
+
+			if (index === -1) {
+				this.newIndex++;
+			}
 
 			newValues = isRemove ? newValues.filter(valObj => valObj._index !== newValue._index)
 													 : index === -1 ? [...newValues, newValue].sort((valObjA, valObjB) => valObjA._index - valObjB._index)
@@ -237,7 +250,10 @@ class MultiAdd extends React.Component {
 	}
 
 	render() {
-		const valueButtons = this.props.value.map((valObj, index) => {
+		const {maxLength, value, label} = this.props;
+		const {getOptionsData, uniqueOptionField, data} = this.props.config;
+		const valueButtons = value.map((valObj, index) => {
+			const invalidNormalPart = valObj._invalids && valObj._invalids.filter(name => name !== this.extended).length > 0;
 			const valueText = Object.keys(valObj).filter(fieldName => {
 				const hasValue = utils.isObj(valObj[fieldName]) ? valObj[fieldName].value
 																												: valObj[fieldName] instanceof Array 	? valObj[fieldName].length
@@ -249,7 +265,7 @@ class MultiAdd extends React.Component {
 			}).sort((aName, bName) => {
 				return this.props.config.display.sort ? this.props.config.display.sort.indexOf(aName) - this.props.config.display.sort.indexOf(bName)
 																							: false
-			}).map(fieldName => {
+			}).map((fieldName, index) => {
 				const displayConfig = this.props.config.display[fieldName] || {};
 				const displayText = (
 					<span>
@@ -297,8 +313,6 @@ class MultiAdd extends React.Component {
 				</span>
 			});
 
-			const invalidNormalPart = valObj._invalids && valObj._invalids.filter(name => name !== this.extended).length > 0;
-
 			!this.extended && valueText.push(
 				<span className="remove" onClick={e => this.clickRemove(e, valObj._index)}><i>close</i></span>
 			);
@@ -313,6 +327,7 @@ class MultiAdd extends React.Component {
 							dragged: index === this.state.draggedIndex,
 							'drag-before': index === this.state.moveDragBefore,
 							'drag-after': index === this.state.moveDragAfter,
+							[`${valObj._index}inx ${this.props.value.length}len `]: true,
 						})}
 						ref={el => this.dragButtons[index] = el}
 						onMouseDown={e => this.dragStartMultiButton(e, index)}
@@ -325,18 +340,18 @@ class MultiAdd extends React.Component {
 					}
 					{this.extended &&
 						<this.Form
+						key={valObj._index}
 							values={this.props.value}
-							openIndex={this.state.openIndex}
-							optionsData={this.state.optionsData}
+							openIndex={valObj._index}
+							optionsData={this.generateOptionsData(valObj._index)}
 							changeValue={this.changeValue}
 							focusField={this.state.focusField}
-							generatedValues={this.state.generatedValues} />
+							generatedValues={this.state.generatedValues}
+							onlyMultiAdd />
 					}
 				</div>
 			);
 		});
-		const {maxLength, value, label} = this.props;
-		const {getOptionsData, uniqueOptionField, data} = this.props.config;
 		let remaining = true;
 
 		if (getOptionsData && getOptionsData[uniqueOptionField]) {
@@ -359,7 +374,7 @@ class MultiAdd extends React.Component {
 				}
 				<Modal show={this.state.isModalOpen}
 					locked={false}
-					className={utils.getClassName({'multi-add-modal': true, 'extended-modal': this.extended})}
+					className="multi-add-modal"
 					onClose={this.toggleModal}>
 					<h3 data-modal-head>{label}</h3>
 					<this.Form
@@ -370,7 +385,8 @@ class MultiAdd extends React.Component {
 						changeValue={this.changeValue}
 						focusField={this.state.focusField}
 						toggleModal={this.toggleModal}
-						generatedValues={this.state.generatedValues} />
+						generatedValues={this.state.generatedValues}
+						noMultiAdd />
 				</Modal>
 			</div>
 		);

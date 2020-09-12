@@ -1,143 +1,90 @@
 {
-  "newEventId": 48,
-  "newPositionId": 20,
+  "newEventId": 12,
+  "newPositionId": 6,
   "newConditionId": 3,
   "startingMapItems": [
     {
       "name": "island",
-      "posX": "pos7PosX",
-      "posY": "pos7PosY"
-    },
-    {
-      "name": "village",
-      "posX": "pos1PosX",
-      "posY": "pos1PosY"
-    },
-    {
-      "name": "mountain",
-      "posX": 240,
-      "posY": 420
-    },
-    {
-      "name": "mountain",
       "posX": "pos2PosX",
       "posY": "pos2PosY"
     },
     {
       "name": "forest",
-      "posX": 250,
-      "posY": 600
+      "posX": "pos1PosX",
+      "posY": "pos1PosY"
     },
     {
-      "name": "farm",
-      "posX": 900,
-      "posY": 300
-    },
-    {
-      "name": "farm",
-      "posX": 300,
-      "posY": 300
+      "name": "desert",
+      "posX": "pos4PosX",
+      "posY": "pos4PosY"
     }
   ],
   "startingQueueItems": [
     {
       "type": "createEvent",
-      "value": "inspireFarming",
-      "activates": 1
+      "value": "eventType5",
+      "activates": 12
     },
     {
       "type": "createEvent",
-      "value": "eventType46",
-      "activates": 2
+      "value": "eventType5",
+      "activates": 20
     },
     {
       "type": "createEvent",
-      "value": "water",
-      "activates": 2
-    },
-    {
-      "type": "createEvent",
-      "value": "earth",
-      "activates": 2
-    },
-    {
-      "type": "createEvent",
-      "value": "eventType1",
-      "activates": 3
-    },
-    {
-      "type": "createEvent",
-      "value": "life",
-      "activates": 8
-    },
-    {
-      "type": "createMapObj",
-      "value": {
-        "name": "forest",
-        "posX": "pos8PosX",
-        "posY": "pos8PosY"
-      },
-      "activates": 9
-    },
-    {
-      "type": "createEvent",
-      "value": "life",
-      "activates": 7
-    },
-    {
-      "type": "createEvent",
-      "value": "earth",
-      "activates": 11
+      "value": "eventType3",
+      "activates": 4
     }
   ],
   "positions": [
     {
-      "id": "pos7",
+      "id": "pos2",
       "name": "Center",
       "posX": 600,
       "posY": 450
     },
     {
-      "id": "pos2",
-      "name": "Mountain",
-      "posX": 950,
-      "posY": 600
-    },
-    {
       "id": "pos1",
-      "name": "Village",
-      "posX": 450,
-      "posY": 280
+      "name": "Forest",
+      "posX": 900,
+      "posY": 590
     },
     {
-      "id": "pos8",
-      "name": "Lake",
-      "posX": 700,
-      "posY": 450
+      "id": "pos3",
+      "name": "Jungle",
+      "posX": 410,
+      "posY": 390
     },
     {
-      "id": "pos18",
-      "name": "Ice cap",
+      "id": "pos4",
+      "name": "Desert",
       "posX": 240,
-      "posY": 600
+      "posY": 290
+    },
+    {
+      "id": "pos5",
+      "name": "Salamander town",
+      "posX": 175,
+      "posY": 285
     }
   ],
   "conditions": [
     {
       "id": 1,
-      "requires": "box.lifeNode >= 3",
+      "requires": "learntSkills includes elementalFire",
       "actions": [
         {
-          "createMapObj": {
-            "name": "forest",
-            "posX": "pos8PosX",
-            "posY": "pos8PosY"
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType1",
+            "delay": "3-7"
           }
         },
         {
-          "createMessage": {
-            "type": "free",
-            "name": "A forest evolved from high natural activity."
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType3",
+            "delay": "35-45"
           }
         },
         {
@@ -147,23 +94,13 @@
     },
     {
       "id": 2,
-      "requires": "box.lifeNode >= 6",
-      "requiredEvent": {
-        "type": "life",
-        "action": "onEnd"
-      },
+      "requires": "box.fireProgress >= 25",
       "actions": [
         {
-          "createMapObj": {
-            "name": "forest2",
-            "posX": "pos8PosX",
-            "posY": "pos8PosY"
-          }
-        },
-        {
-          "createMessage": {
-            "type": "free",
-            "name": "Double forest!"
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType6",
+            "delay": "3-5"
           }
         },
         {
@@ -174,11 +111,17 @@
   ],
   "mapImages": [
     "background",
+    "desert",
     "farm",
+    "forest-burnt",
+    "forest-fire",
     "forest",
     "forest2",
     "island",
+    "jungle",
     "mountain",
+    "salamander-town",
+    "town-shield",
     "village",
     "volcano"
   ],
@@ -197,6 +140,7 @@
   ],
   "icons": [
     "air",
+    "arcane",
     "avatar",
     "bonfire",
     "box",
@@ -204,6 +148,7 @@
     "earth-my",
     "earth",
     "farm",
+    "feral",
     "fire",
     "fireball",
     "flame-shield",
@@ -220,6 +165,11 @@
     "painting",
     "phoenix-heart",
     "player",
+    "primal-air",
+    "primal-earth",
+    "primal-fire",
+    "primal-life",
+    "primal-water",
     "queue",
     "remove",
     "scorch",
@@ -232,270 +182,29 @@
     "water"
   ],
   "events": {
-    "fire": {
-      "title": "Fire",
-      "duration": "7-9",
-      "energy": "5",
-      "posX": "pos1PosX",
-      "posY": "pos1PosY",
-      "range": 100,
-      "onPop": [
-        {
-          "changeBoxAttr": [
-            "fireNode",
-            1
-          ]
-        }
-      ],
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "fire",
-            "delay": "3-6"
-          }
-        }
-      ],
-      "behaviour": "pop",
-      "icon": "fire",
-      "desc": "",
-      "onStart": [],
-      "onNoPop": []
-    },
-    "water": {
-      "title": "Water",
-      "duration": "7-11",
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "water",
-            "delay": "8-12"
-          }
-        }
-      ],
-      "behaviour": "pop",
-      "icon": "water",
-      "desc": "",
-      "onStart": [],
-      "energy": "8",
-      "onPop": [
-        {
-          "changeBoxAttr": [
-            "waterNode",
-            1
-          ]
-        },
-        {
-          "changeMaxEnergy": 0.5
-        }
-      ],
-      "onNoPop": []
-    },
-    "air": {
-      "title": "Air",
-      "duration": "5-7",
-      "energy": "4",
-      "posX": "pos1PosX",
-      "posY": "pos1PosY",
-      "range": 150,
-      "onPop": [
-        {
-          "changeBoxAttr": [
-            "airNode",
-            1
-          ]
-        }
-      ],
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "air",
-            "delay": "3-5"
-          }
-        }
-      ],
-      "behaviour": "pop",
-      "icon": "air",
-      "desc": "",
-      "onStart": [],
-      "onNoPop": []
-    },
-    "life": {
-      "title": "Life",
-      "duration": "10-18",
-      "energy": 0,
-      "onPop": [
-        {
-          "changeBoxAttr": [
-            "lifeNode",
-            1
-          ]
-        },
-        {
-          "changeEnergy": 4
-        }
-      ],
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "life",
-            "delay": "7-9"
-          }
-        }
-      ],
-      "behaviour": "pop",
-      "icon": "life",
-      "desc": "Increases energy by 4",
-      "onStart": [],
-      "onNoPop": []
-    },
-    "earth": {
-      "title": "Earth",
-      "icon": "earth-my",
-      "duration": "9-11",
-      "energy": "10",
-      "onPop": [
-        {
-          "changeBoxAttr": [
-            "earthNode",
-            1
-          ]
-        },
-        {
-          "changeEnergyGainRate": 0.05
-        }
-      ],
-      "onNoPop": [],
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "earth",
-            "delay": "15-25"
-          }
-        }
-      ],
-      "behaviour": "pop",
-      "desc": "",
-      "onStart": []
-    },
-    "inspireFarming": {
-      "title": "Inspire farming",
-      "icon": "farm",
-      "desc": "The village spends most of its time gathering berries and hunting nearby animals.\nLearning to grow and harvest plants would greatly increase productivity.\nWhat?",
-      "duration": "40",
-      "onStart": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "air",
-            "delay": "2-4"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "air",
-            "delay": "5-7"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "air",
-            "delay": "20-25"
-          }
-        }
-      ],
-      "onEnd": [
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "inspireFarming",
-            "delay": "12-15"
-          }
-        },
-        {
-          "removeAllEventsByType": [
-            "air"
-          ]
-        }
-      ],
+    "eventType1": {
+      "icon": "bonfire",
+      "duration": "50",
       "behaviour": "progress",
-      "posX": "pos1PosX",
-      "posY": "pos1PosY",
-      "offsetX": 50,
-      "offsetY": 50,
+      "title": "Burning jungle",
+      "desc": "Focus fire energies to burn down the trees.",
       "progress": 0,
       "progressIncrease": {
-        "air": "10-13"
+        "eventType2": "15-25"
       },
-      "onSuccess": [
-        {
-          "createMessage": {
-            "type": "primary",
-            "name": "Inspire Farming Success",
-            "descVal": "The villagers have learnt how to farm the land. {icon-skill-points} +5",
-            "icon": "farm",
-            "shape": "rhombus"
-          }
-        },
-        {
-          "gainSkillPoints": 5
-        },
-        {
-          "createMapObj": {
-            "name": "farm",
-            "posX": "pos1PosX",
-            "posY": "pos1PosY",
-            "noAnimation": false
-          }
-        }
-      ],
-      "onFail": [],
-      "onFullProgress": [
-        {
-          "removeAllEventsByType": [
-            "air"
-          ]
-        }
-      ]
-    },
-    "eventType1": {
-      "title": "Volcano",
-      "icon": "volcano",
-      "desc": "A volcano will erupt if enough fire energy is focused at this location.",
-      "duration": "50",
       "onStart": [
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "10-20"
+            "delay": "10-15"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
             "value": "eventType2",
-            "delay": "20-35"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "eventType2",
-            "delay": "37-45"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "eventType2",
-            "delay": "25-40"
+            "delay": "15-20"
           }
         }
       ],
@@ -504,7 +213,104 @@
           "removeAllEventsByType": [
             "eventType2"
           ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMessage": {
+            "type": "primary",
+            "name": "Burning jungle succeeded!",
+            "descVal": "{icon-skill-points} +1",
+            "icon": "bonfire",
+            "shape": "rhombus"
+          }
         },
+        {
+          "createMapObj": {
+            "name": "forest-fire",
+            "posX": "pos3PosX",
+            "posY": "pos3PosY",
+            "noAnimation": false
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createMapObj",
+            "delay": "10",
+            "value": {
+              "name": "forest-burnt",
+              "posX": "pos3PosX",
+              "posY": "pos3PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "10",
+            "value": {
+              "name": "forest-fire",
+              "posX": "pos3PosX",
+              "posY": "pos3PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "10",
+            "value": {
+              "name": "jungle",
+              "posX": "pos3PosX",
+              "posY": "pos3PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "changeBoxAttr": [
+            "fireProgress",
+            10
+          ]
+        },
+        {
+          "gainSkillPoints": 1
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "20",
+            "value": {
+              "name": "forest-burnt",
+              "posX": "pos3PosX",
+              "posY": "pos3PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createMapObj",
+            "delay": "20",
+            "value": {
+              "name": "jungle",
+              "posX": "pos3PosX",
+              "posY": "pos3PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType1",
+            "delay": "55-65"
+          }
+        }
+      ],
+      "onFail": [
         {
           "queueItem": {
             "type": "createEvent",
@@ -513,52 +319,6 @@
           }
         }
       ],
-      "behaviour": "progress",
-      "progress": 0,
-      "progressIncrease": {
-        "eventType2": "25-35"
-      },
-      "onSuccess": [
-        {
-          "createMessage": {
-            "type": "primary",
-            "name": "Volcano erupted",
-            "descVal": "A lot of people died because of you.. I hope you are happy!\n{icon-skill-points} +5",
-            "icon": "volcano",
-            "shape": "rhombus"
-          }
-        },
-        {
-          "gainSkillPoints": 5
-        },
-        {
-          "createMapObj": {
-            "name": "volcano",
-            "posX": "pos2PosX",
-            "posY": "pos2PosY",
-            "noAnimation": false
-          }
-        },
-        {
-          "queueItem": {
-            "type": "destroyMapObj",
-            "delay": "7-10",
-            "value": {
-              "name": "volcano",
-              "posX": "pos2PosX",
-              "posY": "pos2PosY",
-              "noAnimation": false
-            }
-          }
-        },
-        {
-          "changeBoxAttr": [
-            "volcanoErupted",
-            1
-          ]
-        }
-      ],
-      "onFail": [],
       "onFullProgress": [
         {
           "removeAllEventsByType": [
@@ -566,81 +326,466 @@
           ]
         }
       ],
-      "posX": "pos2PosX",
-      "posY": "pos2PosY",
+      "posX": "pos3PosX",
+      "posY": "pos3PosY",
       "offsetX": 50,
-      "offsetY": 50,
-      "selectScreen": "event"
+      "offsetY": 50
     },
     "eventType2": {
-      "title": "Focused flame",
-      "duration": "6-8",
-      "posX": "pos2PosX",
-      "posY": "pos2PosY",
-      "range": 250,
-      "onEnd": [],
-      "behaviour": "pop",
       "icon": "scorch",
+      "energy": "5",
+      "duration": "7-11",
+      "behaviour": "pop",
+      "title": "Scorching fire",
       "desc": "",
       "onStart": [],
-      "energy": "8",
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType2",
+            "delay": "3-5"
+          }
+        }
+      ],
       "onPop": [],
-      "onNoPop": []
+      "onNoPop": [],
+      "posX": "pos3PosX",
+      "posY": "pos3PosY",
+      "range": 150
     },
-    "eventType46": {
-      "title": "Icy eye",
-      "icon": "ice-rune",
-      "desc": "",
-      "duration": "30",
+    "eventType3": {
+      "icon": "bonfire",
+      "duration": "50",
+      "behaviour": "progress",
+      "title": "Burning forest",
+      "desc": "Focus fire energies to burn down the trees.",
+      "progress": 0,
+      "progressIncrease": {
+        "eventType4": "15-25"
+      },
       "onStart": [
         {
           "queueItem": {
             "type": "createEvent",
-            "value": "eventType47",
-            "delay": "12-15"
+            "value": "eventType4",
+            "delay": "10-15"
           }
         },
         {
           "queueItem": {
             "type": "createEvent",
-            "value": "eventType47",
+            "value": "eventType4",
             "delay": "15-20"
-          }
-        },
-        {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "eventType47",
-            "delay": "15-25"
           }
         }
       ],
       "onEnd": [
         {
-          "queueItem": {
-            "type": "createEvent",
-            "value": "eventType46",
-            "delay": "19-26"
-          }
-        },
-        {
           "removeAllEventsByType": [
-            "eventType47"
+            "eventType4"
           ]
         }
       ],
-      "behaviour": "progress",
-      "progress": 0,
-      "progressIncrease": {
-        "eventType47": "34"
-      },
       "onSuccess": [
         {
+          "createMessage": {
+            "type": "primary",
+            "name": "Burning forest succeeded!",
+            "descVal": "{icon-skill-points} +1",
+            "icon": "bonfire",
+            "shape": "rhombus"
+          }
+        },
+        {
           "createMapObj": {
-            "name": "forest2",
-            "posX": "pos18PosX",
-            "posY": "pos18PosY",
+            "name": "forest-fire",
+            "posX": "pos1PosX",
+            "posY": "pos1PosY",
             "noAnimation": false
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createMapObj",
+            "delay": "10",
+            "value": {
+              "name": "forest-burnt",
+              "posX": "pos1PosX",
+              "posY": "pos1PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "10",
+            "value": {
+              "name": "forest-fire",
+              "posX": "pos1PosX",
+              "posY": "pos1PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "10",
+            "value": {
+              "name": "forest",
+              "posX": "pos1PosX",
+              "posY": "pos1PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "gainSkillPoints": 1
+        },
+        {
+          "changeBoxAttr": [
+            "fireProgress",
+            10
+          ]
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "20",
+            "value": {
+              "name": "forest-burnt",
+              "posX": "pos1PosX",
+              "posY": "pos1PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createMapObj",
+            "delay": "20",
+            "value": {
+              "name": "forest",
+              "posX": "pos1PosX",
+              "posY": "pos1PosY",
+              "noAnimation": false
+            }
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType3",
+            "delay": "55-65"
+          }
+        }
+      ],
+      "onFail": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType3",
+            "delay": "12-15"
+          }
+        }
+      ],
+      "onFullProgress": [
+        {
+          "removeAllEventsByType": [
+            "eventType4"
+          ]
+        }
+      ],
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "offsetX": 50,
+      "offsetY": 50
+    },
+    "eventType4": {
+      "icon": "scorch",
+      "energy": "5",
+      "duration": "7-11",
+      "behaviour": "pop",
+      "title": "Burning Fire",
+      "desc": "",
+      "onStart": [],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType4",
+            "delay": "3-5"
+          }
+        }
+      ],
+      "onPop": [],
+      "onNoPop": [],
+      "posX": "pos1PosX",
+      "posY": "pos1PosY",
+      "range": 150
+    },
+    "eventType5": {
+      "icon": "life",
+      "energy": 0,
+      "duration": "12-15",
+      "behaviour": "pop",
+      "title": "Energising Node",
+      "desc": "",
+      "onStart": [],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType5",
+            "delay": "12-15"
+          }
+        }
+      ],
+      "onPop": [
+        {
+          "changeEnergy": 3
+        },
+        {
+          "changeBoxAttr": [
+            "fireProgress",
+            1
+          ]
+        }
+      ],
+      "onNoPop": []
+    },
+    "eventType6": {
+      "icon": "phoenix-heart",
+      "duration": "100",
+      "behaviour": "progress",
+      "title": "Salamander town",
+      "desc": "A salamander town is being formed in this region. Protect the construction from invading elements.",
+      "progress": 0,
+      "progressIncrease": {
+        "eventType7": "4-6",
+        "eventType8": "8-12"
+      },
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType7",
+            "delay": "7-9"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType7",
+            "delay": "12-16"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType8",
+            "delay": "10-14"
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "removeAllEventsByType": [
+            "eventType7",
+            "eventType8"
+          ]
+        }
+      ],
+      "onSuccess": [
+        {
+          "gainSkillPoints": 1
+        },
+        {
+          "changeBoxAttr": [
+            "fireProgress",
+            10
+          ]
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType9",
+            "delay": "35-45"
+          }
+        },
+        {
+          "createMessage": {
+            "type": "primary",
+            "name": "A new town has been founded.",
+            "descVal": "{icon-skill-points} +1",
+            "icon": "phoenix-heart",
+            "shape": "rhombus"
+          }
+        },
+        {
+          "createMapObj": {
+            "name": "salamander-town",
+            "posX": "pos5PosX",
+            "posY": "pos5PosY",
+            "noAnimation": false
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType10",
+            "delay": "1"
+          }
+        }
+      ],
+      "onFail": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType6",
+            "delay": "20-25"
+          }
+        }
+      ],
+      "onFullProgress": [
+        {
+          "removeAllEventsByType": [
+            "eventType7",
+            "eventType8"
+          ]
+        }
+      ],
+      "posX": "pos5PosX",
+      "posY": "pos5PosY"
+    },
+    "eventType7": {
+      "icon": "water",
+      "energy": "4",
+      "duration": "6-9",
+      "behaviour": "pop",
+      "title": "Vaporise Water",
+      "desc": "",
+      "onStart": [],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType7",
+            "delay": "6-9"
+          }
+        }
+      ],
+      "onPop": [],
+      "onNoPop": [],
+      "posX": "pos5PosX",
+      "posY": "pos5PosY",
+      "range": 150
+    },
+    "eventType8": {
+      "icon": "nature",
+      "energy": "6",
+      "duration": "10-14",
+      "behaviour": "pop",
+      "title": "Burn the bushes",
+      "desc": "",
+      "onStart": [],
+      "onEnd": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType8",
+            "delay": "14-17"
+          }
+        }
+      ],
+      "onPop": [],
+      "onNoPop": [],
+      "posX": "pos5PosX",
+      "posY": "pos5PosY",
+      "range": 150
+    },
+    "eventType9": {
+      "icon": "phoenix-heart",
+      "duration": "50",
+      "behaviour": "progress",
+      "title": "Protect the town",
+      "desc": "A salamander town is being formed in this region. Protect the construction from invading elements.",
+      "progress": 0,
+      "progressIncrease": {
+        "eventType7": "8-12",
+        "eventType8": "16-24"
+      },
+      "onStart": [
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType7",
+            "delay": "7-9"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType7",
+            "delay": "12-16"
+          }
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType8",
+            "delay": "10-14"
+          }
+        }
+      ],
+      "onEnd": [
+        {
+          "removeAllEventsByType": [
+            "eventType7",
+            "eventType8"
+          ]
+        },
+        {
+          "queueItem": {
+            "type": "createEvent",
+            "value": "eventType9",
+            "delay": "35-45"
+          }
+        }
+      ],
+      "onSuccess": [
+        {
+          "createMessage": {
+            "type": "primary",
+            "name": "The town has been protected",
+            "descVal": "{icon-skill-points} +1",
+            "icon": "phoenix-heart",
+            "shape": "rhombus"
+          }
+        },
+        {
+          "gainSkillPoints": 1
+        },
+        {
+          "createMapObj": {
+            "name": "town-shield",
+            "posX": "pos5PosX",
+            "posY": "pos5PosY",
+            "noAnimation": false
+          }
+        },
+        {
+          "queueItem": {
+            "type": "destroyMapObj",
+            "delay": "20",
+            "value": {
+              "name": "town-shield",
+              "posX": "pos5PosX",
+              "posY": "pos5PosY",
+              "noAnimation": false
+            }
           }
         }
       ],
@@ -648,55 +793,34 @@
       "onFullProgress": [
         {
           "removeAllEventsByType": [
-            "eventType47"
+            "eventType7",
+            "eventType8"
           ]
         }
       ],
-      "posX": "pos18PosX",
-      "posY": "pos18PosY"
+      "posX": "pos5PosX",
+      "posY": "pos5PosY",
+      "offsetX": 50,
+      "offsetY": 50
     },
-    "eventType47": {
-      "title": "Snow ball",
-      "icon": "snowball",
-      "desc": "",
-      "duration": "12-14",
+    "eventType10": {
+      "icon": "player",
+      "energy": "0",
+      "duration": "100",
+      "behaviour": "pop",
+      "title": "Inner power",
+      "desc": "Increases maximum energy and energy gain rate.",
       "onStart": [],
       "onEnd": [],
-      "behaviour": "pop",
-      "energy": "7",
-      "onPop": [],
-      "onNoPop": [],
-      "posX": "pos18PosX",
-      "posY": "pos18PosY",
-      "range": 150
+      "onPop": [
+        {
+          "changeMaxEnergy": 2
+        },
+        {
+          "changeEnergyGainRate": 0.2
+        }
+      ],
+      "onNoPop": []
     }
-  },
-  "sendState": {
-    "positionsEditor": [
-      {
-        "id": "pos1",
-        "positionName": "Village",
-        "posX": "900",
-        "posY": "280",
-        "_index": 1,
-        "_isValid": true
-      },
-      {
-        "id": "pos2",
-        "positionName": "Mountain",
-        "posX": "400",
-        "posY": "300",
-        "_index": 2,
-        "_isValid": true
-      },
-      {
-        "id": "",
-        "positionName": "Ice cap",
-        "posX": "400",
-        "posY": "799",
-        "_isValid": true,
-        "_index": 3
-      }
-    ]
   }
 }

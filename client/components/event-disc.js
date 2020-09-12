@@ -47,11 +47,16 @@ class EventDisc extends React.Component {
 																				: {'stroke-dasharray': `${remaining * 1.3823} 138.23`};
 		const start = event.starts >= world.hour && event.starts <= world.hour + 0.5;
 		const end = event.starts < world.hour && (event.ended || event.ends <= world.hour);
-		const endsIn = utils.humanizeNumber(event.ends - world.hour, 'hour', 'in');
-		const rewards = event.onSuccess && event.onSuccess.map(actionObj => {
+		const endsIn = utils.humanizeNumber(event.ends - world.hour, 'turn', 'in');
+		const rewards = [...(event.onSuccess ? event.onSuccess : []), ...(event.onPop ? event.onPop : [])].map(actionObj => {
 			switch (Object.keys(actionObj)[0]) {
 				case 'gainSkillPoints': return (
 					<span className="padding-side"><span className="skill-points" />+{actionObj.gainSkillPoints}</span>
+				);
+				case 'changeEnergy': return (
+					<span className="padding-side"><span className="energy-points" />
+						{actionObj.changeEnergy > 0 ? `+${actionObj.changeEnergy}` : actionObj.changeEnergy}
+					</span>
 				);
 				default: return '';
 			}
@@ -106,7 +111,7 @@ class EventDisc extends React.Component {
 							{event.desc &&
 								<p className="desc">{event.desc}</p>
 							}
-							{rewards &&
+							{rewards && rewards.length > 0 &&
 								<p>Rewards: {rewards}</p>
 							}
 							{event.progressIncrease &&

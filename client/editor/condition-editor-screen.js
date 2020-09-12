@@ -9,11 +9,11 @@ import Editor from './editor';
 import {formWithValidation, Field} from './form';
 import Tooltip from '../components/tooltip';
 import Modal from '../components/modal';
-import {stateFields} from './editor-screen-fields';
+import {actionFieldConfigCondition, stateFields} from './editor-screen-fields';
 import TitleMenu from './title-menu';
 
 
-class StateEditorScreen extends React.Component {
+class ConditionEditorScreen extends React.Component {
 
 	constructor(props) {
 		super(props);
@@ -47,9 +47,7 @@ class StateEditorScreen extends React.Component {
 			const newState = {};
 
 			switch (fieldName) {
-				case 'positions': newState.positionsEditor = field.value; break;
-				case 'startingMapItems': newState.startingMapItemsEditor = field.value; break;
-				case 'startingQueueItems': newState.startingQueueItemsEditor = field.value; break;
+				case 'conditions': newState.conditionsEditor = field.value; break;
 			}
 
 			this.setState({saving: true});
@@ -63,16 +61,14 @@ class StateEditorScreen extends React.Component {
 
 	dataChange(newData, callback) {
 		const loadToState = () => {
-			const posConfig = this.props.fields.positions.config;
+			const conConfig = this.props.fields.conditions.config;
 
-			if (posConfig.newId < this.data.newPositionId) {
-				posConfig.newId = this.data.newPositionId;
+			if (conConfig.newId < this.data.newConditionId) {
+				conConfig.newId = this.data.newConditionId;
 			}
 			if (!this.firstLoaded) {
 				this.props.formMethods.updateFields({
-					positions: this.data.positionsEditor,
-					startingMapItems: this.data.startingMapItemsEditor,
-					startingQueueItems: this.data.startingQueueItemsEditor,
+					conditions: this.data.conditionsEditor,
 				}, () => {
 					this.loadInProgress = false;
 					this.loadCallbacks.forEach(fn => fn());
@@ -91,6 +87,7 @@ class StateEditorScreen extends React.Component {
 				this.props.fields[fieldName].config.data = this.data;
 			}
 		}
+		actionFieldConfigCondition.data = this.data;
 		if (callback) {
 			this.loadCallbacks.push(callback);
 		}
@@ -122,7 +119,7 @@ class StateEditorScreen extends React.Component {
 						<div className="inner">
 							<div className="row">
 								<div className="col-30 col-l-20">
-									<TitleMenu selected="state" />
+									<TitleMenu selected="conditions" />
 								</div>
 								<div className="col-70 col-l-50 event-select-col">
 									{(saving !== undefined || !isValidAll) &&
@@ -147,16 +144,8 @@ class StateEditorScreen extends React.Component {
 					<div className="form-content">
 						<div className="inner">
 							<div className="row">
-								<div className="col-100 col-l-50">
-									<Field config={fields.startingQueueItems} />
-								</div>
-								<div className="col-100 col-l-50">
-									<Field config={fields.startingMapItems} />
-								</div>
-							</div>
-							<div className="row">
 								<div className="col-100">
-									<Field config={fields.positions} />
+									<Field config={fields.conditions} />
 								</div>
 							</div>
 						</div>
@@ -167,4 +156,4 @@ class StateEditorScreen extends React.Component {
 	}
 }
 
-export default formWithValidation(StateEditorScreen, stateFields);
+export default formWithValidation(ConditionEditorScreen, stateFields);

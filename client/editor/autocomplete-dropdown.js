@@ -29,7 +29,7 @@ class AutocompleteDropdown extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.autoFocus && nextProps.autoFocus !== this.props.autoFocus) {
 			setTimeout(() => {
-				this.setFocus(utils.pickWildIndex(nextProps.options, 'value', nextProps.selected && nextProps.selected.value));
+				this.setFocus(utils.pickWildIndex(nextProps.options, 'value', (nextProps.selected || {}).value || ''));
 			});
 		}
 	}

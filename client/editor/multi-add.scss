@@ -12,6 +12,7 @@
 	text-overflow: ellipsis;
 	max-width: 100%;
 	float: left;
+	text-transform: none;
 
 	.tab-active &:focus > span {
 		background: lighten($cSecondary, 10%);
@@ -257,6 +258,10 @@
 			}
 		}
 
+		form .add-new {
+			position: relative;
+			left: 0;
+		}
 
 		.sub-multi-val {
 			background: $cSecondary;
@@ -327,8 +332,4 @@
 	.row-buttons {
 		padding-bottom: 0;
 	}
-}
-
-.extended-modal .multi-add-row {
-	display: none;
 }

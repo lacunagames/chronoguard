@@ -5,6 +5,7 @@ import {Field} from './form';
 import config from '../config';
 import {mapImages as allImages, mapVideos as allVideos, positions as allPositions, icons as allIcons} from '../game/data/data.json';
 import {actionTypes} from '../game/world';
+import {validConditionNames} from './validation';
 
 const actionFieldConfig = {
 	fields: {
@@ -276,12 +277,12 @@ const actionFieldConfig = {
 		createMapObjLocation: data => {
 			const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
 
-			return [{value: 'event', title: 'This event'}, ...fixedPositions];
+			return [{value: 'event', title: '- This event'}, ...fixedPositions];
 		},
 		destroyMapObjLocation: data => {
 			const fixedPositions = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
 
-			return [{value: 'any', title: 'Anywhere'}, {value: 'event', title: 'This event'}, ...fixedPositions];
+			return [{value: 'any', title: '- Anywhere'}, {value: 'event', title: '- This event'}, ...fixedPositions];
 		},
 		boxName: data => {
 			const uniqueNames = [];
@@ -297,8 +298,10 @@ const actionFieldConfig = {
 					});
 
 					data.events[eventName][`${actionType}Editor`] && data.events[eventName][`${actionType}Editor`].forEach(action => {
-						if (action.boxName && uniqueNames.indexOf(action.boxName) === -1) {
-							uniqueNames.push(action.boxName);
+						const boxName = typeof action.boxName === 'object' ? action.boxName.value : action.boxName;
+
+						if (action.boxName && uniqueNames.indexOf(boxName) === -1) {
+							uniqueNames.push(boxName);
 						}
 					});
 				});
@@ -377,7 +380,7 @@ const actionFieldConfigCondition = {
 		destroyMapObjLocation: data => {
 			const fixedPositions  = data.positions.map(posObj => ({value: posObj.id,	title: posObj.name}));
 
-			return [{value: 'any', title: 'Anywhere'}, ...fixedPositions];
+			return [{value: 'any', title: '- Anywhere'}, ...fixedPositions];
 		},
 	},
 };
@@ -792,7 +795,7 @@ const stateFields = {
 					type: 'select',
 					label: 'Location',
 					options: [],
-					value: 'pos7',
+					value: 'pos2',
 					rules: [{type: 'required'}],
 				},
 				posX: {
@@ -1039,12 +1042,57 @@ const stateFields = {
 				},
 				condition: {
 					id: 'condition',
-					type: 'text',
+					type: 'autocomplete',
+					partialComplete: true,
 					value: '',
 					label: 'Condition',
+					options: [],
+					rules: [
+						{type: 'required'},
+						{type: 'conditionText'},
+					],
+				},
+				eventActionCheck: {
+					id: 'event-action-check',
+					type: 'checkbox',
+					value: '',
+					label: 'Check condition on event action',
+					checkedValue: '1',
+					rules: [],
+				},
+				selectCheckEvent: {
+					id: 'select-check-event',
+					type: 'autocomplete',
+					value: '',
+					label: 'Select event',
+					options: [],
+					hidden: {field: 'eventActionCheck', fieldValueNot: '1'},
+					rules: [
+						{type: 'required'},
+						{type: 'matchOption'},
+					],
+				},
+				selectCheckAction: {
+					id: 'select-check-action',
+					type: 'select',
+					value: '',
+					label: 'Select event action',
+					options: [
+						{value: '', title: 'Select event action', disabled: true},
+						...actionTypes.map(type => ({value: type, title: type})),
+					],
+					hidden: {field: 'eventActionCheck', fieldValueNot: '1'},
 					rules: [
 						{type: 'required'},
 					],
+				},
+				multipleActivation: {
+					id: 'multiple-activation',
+					type: 'checkbox',
+					value: '',
+					label: 'Allow multiple activation',
+					checkedValue: '- Multiple',
+					rules: [],
 				},
 				actions: {
 					id: 'actions',
@@ -1056,25 +1104,62 @@ const stateFields = {
 				},
 			},
 			getOptionsData: {
+				condition: () => [...validConditionNames.map(obj => obj.name), '>', '>=', '==', '===', '<=', '<', 'includes'].map(name => ({
+					value: name, title: name,
+				})),
+				selectCheckEvent: data => Object.keys(data.events || {})
+																			.map(eventName => ({
+																				value: eventName,
+																				title: data.events[eventName].title,
+																				icon: data.events[eventName].icon,
+																				shape: data.events[eventName].behaviour === 'progress' ? 'rhombus' : 'circle',
+																			})),
 			},
 			newId: 0,
 			data: {},
 			display: {
 				id: {type: 'hidden'},
-				actions: {iconField: 'selectAction'},
+				eventActionCheck: {type: 'hidden'},
+				selectCheckAction: {post: ' check'},
 			},
-			renderForm: fields => (
+			renderForm: (fields, props) => (
 				<React.Fragment>
-					<div className="row">
-						<div className="col-100">
-							<Field config={fields.condition} />
+					{!props.onlyMultiAdd &&
+						<React.Fragment>
+							<div className="row">
+								<div className="col-100">
+									<Field config={fields.condition} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-100">
+									<Field config={fields.eventActionCheck} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-100">
+									<Field config={fields.selectCheckEvent} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-100">
+									<Field config={fields.selectCheckAction} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-100">
+									<Field config={fields.multipleActivation} />
+								</div>
+							</div>
+						</React.Fragment>
+					}
+					{!props.noMultiAdd &&
+						<div className="row multi-add-row">
+							<div className="col-100">
+								<Field config={fields.actions} />
+							</div>
 						</div>
-					</div>
-					<div className="row multi-add-row">
-						<div className="col-100">
-							<Field config={fields.actions} />
-						</div>
-					</div>
+					}
 				</React.Fragment>
 			),
 		},

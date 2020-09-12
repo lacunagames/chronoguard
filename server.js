@@ -65,12 +65,13 @@ app.post('/save-state', (req, resp) => {
 	const newState = {...req.body};
 	let data = JSON.parse(fs.readFileSync(dataJsonUrl));
 	const positionIds = (newState.positions || []).map(posObj => +posObj.id.substr(3) + 1);
-	const newPositionId = Math.max(...positionIds, data.newPositionId);
+	const conditionIds = (newState.conditionIds || []).map(posObj => +posObj.id + 1);
 
 	for (let key in newState) {
 		data[key] = newState[key];
 	}
-	data.newPositionId = newPositionId;
+	data.newPositionId = Math.max(...positionIds, data.newPositionId);
+	data.newConditionId = Math.max(...conditionIds, data.newConditionId);
 	fs.writeFileSync(dataJsonUrl, JSON.stringify(data, null, 2));
 	resp.send(data);
 });

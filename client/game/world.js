@@ -276,13 +276,18 @@ class World extends Agent {
 		this._removeStateObj('conditions', id);
 	}
 
-	checkCondition(condition, event, action) {
-		if (condition.requiredEvent && !event || condition.requiredEvent && event &&
-			(condition.requiredEvent.type !== event.type || condition.requiredEvent.action !== action)) {
+	checkCondition(condition, eventType, action) {
+		if (condition.requiredEvent && !eventType ||
+			condition.requiredEvent && eventType &&
+				(condition.requiredEvent.type !== eventType || condition.requiredEvent.action !== action) ||
+			!condition.requiredEvent && eventType) {
 			return;
 		}
 
-		const parts = condition.requires.replace(/(\[\')/g, '').replace(/(\'\])/g, '.').split(/(\s|>=|==|===|<=|<|>|\.)/g);
+		const parts = condition.requires
+															.replace(/(\[|\]\.)/g, '.')
+															.replace(/(\s|\'|\")/g, '')
+															.split(/(\s|>=|==|===|<=|<|>|includes|\.)/g);
 		const compare = {sides: [], operator: ''};
 		const agents = [this, this.player, this.system];
 		const compareSides = () => {
@@ -293,6 +298,7 @@ class World extends Agent {
 				case '>=': return compare.sides[0] >= compare.sides[1];
 				case '==': return compare.sides[0] == compare.sides[1];
 				case '===': return compare.sides[0] === compare.sides[1];
+				case 'includes': return compare.sides[0] instanceof Array && compare.sides[0].includes(compare.sides[1]);
 			}
 		};
 		let stateProp;
@@ -303,22 +309,22 @@ class World extends Agent {
 			}
 			if (typeof +part === 'number' && !isNaN(+part)) {
 				compare.sides.push(+part);
-			} else if (/(>=|==|===|<=|<|>)/g.test(part)) {
+			} else if (/(>=|==|===|<=|<|>|includes)/g.test(part)) {
 				compare.operator = part;
 			} else {
 				if (typeof stateProp === 'undefined') {
 					const agent = agents.find(agent => agent.state.hasOwnProperty(part));
 
-					if (!agent) {
+					if (!agent && compare.operator !== 'includes') {
 						return console.warn(`Error: '${condition.requires}' is not a valid condition.`);
 					}
-					stateProp = agent.state[part];
+					stateProp = compare.operator === 'includes' ? part : agent.state[part];
 				} else {
 					stateProp = stateProp[part];
-					if (parts[i + 1] !== '.') {
-						compare.sides.push(stateProp);
-						stateProp = undefined;
-					}
+				}
+				if (typeof stateProp !== 'undefined' && parts[i + 1] !== '.') {
+					compare.sides.push(stateProp);
+					stateProp = undefined;
 				}
 			}
 		});
@@ -349,6 +355,7 @@ class World extends Agent {
 
 export {
 	actionTypes,
+	defaultState,
 };
 
 export default World;

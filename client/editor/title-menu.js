@@ -8,6 +8,7 @@ import utils from 'utils';
 const options = [
 	{value: 'events', title: 'Events', link: '/event-editor'},
 	{value: 'state', title: 'State', link: '/state-editor'},
+	{value: 'conditions', title: 'Conditions', link: '/condition-editor'},
 ];
 
 class TitleMenu extends React.Component {

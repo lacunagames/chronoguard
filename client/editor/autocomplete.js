@@ -25,7 +25,7 @@ class Autocomplete extends React.Component {
 
 		this.state = {
 			isOpen: false,
-			selected: this.props.options.find(option => option.title === this.props.value),
+			selected: !this.props.partialComplete && this.props.options.find(option => option.title === this.props.value),
 			placeholder: this.props.placeholder || (this.props.options.find(option => option.value === '') || {}).title || '',
 			options: this.props.options,
 			focusDropdown: false,
@@ -40,7 +40,7 @@ class Autocomplete extends React.Component {
 		const selected = (this.state.selected || {}).value === (nextProps.matchingOption || {}).value ? nextProps.matchingOption : options.find(option => option.title === nextProps.value);
 
 		if (isOptionsChange || isValChange) {
-			this.setState({selected, options});
+			this.setState({selected: !this.props.partialComplete && selected, options});
 		}
 	}
 
@@ -49,11 +49,14 @@ class Autocomplete extends React.Component {
 	}
 
 	onInputChange(e) {
+		const partial = this.props.partialComplete;
 		const value = e.currentTarget.value;
-		const wildValue = value.toLowerCase().trim();
+		const caretPos = e.currentTarget.selectionStart;
+		const words = value.substring(0, caretPos).split(' ');
+		const wildValue = (partial ? words[words.length - 1] : value).toLowerCase().trim();
 		const matchingOption = utils.pickWild(this.props.options, 'title', wildValue);
 
-		if (matchingOption) {
+		if (matchingOption && !partial) {
 			return this.setState({
 				options: this.props.options,
 				isOpen: true,
@@ -68,17 +71,19 @@ class Autocomplete extends React.Component {
 		}
 
 		const filteredOptions = this.props.options.filter(item => {
-			return item.title.toLowerCase().trim().indexOf(wildValue) > -1 || item.desc && item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
+			return item.title.toLowerCase().trim().indexOf(wildValue) > -1 ||
+								item.desc && item.desc.toLowerCase().trim().indexOf(wildValue) > -1;
 		});
 
-		if (filteredOptions.length === 0) {
+		if (filteredOptions.length === 0 && !partial) {
 			filteredOptions.push(specialOptions.noMatch);
 		}
 		this.setState({
 			options: filteredOptions,
-			isOpen: true,
+			isOpen: !!filteredOptions.length,
 		}, () => {
 			this.props.onChange({target: {value}, type: 'change'});
+			setTimeout(() => this.refs.input.setSelectionRange(caretPos, caretPos), 0);
 		});
 	}
 
@@ -119,16 +124,33 @@ class Autocomplete extends React.Component {
 	}
 
 	clickOption(selected) {
+		let caretPos = this.refs.input.selectionStart;
+
 		if (typeof selected === 'object') {
-			selected = {...selected};
+			let newValue = selected.value ? selected.title || selected.value : '';
+
+			if (this.props.partialComplete) {
+				const words = this.props.value.substring(0, caretPos).split(' ');
+				const afterCaret = this.props.value.substring(caretPos);
+
+				words[words.length - 1] = newValue;
+				caretPos = words.join(' ').length;
+				newValue = words.join(' ') + afterCaret;
+			}
+
 			this.props.onChange({
-				target: {value: selected.value ? selected.title || selected.value : '',},
-				matchingOption: selected,
+				target: {value: newValue},
+				matchingOption: !this.props.partialComplete && {...selected},
 			});
-			this.refs.input.value = selected && selected.value ? selected.title || selected.value : '';
+			this.refs.input.value = newValue;
 			this.refs.input.focus();
 		}
-		this.setState({isOpen: false, options: this.props.options});
+		this.setState({
+			isOpen: false,
+			options: this.props.partialComplete ? this.state.options : this.props.options,
+		}, () => {
+			this.props.partialComplete && setTimeout(() => this.refs.input.setSelectionRange(caretPos, caretPos), 0);
+		});
 	}
 
 	clearValue(e) {

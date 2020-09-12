@@ -3,14 +3,15 @@ import Agent from './agent';
 import skills from './data/skills';
 
 const defaultState = {
-	skillPoints: 50,
-	energy: 10,
-	maxEnergy: 15,
-	energyGainRate: 1,
+	skillPoints: 5,
+	energy: 5,
+	maxEnergy: 10,
+	energyGainRate: 0.5,
 	box: {},
 	skills,
 	learntSkills: [],
 };
+
 
 class Player extends Agent {
 
@@ -69,6 +70,10 @@ class Player extends Agent {
 			skillPoints: this.state.skillPoints - skill.skillPoints,
 		});
 	}
+};
+
+export {
+	defaultState,
 };
 
 export default Player;

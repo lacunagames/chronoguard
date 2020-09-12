@@ -10,7 +10,6 @@ const defaultState = {
 	music: '',
 	musicVolume: 0.15,
 	soundVolume: 0.3,
-	assets: {},
 };
 
 let messageCounter = 0;
@@ -97,6 +96,7 @@ class System extends Agent {
 
 	massDispatch(actionArr, actionType) {
 		const actions = actionType ? actionArr[actionType] : actionArr;
+		const eventType = actionType ? actionArr.type : undefined;
 
 		actions && actions.forEach(action => {
 			const actionName = Object.keys(action)[0];
@@ -104,7 +104,9 @@ class System extends Agent {
 
 			this.dispatch(actionName, ...args);
 		});
-		this.world.state.conditions.forEach(condition => this.world.checkCondition(condition, actionArr, actionType));
+		if (eventType && actionType) {
+			this.world.state.conditions.forEach(condition => this.world.checkCondition(condition, eventType, actionType));
+		}
 	}
 
 	playMusic(musicName) {

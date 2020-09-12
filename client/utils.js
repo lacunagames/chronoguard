@@ -45,7 +45,7 @@ const utils = {
 
 	// Forgiving value comparison to select object in array
 	pickWild: (array, prop, value = '') => {
-		const val = value.toLowerCase().trim();
+		const val = typeof value === 'string' ? value.toLowerCase().trim() : value.value.toLowerCase().trim();
 
 		array = array || [];
 		for (let i = 0; i < array.length; i += 1) {

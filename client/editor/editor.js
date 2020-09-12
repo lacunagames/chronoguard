@@ -54,106 +54,177 @@ class Editor extends Agent {
 		return {[fieldName]: option};
 	}
 
-	_actionToEditor(event, data) {
+	_actionToEditor(action, index, data) {
+		const actionName = Object.keys(action)[0];
+		const actionValue = action[actionName];
+		let obj;
+
+		switch (actionName) {
+			case 'changeBoxAttr':
+			case 'setBoxAttr':
+				obj = {
+					...this._getOptionVal('selectAction', 'boxAttrs'),
+					boxName: actionValue[0],
+					...this._getOptionVal('boxActionType', actionName === 'changeBoxAttr' ? 'change' : 'set'),
+					boxValue: actionValue[1] + '',
+				};
+				break;
+
+			case 'queueItem':
+				if (actionValue.type === 'createEvent') {
+					obj = {
+						...this._getOptionVal('selectAction', 'queueEvent'),
+						...this._getOptionVal('queueEvent', actionValue.value, data),
+						delayEvent: actionValue.delay + '',
+					};
+				} else if (['createMapObj', 'destroyMapObj'].includes(actionValue.type)) {
+					obj = {
+						...this._getOptionVal('selectAction', actionValue.type),
+						...this._getOptionVal('selectMapObj', actionValue.value.name),
+						...this._getOptionVal(`${actionValue.type}Location`, actionValue.value.posX.split('PosX')[0]),
+						delayMapObj: actionValue.delay + '',
+						...(actionValue.type === 'destroyMapObj' 	? {
+									noDestroyMapObjAnimation: actionValue.value.noAnimation ? actionFieldConfig.fields.noDestroyMapObjAnimation.checkedValue
+																																					: ''}
+																											: {}),
+					};
+				}
+				break;
+
+			case 'changeMaxEnergy':
+			case 'changeEnergy':
+			case 'changeEnergyGainRate':
+			case 'gainSkillPoints':
+				obj = {
+					...this._getOptionVal('selectAction', 'playerAttrs'),
+					...this._getOptionVal('playerAttrs', actionName),
+					[actionName === 'gainSkillPoints' ? 'playerAttrWhole' : 'playerAttrValue']: actionValue + '',
+				};
+				break;
+
+			case 'createMapObj':
+			case 'destroyMapObj':
+				obj = {
+					...this._getOptionVal('selectAction', actionName),
+					...this._getOptionVal('selectMapObj', actionValue.name),
+					...this._getOptionVal(`${actionName}Location`, actionValue.posX.split('PosX')[0]),
+					delayMapObj: '',
+					noDestroyMapObjAnimation: actionValue.noAnimation ? actionFieldConfig.fields.noDestroyMapObjAnimation.checkedValue : '',
+				};
+				break;
+
+			case 'removeAllEventsByType':
+				obj = {
+					...this._getOptionVal('selectAction', 'removeEvents'),
+					removeEvents: actionValue.map(eventName => this._getOptionVal('removeEvents', eventName, data).removeEvents),
+				};
+				break;
+
+			case 'createMessage':
+				const eventShape = event.behaviour === 'progress' ? 'rhombus' : 'circle';
+				const isMatchEvent = actionValue.icon === event.icon && actionValue.shape === eventShape;
+				obj = {
+					...this._getOptionVal('selectAction', 'createMessage'),
+					messageTitle: actionValue.name,
+					...this._getOptionVal('messageIconShape', isMatchEvent 	? 'matchEvent'
+																														: !actionValue.icon ? 'noIcon' : actionValue.shape),
+					...(isMatchEvent 	? {messageIcon: {value: event.icon, icon: event.icon, shape: eventShape}}
+														: !actionValue.icon ? {} : {
+																messageIcon: {
+																	...this._getOptionVal('messageIcon', actionValue.icon).messageIcon,
+																	...{shape: actionValue.shape},
+																}
+															}),
+					messageDesc: actionValue.descVal || '',
+				};
+				break;
+		}
+
+		if (obj) {
+			obj._index = index + 1;
+			obj._isValid = true;
+		}
+
+		return obj;
+	}
+
+	_eventActionToEditor(event, data) {
 		const returnObj = {};
 
 		actionTypes.forEach(actionType => {
 			returnObj[`${actionType}Editor`] = [];
 
 			event[actionType] && event[actionType].forEach((action, index) => {
-				const actionName = Object.keys(action)[0];
-				const actionValue = action[actionName];
-				let obj;
+				const actionObj = this._actionToEditor(action, index, data);
 
-				switch (actionName) {
-					case 'changeBoxAttr':
-					case 'setBoxAttr':
-						obj = {
-							...this._getOptionVal('selectAction', 'boxAttrs'),
-							boxName: actionValue[0],
-							...this._getOptionVal('boxActionType', actionName === 'changeBoxAttr' ? 'change' : 'set'),
-							boxValue: actionValue[1] + '',
-						};
-						break;
-
-					case 'queueItem':
-						if (actionValue.type === 'createEvent') {
-							obj = {
-								...this._getOptionVal('selectAction', 'queueEvent'),
-								...this._getOptionVal('queueEvent', actionValue.value, data),
-								delayEvent: actionValue.delay + '',
-							};
-						} else if (['createMapObj', 'destroyMapObj'].includes(actionValue.type)) {
-							obj = {
-								...this._getOptionVal('selectAction', actionValue.type),
-								...this._getOptionVal('selectMapObj', actionValue.value.name),
-								...this._getOptionVal(`${actionValue.type}Location`, actionValue.value.posX.split('PosX')[0]),
-								delayMapObj: actionValue.delay + '',
-								noAnimation: actionValue.noAnimation,
-							};
-						}
-						break;
-
-					case 'changeMaxEnergy':
-					case 'changeEnergy':
-					case 'changeEnergyGainRate':
-					case 'gainSkillPoints':
-						obj = {
-							...this._getOptionVal('selectAction', 'playerAttrs'),
-							...this._getOptionVal('playerAttrs', actionName),
-							[actionName === 'gainSkillPoints' ? 'playerAttrWhole' : 'playerAttrValue']: actionValue + '',
-						};
-						break;
-
-					case 'createMapObj':
-					case 'destroyMapObj':
-						obj = {
-							...this._getOptionVal('selectAction', actionName),
-							...this._getOptionVal('selectMapObj', actionValue.name),
-							...this._getOptionVal(`${actionName}Location`, actionValue.posX.split('PosX')[0]),
-							delayMapObj: '',
-							noDestroyMapObjAnimation: actionValue.noAnimation ? actionFieldConfig.fields.noDestroyMapObjAnimation.checkedValue : '',
-						};
-						break;
-
-					case 'removeAllEventsByType':
-						obj = {
-							...this._getOptionVal('selectAction', 'removeEvents'),
-							removeEvents: actionValue.map(eventName => this._getOptionVal('removeEvents', eventName, data).removeEvents),
-						};
-						break;
-
-					case 'createMessage':
-						const eventShape = event.behaviour === 'progress' ? 'rhombus' : 'circle';
-						const isMatchEvent = actionValue.icon === event.icon && actionValue.shape === eventShape;
-						obj = {
-							...this._getOptionVal('selectAction', 'createMessage'),
-							messageTitle: actionValue.name,
-							...this._getOptionVal('messageIconShape', isMatchEvent 	? 'matchEvent'
-																																: !actionValue.icon ? 'noIcon' : actionValue.shape),
-							...(isMatchEvent 	? {messageIcon: {value: event.icon, icon: event.icon, shape: eventShape}}
-																: !actionValue.icon ? {} : {
-																		messageIcon: {
-																			...this._getOptionVal('messageIcon', actionValue.icon).messageIcon,
-																			...{shape: actionValue.shape},
-																		}
-																	}),
-							messageDesc: actionValue.descVal,
-						};
-						break;
-				}
-
-				if (obj) {
-					obj._index = index + 1;
-					obj._isValid = true;
-					returnObj[`${actionType}Editor`].push(obj);
-				}
+				actionObj && returnObj[`${actionType}Editor`].push(actionObj);
 			});
 		});
 		return returnObj;
 	}
 
-	_actionToGame(sendEvent) {
+	_actionToGame(actionObj, sendEvent) {
+		let obj;
+
+		switch (actionObj.selectAction.value) {
+			case 'queueEvent':
+				obj = {
+					queueItem: {type: 'createEvent', value: actionObj.queueEvent.value, delay: actionObj.delayEvent}
+				};
+				break;
+
+			case 'removeEvents':
+				obj = {
+					removeAllEventsByType: actionObj.removeEvents.map(eventObj => eventObj.value)
+				};
+				break;
+
+			case 'createMapObj':
+			case 'destroyMapObj':
+				const actionName = actionObj.selectAction.value;
+				const mapObj = {
+					name: actionObj.selectMapObj.value,
+					posX: actionObj[`${actionName}Location`].value + 'PosX',
+					posY: actionObj[`${actionName}Location`].value + 'PosY',
+					noAnimation: actionName === 'destroyMapObj' && !!actionObj.noDestroyMapObjAnimation,
+				};
+				obj = actionObj.delayMapObj ? {queueItem: {type: actionName, delay: actionObj.delayMapObj, value: mapObj}}
+																		: {[actionName]: mapObj};
+				break;
+
+			case 'createMessage':
+				const isMatchEvent = actionObj.messageIconShape.value === 'matchEvent';
+				const eventShape = sendEvent && sendEvent.behaviour === 'progress' ? 'rhombus' : 'circle';
+				const icon = actionObj.messageIconShape.value !== 'noIcon' && (isMatchEvent ? sendEvent.icon : actionObj.messageIcon.value);
+				const shape = icon && isMatchEvent ? eventShape : icon && actionObj.messageIconShape.value;
+
+				obj = {
+					createMessage: {
+						type: actionObj.messageDesc || icon ? 'primary' : 'free',
+						name: actionObj.messageTitle,
+						descVal: actionObj.messageDesc,
+						icon,
+						shape,
+					}
+				};
+				break;
+
+			case 'playerAttrs':
+				obj = {[actionObj.playerAttrs.value]: actionObj.playerAttrs.value === 'gainSkillPoints' ? +actionObj.playerAttrWhole
+																																																: +actionObj.playerAttrValue};
+				break;
+
+			case 'boxAttrs':
+			const boxName = typeof actionObj.boxName === 'object' ? actionObj.boxName.value : actionObj.boxName;
+				obj = {
+					[actionObj.boxActionType.value === 'set' ? 'setBoxAttr' : 'changeBoxAttr']: [boxName, +actionObj.boxValue]
+				};
+		}
+
+		return obj;
+	}
+
+	_eventActionToGame(sendEvent) {
 		actionTypes.forEach(actionType => {
 			if (sendEvent.behaviour === 'pop' && ['onSuccess', 'onFail', 'onFullProgress'].includes(actionType) ||
 				sendEvent.behaviour === 'progress' && ['onPop', 'onNoPop'].includes(actionType)) {
@@ -164,62 +235,8 @@ class Editor extends Agent {
 			sendEvent[actionType] = [];
 
 			sendEvent[`${actionType}Editor`].forEach(actionObj => {
-				let obj;
+				let obj = this._actionToGame(actionObj, sendEvent);
 
-				switch (actionObj.selectAction.value) {
-					case 'queueEvent':
-						obj = {
-							queueItem: {type: 'createEvent', value: actionObj.queueEvent.value, delay: actionObj.delayEvent}
-						};
-						break;
-
-					case 'removeEvents':
-						obj = {
-							removeAllEventsByType: actionObj.removeEvents.map(eventObj => eventObj.value)
-						};
-						break;
-
-					case 'createMapObj':
-					case 'destroyMapObj':
-						const actionName = actionObj.selectAction.value;
-						const mapObj = {
-							name: actionObj.selectMapObj.value,
-							posX: actionObj[`${actionName}Location`].value + 'PosX',
-							posY: actionObj[`${actionName}Location`].value + 'PosY',
-							noAnimation: actionName === 'destroyMapObj' && !!actionObj.noDestroyMapObjAnimation,
-						};
-						obj = actionObj.delayMapObj ? {queueItem: {type: actionName, delay: actionObj.delayMapObj, value: mapObj}}
-																				: {[actionName]: mapObj};
-						break;
-
-					case 'createMessage':
-						const isMatchEvent = actionObj.messageIconShape.value === 'matchEvent';
-						const eventShape = sendEvent.behaviour === 'progress' ? 'rhombus' : 'circle';
-						const icon = actionObj.messageIconShape.value !== 'noIcon' && (isMatchEvent ? sendEvent.icon : actionObj.messageIcon.value);
-						const shape = icon && isMatchEvent ? eventShape : icon && actionObj.messageIconShape.value;
-
-						obj = {
-							createMessage: {
-								type: actionObj.messageDesc || icon ? 'primary' : 'free',
-								name: actionObj.messageTitle,
-								descVal: actionObj.messageDesc,
-								icon,
-								shape,
-							}
-						};
-						break;
-
-					case 'playerAttrs':
-						obj = {[actionObj.playerAttrs.value]: actionObj.playerAttrs.value === 'gainSkillPoints' ? +actionObj.playerAttrWhole
-																																																		: +actionObj.playerAttrValue};
-						break;
-
-					case 'boxAttrs':
-					const boxName = typeof actionObj.boxName === 'object' ? actionObj.boxName.value : actionObj.boxName;
-						obj = {
-							[actionObj.boxActionType.value === 'set' ? 'setBoxAttr' : 'changeBoxAttr']: [boxName, +actionObj.boxValue]
-						};
-				}
 				obj && sendEvent[actionType].push(obj);
 			});
 			delete sendEvent[`${actionType}Editor`];
@@ -263,6 +280,31 @@ class Editor extends Agent {
 				...(queueObj.type === 'createMapObj' ? createMapObjLocationFn() : {}),
 				...(queueObj.type === 'destroyMapObj' ? destroyMapObjLocationFn() : {}),
 				...(queueObj.type === 'destroyMapObj' ? {noDestroyMapObjAnimation: queueObj.value.noAnimation} : {}),
+				_index: index + 1,
+				_isValid: true,
+			};
+		});
+
+		data.conditionsEditor = data.conditions.map((condObj, index) => {
+			const removeConditionAction = condObj.actions.find(obj => {
+					return Object.keys(obj)[0] === 'removeCondition' && obj.removeCondition === condObj.id;
+				});
+			const actions = condObj.actions.filter(action => action !== removeConditionAction)
+																			.map((action, index) => this._actionToEditor(action, index, data))
+																			.filter(action => action);
+
+			return {
+				id: condObj.id + '',
+				condition: condObj.requires,
+				eventActionCheck: condObj.requiredEvent ? stateFields.conditions.config.fields.eventActionCheck.checkedValue || '1' : '',
+				...(condObj.requiredEvent ? this._getOptionVal('selectCheckEvent',
+																													condObj.requiredEvent.type, data, stateFields.conditions.config)
+																	: {}),
+				...(condObj.requiredEvent ? this._getOptionVal('selectCheckAction', condObj.requiredEvent.action, null,
+																													stateFields.conditions.config)
+																	: {}),
+				multipleActivation: removeConditionAction ? '' : stateFields.conditions.config.fields.multipleActivation.checkedValue || '1',
+				actions,
 				_index: index + 1,
 				_isValid: true,
 			};
@@ -313,7 +355,7 @@ class Editor extends Agent {
 			for (let eventName in data.events) {
 				data.events[eventName] = {
 					...data.events[eventName],
-					...this._actionToEditor(data.events[eventName], data),
+					...this._eventActionToEditor(data.events[eventName], data),
 				};
 			}
 
@@ -386,7 +428,7 @@ class Editor extends Agent {
 		delete sendEvent.fixedPosX;
 		delete sendEvent.fixedPosY;
 
-		this._actionToGame(sendEvent);
+		this._eventActionToGame(sendEvent);
 
 		this.saving = '!!inProgress';
 		this._ajax({url: '/save-event', type: 'post', data: {[type]: sendEvent}}).then(eventObj => {
@@ -464,6 +506,35 @@ class Editor extends Agent {
 				return {type: queueObj.selectAction.value, value, activates: +queueObj.activates};
 			});
 			delete sendState.startingQueueItemsEditor;
+		}
+
+		if (newStateObj.conditionsEditor) {
+			sendState.conditions = sendState.conditionsEditor.map(condObj => {
+				const actions = [];
+
+				condObj.actions.forEach(actionObj => {
+					let obj = this._actionToGame(actionObj);
+
+					obj && actions.push(obj);
+				});
+
+				if (!condObj.multipleActivation) {
+					actions.push({removeCondition: +condObj.id});
+				}
+
+				return {
+					id: +condObj.id,
+					...(condObj.eventActionCheck ? {
+						requiredEvent: {
+							type: condObj.selectCheckEvent.value,
+							action: condObj.selectCheckAction.value,
+						}
+					} : {}),
+					requires: condObj.condition,
+					actions,
+				};
+			});
+			delete sendState.conditionsEditor;
 		}
 
 		this.saving = '!!inProgress';

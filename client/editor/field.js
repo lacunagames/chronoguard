@@ -65,6 +65,7 @@ class Field extends React.Component {
 							onChange={field.onChange}
 							disabled={field.disabled}
 							value={field.value}
+							partialComplete={field.partialComplete}
 							matchingOption={field.matchingOption} />
 					);
 
@@ -114,7 +115,7 @@ class Field extends React.Component {
 						<div className="check-wrap">
 							<input type="checkbox"
 								value={field.checkedValue || '1'}
-								checked={field.value === (typeof field.checkedValue === 'undefined' ? '1' : field.checkedValue)}
+								checked={field.value === (field.checkedValue || '1')}
 								onChange={field.onChange}
 								name={field.name}
 								disabled={field.disabled}

@@ -211,7 +211,7 @@ class MapCanvas extends React.Component {
 
 		if (mapObj.animStarted + mapObj.animDuration <= now || mapObj.video && mapObj.video.ended) {
 			if (mapObj.animation === 'destroy' || mapObj.video) {
-				this.mapObjs.splice(this.mapObjs.indexOf(mapObj), 1);
+				setTimeout(() => this.mapObjs.splice(this.mapObjs.indexOf(mapObj), 1), 0);
 				this.props.dispatch('removeMapObj', mapObj.id);
 			} else {
 				const state = mapObj.animation === 'hide' ? 'hidden' : mapObj.state;
@@ -243,7 +243,6 @@ class MapCanvas extends React.Component {
 		ctx.translate(bgOffsetX, bgOffsetY);
 		ctx.fillStyle = ctx.createPattern(scaledBg, 'repeat');
 		ctx.fillRect(-bgOffsetX, -bgOffsetY, canvas.width, canvas.height);
-		ctx.restore();
 
 		this.mapObjs.forEach(mapObj => {
 			const assetObj = assets.find(assetObj => assetObj.name === mapObj.name);
@@ -254,6 +253,7 @@ class MapCanvas extends React.Component {
 			ctx.imageSmoothingEnabled = false;
 			img && ctx.drawImage(img, parseInt(startX), parseInt(startY));
 		});
+		ctx.restore();
 		if (this.mapObjs.some(mapObj => mapObj.animation)) {
 			requestAnimationFrame(this.drawMap);
 		}
